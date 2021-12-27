@@ -95,16 +95,16 @@ class DatabaseHelper {
   Future _onCreate(Database db, int version) async {
     await db.execute("DROP TABLE IF EXISTS `transaction`");
     await db.execute(
-        "CREATE TABLE `transaction` (`id` INTEGER PRIMARY KEY, `name` TEXT, `money` INTEGER, `date` TEXT, `categoryId` INTEGER, `labelIds` TEXT, `recurrence` TEXT, `comment` TEXT)");
+        "CREATE TABLE `transaction` (`id` INTEGER PRIMARY KEY, `name` TEXT, `money` INTEGER, `date` TEXT, `categoryId` INTEGER, `labelIds` TEXT, `recurrence` TEXT, `comment` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
     await db.execute("DROP TABLE IF EXISTS `category`");
     await db.execute(
-        "CREATE TABLE `category` (`id` INTEGER PRIMARY KEY, `name` TEXT, `type` TEXT, `icon` TEXT, `color` TEXT)");
+        "CREATE TABLE `category` (`id` INTEGER PRIMARY KEY, `name` TEXT, `type` TEXT, `icon` TEXT, `color` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
     await db.execute("DROP TABLE IF EXISTS `event`");
     await db.execute(
-        "CREATE TABLE `event` (`id` INTEGER PRIMARY KEY, `name` TEXT)");
+        "CREATE TABLE `event` (`id` INTEGER PRIMARY KEY, `name` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
     await db.execute("DROP TABLE IF EXISTS `label`");
     await db.execute(
-        "CREATE TABLE `label` (`id` INTEGER PRIMARY KEY, `name` TEXT)");
+        "CREATE TABLE `label` (`id` INTEGER PRIMARY KEY, `name` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
 
     await insertPredefinedCategories(db);
   }
@@ -112,16 +112,16 @@ class DatabaseHelper {
   Future _onUpgrade(Database db, int a, int b) async {
     await db.execute("DROP TABLE IF EXISTS `transaction`");
     await db.execute(
-        "CREATE TABLE `transaction` (`id` INTEGER PRIMARY KEY, `money` INTEGER, `date` TEXT, `categoryId` INTEGER, `labelIds` TEXT, `recurrence` TEXT, `comment` TEXT)");
+        "CREATE TABLE `transaction` (`id` INTEGER PRIMARY KEY, `money` INTEGER, `date` TEXT, `categoryId` INTEGER, `labelIds` TEXT, `recurrence` TEXT, `comment` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
     await db.execute("DROP TABLE IF EXISTS `category`");
     await db.execute(
-        "CREATE TABLE `category` (`id` INTEGER PRIMARY KEY, `name` TEXT, `type` TEXT, `icon` TEXT, `color` TEXT)");
+        "CREATE TABLE `category` (`id` INTEGER PRIMARY KEY, `name` TEXT, `type` TEXT, `icon` TEXT, `color` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
     await db.execute("DROP TABLE IF EXISTS `event`");
     await db.execute(
-        "CREATE TABLE `event` (`id` INTEGER PRIMARY KEY, `name` TEXT)");
+        "CREATE TABLE `event` (`id` INTEGER PRIMARY KEY, `name` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
     await db.execute("DROP TABLE IF EXISTS `label`");
     await db.execute(
-        "CREATE TABLE `label` (`id` INTEGER PRIMARY KEY, `name` TEXT)");
+        "CREATE TABLE `label` (`id` INTEGER PRIMARY KEY, `name` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
 
     await insertPredefinedCategories(db);
   }

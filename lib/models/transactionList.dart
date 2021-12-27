@@ -5,35 +5,34 @@ import 'package:flutter/material.dart';
 import 'package:ji_zhang/models/index.dart';
 
 class TransactionList extends ChangeNotifier {
-  final List<Transaction> _items = [];
+  final Map<num, Transaction> _itemsMap = {};
 
-  UnmodifiableListView<Transaction> get items => UnmodifiableListView(_items);
+  UnmodifiableListView<Transaction> get items {
+    var ret = _itemsMap.values.toList();
+    ret.sort();
+    return UnmodifiableListView(ret);
+  }
 
   UnmodifiableMapView<num, Transaction> get itemsMap =>
-      UnmodifiableMapView({for (var item in _items) item.id: item});
+      UnmodifiableMapView(_itemsMap);
 
   void addAll(List<Transaction> items) {
-    _items.addAll(items);
+    _itemsMap.addAll({for (var item in items) item.id: item});
     notifyListeners();
   }
 
-  void add(Transaction item, {int position = -1}) {
-    if (position == -1) {
-      _items.add(item);
-      _items.sort();
-    } else {
-      _items.insert(position, item);
-    }
+  void modify(Transaction item) {
+    _itemsMap[item.id] = item;
     notifyListeners();
   }
 
   void removeAll() {
-    _items.clear();
+    _itemsMap.clear();
     notifyListeners();
   }
 
   void remove(Transaction transaction) {
-    _items.remove(transaction);
+    _itemsMap.remove(transaction.id);
     notifyListeners();
   }
 }

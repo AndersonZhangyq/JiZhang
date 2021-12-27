@@ -1,3 +1,5 @@
+import 'package:flutter/scheduler.dart';
+import 'package:ji_zhang/models/categoryList.dart';
 import 'package:ji_zhang/models/labelList.dart';
 import 'package:ji_zhang/models/transactionList.dart';
 import 'package:provider/provider.dart';
@@ -27,31 +29,18 @@ class CategoryItem {
   late Color color;
 }
 
-class AddTransactionsWidget extends StatelessWidget {
-  const AddTransactionsWidget({Key? key}) : super(key: key);
+class ModifyTransactionsPage extends StatefulWidget {
+  const ModifyTransactionsPage({Key? key, required this.transaction})
+      : super(key: key);
+  final Transaction? transaction;
 
   @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'Flutter Demo',
-      home: AddTransactionsPage(),
-    );
-  }
+  State<ModifyTransactionsPage> createState() => _ModifyTransactionsPageState();
 }
 
-class AddTransactionsPage extends StatefulWidget {
-  const AddTransactionsPage({Key? key}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  @override
-  State<AddTransactionsPage> createState() => _AddTransactionsPageState();
-}
-
-class _AddTransactionsPageState extends State<AddTransactionsPage> {
-  Transaction transaction = Transaction();
+class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
+  late Transaction transaction;
+  late bool isAdd;
   Color categoryColor = const Color(0xFF68a1e8);
   Icon selectedCategoryIcon = const Icon(Icons.add, color: Colors.white);
 
@@ -68,22 +57,58 @@ class _AddTransactionsPageState extends State<AddTransactionsPage> {
   @override
   void initState() {
     super.initState();
+    if (null == widget.transaction) {
+      isAdd = true;
+      transaction = Transaction();
+      WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+        showCategorySelector(context);
+      });
+    } else {
+      isAdd = false;
+      transaction = Transaction.fromJson(widget.transaction!.toJson());
+      moneyController.text = transaction.money.toStringAsFixed(2);
+      dateController.text = transaction.date.format("yyyy-MM-dd");
+      commentController.text = transaction.comment ?? "";
+    }
   }
 
   bool canSave() {
     return moneyController.text.isNotEmpty &&
-        moneyController.text != "0" &&
-        selectedCategoryIcon.icon != Icons.add;
+        0 != double.tryParse(moneyController.text) &&
+        Icons.add != selectedCategoryIcon.icon;
+  }
+
+  void showCategorySelector(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) => const CategorySelectorWidget(),
+    ).then((value) {
+      if (null != value) {
+        setState(() {
+          categoryColor = value["color"];
+          selectedCategoryIcon = Icon(value["icon"], color: Colors.white);
+          transaction.categoryId = value["id"] as int;
+        });
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!isAdd) {
+      CategoryItem categoryItem =
+          context.read<CategoryList>().itemsMap[transaction.categoryId]!;
+      setState(() {
+        categoryColor = categoryItem.color;
+        selectedCategoryIcon = Icon(categoryItem.icon, color: Colors.white);
+      });
+    }
     return Scaffold(
         appBar: AppBar(
             backgroundColor: categoryColor,
             elevation: 0,
             centerTitle: true,
-            title: const Text("Add Transaction"),
+            title: Text((isAdd ? "Add" : "Edit") + " Transaction"),
             leading: IconButton(
               icon: const Icon(Icons.close),
               onPressed: () {
@@ -96,19 +121,35 @@ class _AddTransactionsPageState extends State<AddTransactionsPage> {
                 tooltip: 'Save transaction',
                 onPressed: canSave()
                     ? () async {
-                        int id = await DatabaseHelper.instance
-                            .insertTransaction(transaction);
-                        if (id == 0) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Failed to save transaction"),
-                            ),
-                          );
+                        if (isAdd) {
+                          int id = await DatabaseHelper.instance
+                              .insertTransaction(transaction);
+                          if (0 == id) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Failed to add transaction"),
+                              ),
+                            );
+                          } else {
+                            transaction.id = id;
+                            context.read<TransactionList>().modify(transaction);
+                            Navigator.of(context, rootNavigator: true)
+                                .pop(context);
+                          }
                         } else {
-                          transaction.id = id;
-                          context.read<TransactionList>().add(transaction);
-                          Navigator.of(context, rootNavigator: true)
-                              .pop(context);
+                          bool ret = await DatabaseHelper.instance
+                              .updateTransaction(transaction);
+                          if (false == ret) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Failed to update transaction"),
+                              ),
+                            );
+                          } else {
+                            context.read<TransactionList>().modify(transaction);
+                            Navigator.of(context, rootNavigator: true)
+                                .pop(context);
+                          }
                         }
                       }
                     : null,
@@ -129,20 +170,7 @@ class _AddTransactionsPageState extends State<AddTransactionsPage> {
                       dashPattern: const [6],
                       child: MaterialButton(
                         onPressed: () {
-                          showModalBottomSheet(
-                            context: context,
-                            builder: (BuildContext context) =>
-                                const CategorySelectorWidget(),
-                          ).then((value) {
-                            if (value != null) {
-                              setState(() {
-                                categoryColor = value["color"];
-                                selectedCategoryIcon =
-                                    Icon(value["icon"], color: Colors.white);
-                                transaction.categoryId = value["id"] as int;
-                              });
-                            }
-                          });
+                          showCategorySelector(context);
                         },
                         child: selectedCategoryIcon,
                         shape: const CircleBorder(),
@@ -163,7 +191,7 @@ class _AddTransactionsPageState extends State<AddTransactionsPage> {
                         onChanged: (String text) {
                           double? value = double.tryParse(text);
                           setState(() {
-                            if (value != null) transaction.money = value;
+                            if (null != value) transaction.money = value;
                           });
                         },
                       ),
@@ -188,7 +216,7 @@ class _AddTransactionsPageState extends State<AddTransactionsPage> {
                         lastDate: DateTime(3000))
                     .then((value) {
                   setState(() {
-                    if (value != null) transaction.date = value;
+                    if (null != value) transaction.date = value;
                     dateController.text = transaction.date.format("yyyy-MM-dd");
                   });
                 });
@@ -197,23 +225,19 @@ class _AddTransactionsPageState extends State<AddTransactionsPage> {
           ),
           ListTile(
             leading: Icon(Icons.note, color: categoryColor),
-            title: Focus(
-              child: TextField(
-                controller: commentController,
-                keyboardType: TextInputType.multiline,
-                minLines: 2,
-                maxLines: 4,
-                decoration: const InputDecoration(
-                  border: InputBorder.none,
-                  hintText: "Write a comment",
-                ),
+            title: TextField(
+              controller: commentController,
+              keyboardType: TextInputType.multiline,
+              minLines: 2,
+              maxLines: 4,
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                hintText: "Write a comment",
               ),
-              onFocusChange: (hasFocus) {
-                if (!hasFocus) {
-                  setState(() {
-                    transaction.comment = commentController.text;
-                  });
-                }
+              onChanged: (value) {
+                setState(() {
+                  transaction.comment = value;
+                });
               },
             ),
           ),

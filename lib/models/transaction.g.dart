@@ -13,7 +13,10 @@ Transaction _$TransactionFromJson(Map<String, dynamic> json) => Transaction()
   ..categoryId = json['categoryId']
   ..labelIds = json['labelIds'] as List<int>?
   ..recurrence = json['recurrence'] as String?
-  ..comment = json['comment'] as String?;
+  ..comment = json['comment'] as String?
+  ..createdAt = json['createdAt'] != null
+      ? DateTime.parse(json['createdAt'] as String)
+      : DateTime.now();
 
 Map<String, dynamic> _$TransactionToJson(Transaction instance) {
   Map<String, dynamic> ret = {

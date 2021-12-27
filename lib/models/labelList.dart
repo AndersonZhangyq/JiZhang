@@ -5,30 +5,29 @@ import 'package:flutter/material.dart';
 import 'package:ji_zhang/models/label.dart';
 
 class LabelList extends ChangeNotifier {
-  final List<Label> _items = [];
+  final Map<num, Label> _itemsMap = {};
 
-  UnmodifiableListView<Label> get items => UnmodifiableListView(_items);
+  UnmodifiableListView<Label> get items {
+    var ret = _itemsMap.values.toList();
+    ret.sort((a, b) => a.id.compareTo(b.id));
+    return UnmodifiableListView(ret);
+  }
 
   UnmodifiableMapView<num, Label> get itemsMap =>
-      UnmodifiableMapView({for (var item in _items) item.id: item});
+      UnmodifiableMapView(_itemsMap);
 
   void addAll(List<Label> items) {
-    _items.addAll(items);
+    _itemsMap.addAll({for (var item in items) item.id: item});
     notifyListeners();
   }
 
-  void add(Label item, {int position = -1}) {
-    if (position == -1) {
-      _items.add(item);
-      _items.sort((a, b) => a.id.compareTo(b.id));
-    } else {
-      _items.insert(position, item);
-    }
+  void modify(Label item) {
+    _itemsMap[item.id] = item;
     notifyListeners();
   }
 
   void removeAll() {
-    _items.clear();
+    _itemsMap.clear();
     notifyListeners();
   }
 }

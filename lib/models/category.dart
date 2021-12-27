@@ -11,6 +11,7 @@ class Category {
   late String type;
   late String icon;
   late String color;
+  late DateTime createdAt;
 
   factory Category.fromJson(Map<String, dynamic> json) =>
       _$CategoryFromJson(json);

@@ -8,7 +8,8 @@ part of 'label.dart';
 
 Label _$LabelFromJson(Map<String, dynamic> json) => Label()
   ..id = json['id'] as num
-  ..name = json['name'] as String;
+  ..name = json['name'] as String
+  ..createdAt = DateTime.parse(json['createdAt'] as String);
 
 Map<String, dynamic> _$LabelToJson(Label instance) {
   Map<String, dynamic> ret = {

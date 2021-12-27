@@ -8,7 +8,8 @@ part of 'event.dart';
 
 Event _$EventFromJson(Map<String, dynamic> json) => Event()
   ..id = json['id'] as num
-  ..name = json['name'] as String;
+  ..name = json['name'] as String
+  ..createdAt = DateTime.parse(json['createdAt'] as String);
 
 Map<String, dynamic> _$EventToJson(Event instance) {
   Map<String, dynamic> ret = {

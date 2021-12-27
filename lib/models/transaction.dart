@@ -1,6 +1,5 @@
+import 'package:ji_zhang/common/datetime_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
-// import "dateTime.dart";
-// import "int.dart";
 part 'transaction.g.dart';
 
 @JsonSerializable()
@@ -9,11 +8,12 @@ class Transaction implements Comparable {
 
   num id = -1;
   late num money;
-  DateTime date = DateTime.now();
+  DateTime date = DateTime.now().getDateOnly();
   late int categoryId;
   List<int>? labelIds;
   String? recurrence;
   String? comment;
+  late DateTime createdAt;
 
   factory Transaction.fromJson(Map<String, dynamic> json) =>
       _$TransactionFromJson(json);

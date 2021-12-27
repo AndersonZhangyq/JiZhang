@@ -5,7 +5,7 @@ import 'package:ji_zhang/models/eventList.dart';
 import 'package:ji_zhang/models/index.dart';
 import 'package:ji_zhang/models/labelList.dart';
 import 'package:ji_zhang/models/transactionList.dart';
-import 'package:ji_zhang/widget/addTransaction.dart';
+import 'package:ji_zhang/widget/modifyTransaction.dart';
 import 'package:ji_zhang/widget/navigationPage/account.dart';
 import 'package:ji_zhang/widget/navigationPage/budget.dart';
 import 'package:ji_zhang/widget/navigationPage/chart.dart';
@@ -21,7 +21,7 @@ void main() {
           List<CategoryItem> retItem = [];
           for (var element in ret) {
             retItem.add(CategoryItem(element));
-            print(element.name);
+            // print(element.name);
           }
           categoryList.addAll(retItem);
         });
@@ -35,7 +35,7 @@ void main() {
           List<Transaction> retItem = [];
           for (var element in ret) {
             retItem.add(element);
-            print(element.id);
+            // print(element.id);
           }
           transactionList.addAll(retItem);
         });
@@ -49,7 +49,7 @@ void main() {
           List<Event> retItem = [];
           for (var element in ret) {
             retItem.add(element);
-            print(element.id);
+            // print(element.id);
           }
           eventList.addAll(retItem);
         });
@@ -63,7 +63,7 @@ void main() {
           List<Label> retItem = [];
           for (var element in ret) {
             retItem.add(element);
-            print(element.id);
+            // print(element.id);
           }
           labelList.addAll(retItem);
         });
@@ -124,9 +124,26 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Home Page"),
-      ),
+      // appBar: AppBar(
+      //   elevation: 0,
+      //   title: const Text("Home Page"),
+      //   actions: [
+      //     IconButton(
+      //       onPressed: () {
+      //         DatabaseHelper.instance.queryTransaction().then((ret) {
+      //           List<Transaction> retItem = [];
+      //           for (var element in ret) {
+      //             retItem.add(element);
+      //             // print(element.id);
+      //           }
+      //           context.read<TransactionList>().addAll(retItem);
+      //         });
+      //       },
+      //       icon: const Icon(Icons.refresh),
+      //       tooltip: "Fetch from DB",
+      //     )
+      //   ],
+      // ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -140,11 +157,11 @@ class _MyHomePageState extends State<MyHomePage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => const AddTransactionsWidget()),
+                builder: (context) =>
+                    const ModifyTransactionsPage(transaction: null)),
           );
         },
       ),
-      // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         onTap: onTabTapped,

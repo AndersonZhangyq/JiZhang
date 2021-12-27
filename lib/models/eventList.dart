@@ -5,30 +5,29 @@ import 'package:flutter/material.dart';
 import 'package:ji_zhang/models/index.dart';
 
 class EventList extends ChangeNotifier {
-  final List<Event> _items = [];
+  final Map<num, Event> _itemsMap = {};
 
-  UnmodifiableListView<Event> get items => UnmodifiableListView(_items);
+  UnmodifiableListView<Event> get items {
+    var ret = _itemsMap.values.toList();
+    ret.sort((a, b) => a.id.compareTo(b.id));
+    return UnmodifiableListView(ret);
+  }
 
   UnmodifiableMapView<num, Event> get itemsMap =>
-      UnmodifiableMapView({for (var item in _items) item.id: item});
+      UnmodifiableMapView(_itemsMap);
 
   void addAll(List<Event> items) {
-    _items.addAll(items);
+    _itemsMap.addAll({for (var item in items) item.id: item});
     notifyListeners();
   }
 
-  void add(Event item, {int position = -1}) {
-    if (position == -1) {
-      _items.add(item);
-      _items.sort((a, b) => a.id.compareTo(b.id));
-    } else {
-      _items.insert(position, item);
-    }
+  void add(Event item) {
+    _itemsMap[item.id] = item;
     notifyListeners();
   }
 
   void removeAll() {
-    _items.clear();
+    _itemsMap.clear();
     notifyListeners();
   }
 }
