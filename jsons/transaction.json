@@ -1,0 +1,10 @@
+{
+  "id": 0,
+  "name": "Lunch",
+  "money": 100.00,
+  "date": "$DateTime",
+  "categoryId": "$int",
+  "labelIds?": "$[]int",
+  "recurrence?": "",
+  "comment?": "1234"
+}
