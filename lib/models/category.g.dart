@@ -12,6 +12,7 @@ Category _$CategoryFromJson(Map<String, dynamic> json) => Category()
   ..type = json['type'] as String
   ..icon = json['icon'] as String
   ..color = json['color'] as String
+  ..index = json['index'] as int
   ..createdAt = DateTime.parse(json['createdAt'] as String);
 
 Map<String, dynamic> _$CategoryToJson(Category instance) {
@@ -20,6 +21,7 @@ Map<String, dynamic> _$CategoryToJson(Category instance) {
     'type': instance.type,
     'icon': instance.icon,
     'color': instance.color,
+    'index': instance.index,
   };
   if (-1 != instance.id) {
     ret['id'] = instance.id;

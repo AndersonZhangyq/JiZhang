@@ -29,6 +29,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -40,6 +42,7 @@ dependencies:
   path_provider: ^2.0.8
   provider: ^6.0.1
   flutter_slidable: ^1.1.0
+  month_picker_dialog: ^0.4.0
 
 dev_dependencies:
   json_model: ^1.0.0

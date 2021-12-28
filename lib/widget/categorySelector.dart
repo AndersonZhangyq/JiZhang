@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ji_zhang/models/categoryList.dart';
+import 'package:ji_zhang/widget/modifyCategory.dart';
 import 'package:provider/provider.dart';
 
 import 'modifyTransaction.dart';
@@ -41,77 +42,131 @@ class CategorySelectorWidget extends StatelessWidget {
                     }
                     return TabBarView(
                       children: [
-                        GridView.builder(
-                            itemCount: expenseCategory.length,
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisSpacing: 2,
-                                    mainAxisSpacing: 2,
-                                    crossAxisCount: 4),
-                            itemBuilder: (BuildContext context, int index) {
-                              var value = expenseCategory[index];
-                              return Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  IconButton(
-                                    padding: const EdgeInsets.all(0),
-                                    icon: Icon(value.icon),
-                                    onPressed: () {
-                                      Navigator.pop(context, {
-                                        "category": value.name,
-                                        'icon': value.icon,
-                                        "color": value.color,
-                                        "id": value.id
-                                      });
-                                    },
-                                    color: value.color,
-                                  ),
-                                  Text(
-                                    value.name,
-                                    overflow: TextOverflow.ellipsis,
-                                    softWrap: false,
-                                  ),
-                                ],
-                              );
-                            }),
-                        GridView.builder(
-                            itemCount: incomeCategory.length,
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisSpacing: 2,
-                                    mainAxisSpacing: 2,
-                                    crossAxisCount: 4),
-                            itemBuilder: (BuildContext context, int index) {
-                              var value = incomeCategory[index];
-                              return Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  IconButton(
-                                    padding: const EdgeInsets.all(0),
-                                    icon: Icon(value.icon),
-                                    onPressed: () {
-                                      Navigator.pop(context, {
-                                        'category': key,
-                                        'icon': value.icon,
-                                        'color': value.color,
-                                        "id": value.id
-                                      });
-                                    },
-                                    color: value.color,
-                                  ),
-                                  Text(
-                                    value.name,
-                                    overflow: TextOverflow.ellipsis,
-                                    softWrap: false,
-                                  ),
-                                ],
-                              );
-                            })
+                        _buildExpenseCategory(expenseCategory),
+                        _buildIncomeCategory(incomeCategory)
                       ],
                     );
                   },
                 ))
               ],
             )));
+  }
+
+  GridView _buildIncomeCategory(List<CategoryItem> incomeCategory) {
+    return GridView.builder(
+        itemCount: incomeCategory.length + 1,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisSpacing: 2, mainAxisSpacing: 2, crossAxisCount: 4),
+        itemBuilder: (BuildContext context, int index) {
+          if (index == incomeCategory.length) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                IconButton(
+                  padding: const EdgeInsets.all(0),
+                  icon: const Icon(Icons.settings),
+                  onPressed: () {
+                    // open category settings
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              const ModifyCategoryWidget(tabName: "income")),
+                    );
+                  },
+                  color: Colors.black,
+                ),
+                const Text(
+                  "Settings",
+                  overflow: TextOverflow.ellipsis,
+                  softWrap: false,
+                ),
+              ],
+            );
+          }
+          var value = incomeCategory[index];
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              IconButton(
+                padding: const EdgeInsets.all(0),
+                icon: Icon(value.icon),
+                onPressed: () {
+                  Navigator.pop(context, {
+                    'category': key,
+                    'icon': value.icon,
+                    'color': value.color,
+                    "id": value.id
+                  });
+                },
+                color: value.color,
+              ),
+              Text(
+                value.name,
+                overflow: TextOverflow.ellipsis,
+                softWrap: false,
+              ),
+            ],
+          );
+        });
+  }
+
+  GridView _buildExpenseCategory(List<CategoryItem> expenseCategory) {
+    return GridView.builder(
+        itemCount: expenseCategory.length + 1,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisSpacing: 2, mainAxisSpacing: 2, crossAxisCount: 4),
+        itemBuilder: (BuildContext context, int index) {
+          if (index == expenseCategory.length) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                IconButton(
+                  padding: const EdgeInsets.all(0),
+                  icon: const Icon(Icons.settings),
+                  onPressed: () {
+                    // open category settings
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              const ModifyCategoryWidget(tabName: "expense")),
+                    );
+                  },
+                  color: Colors.black,
+                ),
+                const Text(
+                  "Settings",
+                  overflow: TextOverflow.ellipsis,
+                  softWrap: false,
+                ),
+              ],
+            );
+          }
+          var value = expenseCategory[index];
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              IconButton(
+                padding: const EdgeInsets.all(0),
+                icon: Icon(value.icon),
+                onPressed: () {
+                  Navigator.pop(context, {
+                    "category": value.name,
+                    'icon': value.icon,
+                    "color": value.color,
+                    "id": value.id
+                  });
+                },
+                color: value.color,
+              ),
+              Text(
+                value.name,
+                overflow: TextOverflow.ellipsis,
+                softWrap: false,
+              ),
+            ],
+          );
+        });
   }
 }

@@ -1,11 +1,12 @@
 import 'dart:async';
-import 'dart:io' as io;
 import 'dart:convert';
+import 'dart:io' as io;
+
 import 'package:flutter/material.dart';
 import 'package:ji_zhang/models/index.dart' as models;
 import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sqflite/sqflite.dart';
 
 final Map<String, Icon> expenseCategoryIconInfo = {
   "Food": const Icon(Icons.fastfood),
@@ -71,7 +72,7 @@ final Map<String, Color> incomeCategoryColorInfo = {
 
 class DatabaseHelper {
   static const _dbName = "jizhang.db";
-  static const _dbVersion = 1;
+  static const _dbVersion = 2;
 
   // make this a singleton class
   DatabaseHelper._privateConstructor();
@@ -98,7 +99,7 @@ class DatabaseHelper {
         "CREATE TABLE `transaction` (`id` INTEGER PRIMARY KEY, `name` TEXT, `money` INTEGER, `date` TEXT, `categoryId` INTEGER, `labelIds` TEXT, `recurrence` TEXT, `comment` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
     await db.execute("DROP TABLE IF EXISTS `category`");
     await db.execute(
-        "CREATE TABLE `category` (`id` INTEGER PRIMARY KEY, `name` TEXT, `type` TEXT, `icon` TEXT, `color` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+        "CREATE TABLE `category` (`id` INTEGER PRIMARY KEY, `name` TEXT, `type` TEXT, `icon` TEXT, `color` TEXT, `index` INTEGER, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
     await db.execute("DROP TABLE IF EXISTS `event`");
     await db.execute(
         "CREATE TABLE `event` (`id` INTEGER PRIMARY KEY, `name` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
@@ -115,7 +116,7 @@ class DatabaseHelper {
         "CREATE TABLE `transaction` (`id` INTEGER PRIMARY KEY, `money` INTEGER, `date` TEXT, `categoryId` INTEGER, `labelIds` TEXT, `recurrence` TEXT, `comment` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
     await db.execute("DROP TABLE IF EXISTS `category`");
     await db.execute(
-        "CREATE TABLE `category` (`id` INTEGER PRIMARY KEY, `name` TEXT, `type` TEXT, `icon` TEXT, `color` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+        "CREATE TABLE `category` (`id` INTEGER PRIMARY KEY, `name` TEXT, `type` TEXT, `icon` TEXT, `color` TEXT, `index` INTEGER, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
     await db.execute("DROP TABLE IF EXISTS `event`");
     await db.execute(
         "CREATE TABLE `event` (`id` INTEGER PRIMARY KEY, `name` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
@@ -127,7 +128,9 @@ class DatabaseHelper {
   }
 
   Future insertPredefinedCategories(Database db) async {
-    for (var category in expenseCategoryColorInfo.keys) {
+    var expenseCategoryColorKeys = expenseCategoryColorInfo.keys.toList();
+    for (int i = 0; i < expenseCategoryColorKeys.length; ++i) {
+      var category = expenseCategoryColorKeys[i];
       IconData icon =
           (expenseCategoryIconInfo[category] as Icon).icon as IconData;
       Color color = expenseCategoryColorInfo[category] as Color;
@@ -141,11 +144,14 @@ class DatabaseHelper {
               "fontFamily": icon.fontFamily,
               "fontPackage": icon.fontPackage
             }),
-            "color": color.value.toString()
+            "color": color.value.toString(),
+            "index": i
           },
           conflictAlgorithm: ConflictAlgorithm.ignore);
     }
-    for (var category in incomeCategoryIconInfo.keys) {
+    var incomeCategoryColorKeys = incomeCategoryIconInfo.keys.toList();
+    for (int i = 0; i < incomeCategoryColorKeys.length; ++i) {
+      var category = incomeCategoryColorKeys[i];
       IconData icon =
           (incomeCategoryIconInfo[category] as Icon).icon as IconData;
       Color color = incomeCategoryColorInfo[category] as Color;
@@ -159,13 +165,14 @@ class DatabaseHelper {
               "fontFamily": icon.fontFamily,
               "fontPackage": icon.fontPackage
             }),
-            "color": color.value.toString()
+            "color": color.value.toString(),
+            "index": i
           },
           conflictAlgorithm: ConflictAlgorithm.ignore);
     }
   }
 
-  Future<List<models.Label>> queryLabel() async {
+  Future<List<models.Label>> getAllLabels() async {
     Database db = await database;
     String sql = "SELECT * FROM `label`";
     List<Map<String, dynamic>> result = await db.rawQuery(sql);
@@ -194,7 +201,7 @@ class DatabaseHelper {
     return rowsDeleted == 1;
   }
 
-  Future<List<models.Event>> queryEvent() async {
+  Future<List<models.Event>> getAllEvents() async {
     Database db = await database;
     String sql = "SELECT * FROM `event`";
     List<Map<String, dynamic>> result = await db.rawQuery(sql);
@@ -228,7 +235,7 @@ class DatabaseHelper {
     return rowsDeleted == 1;
   }
 
-  Future<List<models.Category>> queryCategory() async {
+  Future<List<models.Category>> getAllCategories() async {
     Database db = await database;
     String sql = "SELECT * FROM `category`";
     List<Map<String, Object?>> result = await db.rawQuery(sql);
@@ -262,10 +269,15 @@ class DatabaseHelper {
     return rowsDeleted == 1;
   }
 
-  Future<List<models.Transaction>> queryTransaction() async {
+  Future<List<models.Transaction>> getTransactionsByMonth(
+      int year, int month) async {
     Database db = await database;
-    String sql = "SELECT * FROM `transaction` ORDER BY `date` DESC";
-    List<Map<String, Object?>> result = await db.rawQuery(sql);
+    DateTime startDate = DateTime(year, month = month);
+    DateTime endDate =
+        DateTime(year, month = month + 1).subtract(const Duration(days: 1));
+    List<Map<String, Object?>> result = await db.query("transaction",
+        where: "Date(date) >= ? and Date(date) <= ?",
+        whereArgs: [startDate.toString(), endDate.toString()]);
     List<models.Transaction> ret = [];
     if (result.isNotEmpty) {
       for (var item in result) {

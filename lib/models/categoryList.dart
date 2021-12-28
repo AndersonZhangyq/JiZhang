@@ -9,7 +9,7 @@ class CategoryList extends ChangeNotifier {
 
   UnmodifiableListView<CategoryItem> get items {
     var ret = _itemsMap.values.toList();
-    ret.sort((a, b) => a.id.compareTo(b.id));
+    ret.sort();
     return UnmodifiableListView(ret);
   }
 
@@ -21,13 +21,25 @@ class CategoryList extends ChangeNotifier {
     notifyListeners();
   }
 
-  void add(CategoryItem item) {
+  void modify(CategoryItem item) {
     _itemsMap[item.id] = item;
     notifyListeners();
   }
 
   void removeAll() {
     _itemsMap.clear();
+    notifyListeners();
+  }
+
+  void updateAll(List<CategoryItem> items) {
+    for (var item in items) {
+      _itemsMap[item.id] = item;
+    }
+    notifyListeners();
+  }
+
+  void remove(CategoryItem item) {
+    _itemsMap.remove(item.id);
     notifyListeners();
   }
 }

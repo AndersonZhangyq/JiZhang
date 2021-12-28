@@ -17,7 +17,7 @@ void main() {
     ChangeNotifierProvider<CategoryList>(
       create: (context) {
         CategoryList categoryList = CategoryList();
-        DatabaseHelper.instance.queryCategory().then((ret) {
+        DatabaseHelper.instance.getAllCategories().then((ret) {
           List<CategoryItem> retItem = [];
           for (var element in ret) {
             retItem.add(CategoryItem(element));
@@ -31,7 +31,9 @@ void main() {
     ChangeNotifierProvider<TransactionList>(
       create: (context) {
         TransactionList transactionList = TransactionList();
-        DatabaseHelper.instance.queryTransaction().then((ret) {
+        DatabaseHelper.instance
+            .getTransactionsByMonth(DateTime.now().year, DateTime.now().month)
+            .then((ret) {
           List<Transaction> retItem = [];
           for (var element in ret) {
             retItem.add(element);
@@ -45,7 +47,7 @@ void main() {
     ChangeNotifierProvider<EventList>(
       create: (context) {
         EventList eventList = EventList();
-        DatabaseHelper.instance.queryEvent().then((ret) {
+        DatabaseHelper.instance.getAllEvents().then((ret) {
           List<Event> retItem = [];
           for (var element in ret) {
             retItem.add(element);
@@ -59,7 +61,7 @@ void main() {
     ChangeNotifierProvider<LabelList>(
       create: (context) {
         LabelList labelList = LabelList();
-        DatabaseHelper.instance.queryLabel().then((ret) {
+        DatabaseHelper.instance.getAllLabels().then((ret) {
           List<Label> retItem = [];
           for (var element in ret) {
             retItem.add(element);
@@ -124,26 +126,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   elevation: 0,
-      //   title: const Text("Home Page"),
-      //   actions: [
-      //     IconButton(
-      //       onPressed: () {
-      //         DatabaseHelper.instance.queryTransaction().then((ret) {
-      //           List<Transaction> retItem = [];
-      //           for (var element in ret) {
-      //             retItem.add(element);
-      //             // print(element.id);
-      //           }
-      //           context.read<TransactionList>().addAll(retItem);
-      //         });
-      //       },
-      //       icon: const Icon(Icons.refresh),
-      //       tooltip: "Fetch from DB",
-      //     )
-      //   ],
-      // ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

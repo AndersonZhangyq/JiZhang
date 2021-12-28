@@ -1,17 +1,17 @@
-import 'package:flutter/scheduler.dart';
-import 'package:ji_zhang/models/categoryList.dart';
-import 'package:ji_zhang/models/labelList.dart';
-import 'package:ji_zhang/models/transactionList.dart';
-import 'package:provider/provider.dart';
-import 'package:flutter/material.dart';
-import 'package:dotted_border/dotted_border.dart';
-import 'package:ji_zhang/common/dbHelper.dart';
-import 'package:ji_zhang/models/index.dart';
-import 'package:ji_zhang/widget/categorySelector.dart';
-import 'package:ji_zhang/common/datetime_extension.dart';
 import 'dart:convert';
 
-class CategoryItem {
+import 'package:dotted_border/dotted_border.dart';
+import 'package:flutter/material.dart';
+import 'package:ji_zhang/common/datetime_extension.dart';
+import 'package:ji_zhang/common/dbHelper.dart';
+import 'package:ji_zhang/models/categoryList.dart';
+import 'package:ji_zhang/models/index.dart';
+import 'package:ji_zhang/models/labelList.dart';
+import 'package:ji_zhang/models/transactionList.dart';
+import 'package:ji_zhang/widget/categorySelector.dart';
+import 'package:provider/provider.dart';
+
+class CategoryItem implements Comparable {
   CategoryItem(Category category) {
     id = category.id;
     name = category.name;
@@ -20,13 +20,23 @@ class CategoryItem {
     icon = IconData(iconIn['codePoint'],
         fontFamily: iconIn['fontFamily'], fontPackage: iconIn['fontPackage']);
     color = Color(int.parse(category.color));
+    index = category.index;
   }
 
   late num id;
   late String name;
   late String type;
+  late int index;
   late IconData icon;
   late Color color;
+
+  @override
+  int compareTo(other) {
+    if (other is CategoryItem) {
+      return index.compareTo(other.index);
+    }
+    return 0;
+  }
 }
 
 class ModifyTransactionsPage extends StatefulWidget {
@@ -121,6 +131,7 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
                 tooltip: 'Save transaction',
                 onPressed: canSave()
                     ? () async {
+                  transaction.money = double.parse(moneyController.text);
                         if (isAdd) {
                           int id = await DatabaseHelper.instance
                               .insertTransaction(transaction);
@@ -161,7 +172,7 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
             child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     DottedBorder(
                       borderType: BorderType.Circle,
@@ -176,7 +187,7 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
                         shape: const CircleBorder(),
                       ),
                     ),
-                    const Spacer(),
+                    // const Spacer(),
                     Expanded(
                       child: TextFormField(
                         controller: moneyController,
@@ -188,12 +199,7 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
                           // border: OutlineInputBorder(),
                           border: InputBorder.none,
                         ),
-                        onChanged: (String text) {
-                          double? value = double.tryParse(text);
-                          setState(() {
-                            if (null != value) transaction.money = value;
-                          });
-                        },
+                        readOnly: true,
                       ),
                     )
                   ],
@@ -246,7 +252,7 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
             title: const Text("Labels"),
             trailing: const Icon(Icons.chevron_right),
           ),
-          Container(
+          SizedBox(
             height: 50,
             child: Consumer<LabelList>(builder: (context, value, child) {
               final List<Label> labels = value.items;
@@ -264,7 +270,169 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
                         ));
                   });
             }),
-          )
+          ),
+          const Spacer(),
+          Center(child: _buildNumberTablet())
         ]));
+  }
+
+  void _onNumberTabletPressed(
+      {int? number, bool isDot = false, bool isRemove = false}) {
+    String tmp = moneyController.text;
+    if (isRemove) {
+      tmp = tmp.substring(0, tmp.length - 1);
+    } else if (isDot) {
+      tmp = tmp + ".";
+    } else if (number != null) {
+      tmp = tmp + number.toString();
+    }
+    setState(() {
+      // remove leading zero
+      tmp = tmp.replaceFirst(RegExp('^0+'), '');
+      // make sure only two number after dot
+      tmp = RegExp("[0-9]*[.]?[0-9]{0,2}").stringMatch(tmp) ?? "0";
+      moneyController.text = tmp;
+    });
+  }
+
+  Widget _buildNumberTablet() {
+    return GridView.count(
+      padding: const EdgeInsets.all(4),
+      shrinkWrap: true,
+      primary: false,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 3,
+      childAspectRatio: 4 / 2.5,
+      mainAxisSpacing: 4.0,
+      crossAxisSpacing: 4.0,
+      children: <Widget>[
+        OutlinedButton(
+          style: OutlinedButton.styleFrom(
+            textStyle: const TextStyle(fontSize: 18),
+            primary: Colors.black,
+            backgroundColor: Colors.white,
+          ),
+          child: const Text('1'),
+          onPressed: () {
+            _onNumberTabletPressed(number: 1);
+          },
+        ),
+        OutlinedButton(
+          style: OutlinedButton.styleFrom(
+            textStyle: const TextStyle(fontSize: 18),
+            primary: Colors.black,
+            backgroundColor: Colors.white,
+          ),
+          child: const Text('2'),
+          onPressed: () {
+            _onNumberTabletPressed(number: 2);
+          },
+        ),
+        OutlinedButton(
+          style: OutlinedButton.styleFrom(
+            textStyle: const TextStyle(fontSize: 18),
+            primary: Colors.black,
+            backgroundColor: Colors.white,
+          ),
+          child: const Text('3'),
+          onPressed: () {
+            _onNumberTabletPressed(number: 3);
+          },
+        ),
+        OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              textStyle: const TextStyle(fontSize: 18),
+              primary: Colors.black,
+              backgroundColor: Colors.white,
+            ),
+            child: const Text('4'),
+            onPressed: () {
+              _onNumberTabletPressed(number: 4);
+            }),
+        OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              textStyle: const TextStyle(fontSize: 18),
+              primary: Colors.black,
+              backgroundColor: Colors.white,
+            ),
+            child: const Text('5'),
+            onPressed: () {
+              _onNumberTabletPressed(number: 5);
+            }),
+        OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              textStyle: const TextStyle(fontSize: 18),
+              primary: Colors.black,
+              backgroundColor: Colors.white,
+            ),
+            child: const Text('6'),
+            onPressed: () {
+              _onNumberTabletPressed(number: 6);
+            }),
+        OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              textStyle: const TextStyle(fontSize: 18),
+              primary: Colors.black,
+              backgroundColor: Colors.white,
+            ),
+            child: const Text('7'),
+            onPressed: () {
+              _onNumberTabletPressed(number: 7);
+            }),
+        OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              textStyle: const TextStyle(fontSize: 18),
+              primary: Colors.black,
+              backgroundColor: Colors.white,
+            ),
+            child: const Text('8'),
+            onPressed: () {
+              _onNumberTabletPressed(number: 8);
+            }),
+        OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              textStyle: const TextStyle(fontSize: 18),
+              primary: Colors.black,
+              backgroundColor: Colors.white,
+            ),
+            child: const Text('9'),
+            onPressed: () {
+              _onNumberTabletPressed(number: 9);
+            }),
+        OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              textStyle: const TextStyle(fontSize: 18),
+              primary: Colors.black,
+              backgroundColor: Colors.white,
+            ),
+            child: const Text('.'),
+            onPressed: () {
+              _onNumberTabletPressed(isDot: true);
+            }),
+        OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              textStyle: const TextStyle(fontSize: 18),
+              primary: Colors.black,
+              backgroundColor: Colors.white,
+            ),
+            child: const Text('0'),
+            onPressed: () {
+              _onNumberTabletPressed(number: 0);
+            }),
+        OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              textStyle: const TextStyle(fontSize: 18),
+              primary: Colors.black,
+              backgroundColor: Colors.white,
+            ),
+            child: const Icon(
+              Icons.backspace,
+              color: Colors.red,
+            ),
+            onPressed: () {
+              _onNumberTabletPressed(isRemove: true);
+            }),
+      ],
+    );
   }
 }

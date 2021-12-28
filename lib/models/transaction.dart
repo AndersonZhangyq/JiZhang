@@ -1,5 +1,6 @@
 import 'package:ji_zhang/common/datetime_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
+
 part 'transaction.g.dart';
 
 @JsonSerializable()
@@ -26,7 +27,7 @@ class Transaction implements Comparable {
       if (dateCompare != 0) {
         return dateCompare;
       } else {
-        return id.compareTo(other.id);
+        return -id.compareTo(other.id);
       }
     }
     return 0;
