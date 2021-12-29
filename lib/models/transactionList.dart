@@ -29,6 +29,9 @@ class TransactionList extends ChangeNotifier {
   void setYearMonth(int year, int month) {
     this.year = year;
     this.month = month;
+    startDate = DateTime(this.year, month = this.month);
+    endDate = DateTime(this.year, month = this.month + 1)
+        .subtract(const Duration(days: 1));
     notifyListeners();
   }
 
@@ -47,6 +50,8 @@ class TransactionList extends ChangeNotifier {
     if (_isBounded(item)) {
       _itemsMap[item.id] = item;
       notifyListeners();
+    } else {
+      _itemsMap.remove(item.id);
     }
   }
 

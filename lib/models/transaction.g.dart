@@ -12,7 +12,7 @@ Transaction _$TransactionFromJson(Map<String, dynamic> json) {
     ..money = json['money'] as num
     ..date = DateTime.parse(json['date'] as String)
     ..categoryId = json['categoryId']
-    ..labelIds = json['labelIds'] as List<int>?
+    ..tagIds = json['tagIds'] as List<int>?
     ..recurrence = json['recurrence'] as String?
     ..comment = json['comment'] as String?;
   if (json['createdAt'] != null) {
@@ -26,7 +26,7 @@ Map<String, dynamic> _$TransactionToJson(Transaction instance) {
     'money': instance.money,
     'date': instance.date.toIso8601String(),
     'categoryId': instance.categoryId,
-    'labelIds': instance.labelIds,
+    'tagIds': instance.tagIds,
     'recurrence': instance.recurrence,
     'comment': instance.comment,
   };

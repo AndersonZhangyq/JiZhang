@@ -109,7 +109,7 @@ class _TransactionListState extends State<TransactionListWidget> {
                           Provider.of<TransactionList>(context, listen: false)
                               .removeAll();
                           Provider.of<TransactionList>(context, listen: false)
-                              .setYearMonth(date.month, date.month);
+                              .setYearMonth(date.year, date.month);
                           Provider.of<TransactionList>(context, listen: false)
                               .addAll(transactions);
                         });

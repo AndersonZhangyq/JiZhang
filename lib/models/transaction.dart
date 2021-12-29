@@ -11,7 +11,7 @@ class Transaction implements Comparable {
   late num money;
   DateTime date = DateTime.now().getDateOnly();
   late int categoryId;
-  List<int>? labelIds;
+  List<int>? tagIds;
   String? recurrence;
   String? comment;
   late DateTime createdAt;

@@ -4,7 +4,7 @@
   "money": 100.00,
   "date": "$DateTime",
   "categoryId": "$int",
-  "labelIds?": "$[]int",
+  "tagIds?": "$[]int",
   "recurrence?": "",
   "comment?": "1234"
 }
