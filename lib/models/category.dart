@@ -16,7 +16,7 @@ class Category {
   late String icon;
   late String color;
   late int index;
-  late bool predefined;
+  late int predefined;
   late DateTime createdAt;
 
   factory Category.fromCategoryItem(CategoryItem item) {

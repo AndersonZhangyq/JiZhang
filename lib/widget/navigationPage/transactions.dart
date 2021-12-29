@@ -233,7 +233,7 @@ class _TransactionListState extends State<TransactionListWidget> {
                   ScaffoldMessenger.of(context).removeCurrentSnackBar();
                   ScaffoldMessenger.of(context)
                       .showSnackBar(SnackBar(
-                      content: Text(AppLocalizations.of(context)!
+                          content: Text(AppLocalizations.of(context)!
                               .transactions_SnackBar_Remove_Transaction),
                           action: SnackBarAction(
                               label: AppLocalizations.of(context)!

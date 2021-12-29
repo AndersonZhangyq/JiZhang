@@ -27,7 +27,7 @@ class CategoryItem implements Comparable {
   late String name;
   late String type;
   late int index;
-  late bool predefined;
+  late int predefined;
   late IconData icon;
   late Color color;
 
@@ -40,7 +40,7 @@ class CategoryItem implements Comparable {
   }
 
   String getDisplayName(BuildContext context) {
-    if (predefined) {
+    if (predefined == 1) {
       return CategoryNameLocalizationHelper.getDisplayName(name, type, context);
     }
     return name;
@@ -143,7 +143,7 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
                 icon: const Icon(Icons.save),
                 onPressed: canSave()
                     ? () async {
-                  transaction.money = double.parse(moneyController.text);
+                        transaction.money = double.parse(moneyController.text);
                         if (isAdd) {
                           int id = await DatabaseHelper.instance
                               .insertTransaction(transaction);

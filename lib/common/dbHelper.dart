@@ -96,14 +96,14 @@ class DatabaseHelper {
   Future _onCreate(Database db, int version) async {
     await db.execute("DROP TABLE IF EXISTS `transaction`");
     await db.execute(
-        "CREATE TABLE `transaction` (`id` INTEGER PRIMARY KEY, `name` TEXT, `money` INTEGER, `date` TEXT, `categoryId` INTEGER, `labelIds` TEXT, `recurrence` TEXT, `comment` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+        "CREATE TABLE `transaction` (`id` INTEGER PRIMARY KEY, `name` TEXT, `money` INTEGER, `date` TEXT, `categoryId` INTEGER, `tagIds` TEXT, `recurrence` TEXT, `comment` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
     await db.execute("DROP TABLE IF EXISTS `category`");
     await db.execute(
         "CREATE TABLE `category` (`id` INTEGER PRIMARY KEY, `name` TEXT, `type` TEXT, `icon` TEXT, `color` TEXT, `predefined` INTEGER(1), `index` INTEGER, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
     await db.execute("DROP TABLE IF EXISTS `event`");
     await db.execute(
         "CREATE TABLE `event` (`id` INTEGER PRIMARY KEY, `name` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
-    await db.execute("DROP TABLE IF EXISTS `label`");
+    await db.execute("DROP TABLE IF EXISTS `tag`");
     await db.execute(
         "CREATE TABLE `tag` (`id` INTEGER PRIMARY KEY, `name` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
 
@@ -113,7 +113,7 @@ class DatabaseHelper {
   Future _onUpgrade(Database db, int a, int b) async {
     await db.execute("DROP TABLE IF EXISTS `transaction`");
     await db.execute(
-        "CREATE TABLE `transaction` (`id` INTEGER PRIMARY KEY, `money` INTEGER, `date` TEXT, `categoryId` INTEGER, `labelIds` TEXT, `recurrence` TEXT, `comment` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+        "CREATE TABLE `transaction` (`id` INTEGER PRIMARY KEY, `money` INTEGER, `date` TEXT, `categoryId` INTEGER, `tagIds` TEXT, `recurrence` TEXT, `comment` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
     await db.execute("DROP TABLE IF EXISTS `category`");
     await db.execute(
         "CREATE TABLE `category` (`id` INTEGER PRIMARY KEY, `name` TEXT, `type` TEXT, `icon` TEXT, `color` TEXT, `predefined` INTEGER(1), `index` INTEGER, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
@@ -187,20 +187,32 @@ class DatabaseHelper {
     return ret;
   }
 
-  Future<int> insertTag(models.Tag label) async {
+  Future<int> insertTag(models.Tag tag) async {
     Database db = await database;
-    int id = await db.insert("tag", label.toJson(),
+    int id = await db.insert("tag", tag.toJson(),
         conflictAlgorithm: ConflictAlgorithm.replace);
     return id;
   }
 
-  void updateTag(models.Tag label) {}
+  Future<bool> updateTag(models.Tag tag) async {
+    Database db = await database;
+    var args = tag.toJson();
+    args.remove("id");
+    int rowsUpdated =
+        await db.update("tag", args, where: "id = ?", whereArgs: [tag.id]);
+    return rowsUpdated == 1;
+  }
 
-  Future<bool> deleteTag(num labelId) async {
+  Future<bool> deleteTag(num tagId) async {
     Database db = await database;
     int rowsDeleted =
-        await db.delete("tag", where: "id = ?", whereArgs: [labelId]);
+        await db.delete("tag", where: "id = ?", whereArgs: [tagId]);
     return rowsDeleted == 1;
+  }
+
+  void truncateTag() async {
+    Database db = await database;
+    await db.execute("DELETE FROM `tag`");
   }
 
   Future<List<models.Event>> getAllEvents() async {
@@ -225,8 +237,10 @@ class DatabaseHelper {
 
   Future<bool> updateEvent(models.Event event) async {
     Database db = await database;
-    int rowsUpdated = await db.update("event", event.toJson(),
-        where: "id = ?", whereArgs: [event.id]);
+    var args = event.toJson();
+    args.remove("id");
+    int rowsUpdated =
+        await db.update("event", args, where: "id = ?", whereArgs: [event.id]);
     return rowsUpdated == 1;
   }
 
@@ -235,6 +249,11 @@ class DatabaseHelper {
     int rowsDeleted =
         await db.delete("event", where: "id = ?", whereArgs: [eventId]);
     return rowsDeleted == 1;
+  }
+
+  void truncateEvent() async {
+    Database db = await database;
+    await db.execute("DELETE FROM `event`");
   }
 
   Future<List<models.Category>> getAllCategories() async {
@@ -259,8 +278,11 @@ class DatabaseHelper {
 
   Future<bool> updateCategory(models.Category category) async {
     Database db = await database;
-    int rowsUpdated = await db.update("category", category.toJson(),
-        where: "id = ?", whereArgs: [category.id]);
+    var args = category.toJson();
+    args.remove("id");
+    args.remove("createdAt");
+    int rowsUpdated = await db
+        .update("category", args, where: "id = ?", whereArgs: [category.id]);
     return rowsUpdated == 1;
   }
 
@@ -269,6 +291,24 @@ class DatabaseHelper {
     int rowsDeleted =
         await db.delete("category", where: "id = ?", whereArgs: [categoryId]);
     return rowsDeleted == 1;
+  }
+
+  void truncateCategory() async {
+    Database db = await database;
+    await db.execute("DELETE FROM `category`");
+  }
+
+  Future<List<models.Transaction>> getAllTransactions() async {
+    Database db = await database;
+    List<Map<String, Object?>> result =
+        await db.rawQuery("SELECT * FROM `transaction`");
+    List<models.Transaction> ret = [];
+    if (result.isNotEmpty) {
+      for (var item in result) {
+        ret.add(models.Transaction.fromJson(item));
+      }
+    }
+    return ret;
   }
 
   Future<List<models.Transaction>> getTransactionsByMonth(
@@ -298,7 +338,10 @@ class DatabaseHelper {
 
   Future<bool> updateTransaction(models.Transaction transaction) async {
     Database db = await database;
-    int rowsUpdated = await db.update("transaction", transaction.toJson(),
+    var args = transaction.toJson();
+    args.remove("od");
+    args.remove("createdAt");
+    int rowsUpdated = await db.update("transaction", args,
         where: "id = ?", whereArgs: [transaction.id]);
     return rowsUpdated == 1;
   }
@@ -308,5 +351,10 @@ class DatabaseHelper {
     int rowsDeleted = await db
         .delete("transaction", where: "id = ?", whereArgs: [transactionId]);
     return rowsDeleted == 1;
+  }
+
+  void truncateTransaction() async {
+    Database db = await database;
+    await db.rawDelete("DELETE FROM `transaction`");
   }
 }
