@@ -1,10 +1,9 @@
 import "package:collection/collection.dart";
 import 'package:flutter/material.dart';
-import 'package:ji_zhang/common/datetime_extension.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:ji_zhang/common/datetimeExtension.dart';
 import 'package:ji_zhang/common/dbHelper.dart';
-import 'package:ji_zhang/models/categoryList.dart';
 import 'package:ji_zhang/models/index.dart';
-import 'package:ji_zhang/models/transactionList.dart';
 import 'package:ji_zhang/widget/categorySelector.dart';
 import 'package:ji_zhang/widget/modifyTransaction.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
@@ -171,7 +170,7 @@ class _TransactionListState extends State<TransactionListWidget> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text("Expense",
+                        Text(AppLocalizations.of(context)!.tab_Expense,
                             style: TextStyle(fontWeight: FontWeight.w300)),
                         Text(totalExpense.toStringAsFixed(2),
                             style: const TextStyle(
@@ -184,7 +183,7 @@ class _TransactionListState extends State<TransactionListWidget> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text("Income",
+                        Text(AppLocalizations.of(context)!.tab_Income,
                             style: TextStyle(fontWeight: FontWeight.w300)),
                         Text(totalIncome.toStringAsFixed(2),
                             style: const TextStyle(
@@ -206,7 +205,9 @@ class _TransactionListState extends State<TransactionListWidget> {
     if (listItems.isEmpty) {
       return Expanded(
           child: Center(
-              child: Text("No transactions found",
+              child: Text(
+                  AppLocalizations.of(context)!
+                      .transactions_ListView_No_Transaction,
                   style: TextStyle(
                       fontSize: 20,
                       color: Colors.grey[300],
@@ -232,9 +233,11 @@ class _TransactionListState extends State<TransactionListWidget> {
                   ScaffoldMessenger.of(context).removeCurrentSnackBar();
                   ScaffoldMessenger.of(context)
                       .showSnackBar(SnackBar(
-                          content: const Text('Transaction removed'),
+                      content: Text(AppLocalizations.of(context)!
+                              .transactions_SnackBar_Remove_Transaction),
                           action: SnackBarAction(
-                              label: 'Undo',
+                              label: AppLocalizations.of(context)!
+                                  .snackBarAction_Undo,
                               onPressed: () {
                                 context
                                     .read<TransactionList>()
@@ -247,9 +250,9 @@ class _TransactionListState extends State<TransactionListWidget> {
                       bool ret = await DatabaseHelper.instance
                           .deleteTransaction(transactionToRemove.id);
                       if (ret == false) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Failed to delete transaction')));
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(AppLocalizations.of(context)!
+                                .transactions_SnackBar_failed_to_delete_transaction)));
                       }
                     }
                   });
@@ -282,10 +285,9 @@ class _TransactionListState extends State<TransactionListWidget> {
                           bool ret = await DatabaseHelper.instance
                               .updateTransaction(curTransaction);
                           if (false == ret) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content:
-                                        Text('Failed to update transaction')));
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Text(AppLocalizations.of(context)!
+                                    .transactions_SnackBar_failed_to_update_transaction)));
                           } else {
                             context
                                 .read<TransactionList>()

@@ -12,6 +12,7 @@ Category _$CategoryFromJson(Map<String, dynamic> json) => Category()
   ..type = json['type'] as String
   ..icon = json['icon'] as String
   ..color = json['color'] as String
+  ..predefined = json['predefined'] == 1 ? true : false
   ..index = json['index'] as int
   ..createdAt = DateTime.parse(json['createdAt'] as String);
 

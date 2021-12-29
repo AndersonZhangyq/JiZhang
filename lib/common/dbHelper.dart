@@ -72,7 +72,7 @@ final Map<String, Color> incomeCategoryColorInfo = {
 
 class DatabaseHelper {
   static const _dbName = "jizhang.db";
-  static const _dbVersion = 2;
+  static const _dbVersion = 3;
 
   // make this a singleton class
   DatabaseHelper._privateConstructor();
@@ -99,13 +99,13 @@ class DatabaseHelper {
         "CREATE TABLE `transaction` (`id` INTEGER PRIMARY KEY, `name` TEXT, `money` INTEGER, `date` TEXT, `categoryId` INTEGER, `labelIds` TEXT, `recurrence` TEXT, `comment` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
     await db.execute("DROP TABLE IF EXISTS `category`");
     await db.execute(
-        "CREATE TABLE `category` (`id` INTEGER PRIMARY KEY, `name` TEXT, `type` TEXT, `icon` TEXT, `color` TEXT, `index` INTEGER, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+        "CREATE TABLE `category` (`id` INTEGER PRIMARY KEY, `name` TEXT, `type` TEXT, `icon` TEXT, `color` TEXT, `predefined` INTEGER(1), `index` INTEGER, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
     await db.execute("DROP TABLE IF EXISTS `event`");
     await db.execute(
         "CREATE TABLE `event` (`id` INTEGER PRIMARY KEY, `name` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
     await db.execute("DROP TABLE IF EXISTS `label`");
     await db.execute(
-        "CREATE TABLE `label` (`id` INTEGER PRIMARY KEY, `name` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+        "CREATE TABLE `tag` (`id` INTEGER PRIMARY KEY, `name` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
 
     await insertPredefinedCategories(db);
   }
@@ -116,13 +116,13 @@ class DatabaseHelper {
         "CREATE TABLE `transaction` (`id` INTEGER PRIMARY KEY, `money` INTEGER, `date` TEXT, `categoryId` INTEGER, `labelIds` TEXT, `recurrence` TEXT, `comment` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
     await db.execute("DROP TABLE IF EXISTS `category`");
     await db.execute(
-        "CREATE TABLE `category` (`id` INTEGER PRIMARY KEY, `name` TEXT, `type` TEXT, `icon` TEXT, `color` TEXT, `index` INTEGER, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+        "CREATE TABLE `category` (`id` INTEGER PRIMARY KEY, `name` TEXT, `type` TEXT, `icon` TEXT, `color` TEXT, `predefined` INTEGER(1), `index` INTEGER, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
     await db.execute("DROP TABLE IF EXISTS `event`");
     await db.execute(
         "CREATE TABLE `event` (`id` INTEGER PRIMARY KEY, `name` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
-    await db.execute("DROP TABLE IF EXISTS `label`");
+    await db.execute("DROP TABLE IF EXISTS `tag`");
     await db.execute(
-        "CREATE TABLE `label` (`id` INTEGER PRIMARY KEY, `name` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+        "CREATE TABLE `tag` (`id` INTEGER PRIMARY KEY, `name` TEXT, `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
 
     await insertPredefinedCategories(db);
   }
@@ -145,6 +145,7 @@ class DatabaseHelper {
               "fontPackage": icon.fontPackage
             }),
             "color": color.value.toString(),
+            "predefined": 1,
             "index": i
           },
           conflictAlgorithm: ConflictAlgorithm.ignore);
@@ -166,38 +167,39 @@ class DatabaseHelper {
               "fontPackage": icon.fontPackage
             }),
             "color": color.value.toString(),
+            "predefined": 1,
             "index": i
           },
           conflictAlgorithm: ConflictAlgorithm.ignore);
     }
   }
 
-  Future<List<models.Label>> getAllLabels() async {
+  Future<List<models.Tag>> getAllTags() async {
     Database db = await database;
-    String sql = "SELECT * FROM `label`";
+    String sql = "SELECT * FROM `tag`";
     List<Map<String, dynamic>> result = await db.rawQuery(sql);
-    List<models.Label> ret = [];
+    List<models.Tag> ret = [];
     if (result.isNotEmpty) {
       for (var item in result) {
-        ret.add(models.Label.fromJson(item));
+        ret.add(models.Tag.fromJson(item));
       }
     }
     return ret;
   }
 
-  Future<int> insertLabel(models.Label label) async {
+  Future<int> insertTag(models.Tag label) async {
     Database db = await database;
-    int id = await db.insert("label", label.toJson(),
+    int id = await db.insert("tag", label.toJson(),
         conflictAlgorithm: ConflictAlgorithm.replace);
     return id;
   }
 
-  void updateLabel(models.Label label) {}
+  void updateTag(models.Tag label) {}
 
-  Future<bool> deleteLabel(num labelId) async {
+  Future<bool> deleteTag(num labelId) async {
     Database db = await database;
     int rowsDeleted =
-        await db.delete("label", where: "id = ?", whereArgs: [labelId]);
+        await db.delete("tag", where: "id = ?", whereArgs: [labelId]);
     return rowsDeleted == 1;
   }
 

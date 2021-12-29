@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ji_zhang/common/dbHelper.dart';
-import 'package:ji_zhang/models/categoryList.dart';
 import 'package:ji_zhang/models/index.dart';
 import 'package:ji_zhang/widget/addCategory.dart';
 import 'package:ji_zhang/widget/modifyTransaction.dart';
@@ -72,7 +72,7 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
       },
       child: Scaffold(
           appBar: AppBar(
-            title: const Text("Category Settings"),
+            title: Text(AppLocalizations.of(context)!.modifyCategory_Title),
             leading: IconButton(
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () {
@@ -89,11 +89,13 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        const TabBar(
+                        TabBar(
                           labelColor: Colors.grey,
                           tabs: [
-                            Tab(text: "Expense"),
-                            Tab(text: "Income"),
+                            Tab(
+                                text:
+                                    AppLocalizations.of(context)!.tab_Expense),
+                            Tab(text: AppLocalizations.of(context)!.tab_Income),
                           ],
                         ),
                         Expanded(
@@ -124,7 +126,10 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
                                   ),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
-                                    children: const [Text("Add new category")],
+                                    children: [
+                                      Text(AppLocalizations.of(context)!
+                                          .modifyCategory_Add_Category)
+                                    ],
                                   ),
                                 ),
                               )
@@ -154,7 +159,10 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
                                   ),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
-                                    children: const [Text("Add new category")],
+                                    children: [
+                                      Text(AppLocalizations.of(context)!
+                                          .modifyCategory_Add_Category)
+                                    ],
                                   ),
                                 ),
                               )
@@ -190,7 +198,8 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
                   ScaffoldMessenger.of(context).removeCurrentSnackBar();
                   ScaffoldMessenger.of(context)
                       .showSnackBar(SnackBar(
-                          content: const Text('Transaction removed'),
+                      content: Text(AppLocalizations.of(context)!
+                              .modifyCategory_SnackBar_category_removed),
                           action: SnackBarAction(
                               label: 'Undo',
                               onPressed: () {
@@ -208,16 +217,16 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
                       bool ret = await DatabaseHelper.instance
                           .deleteCategory(categoryToRemove.id);
                       if (ret == false) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Failed to delete category')));
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(AppLocalizations.of(context)!
+                                .modifyCategory_SnackBar_failed_to_remove_category)));
                       }
                     }
                   });
                 },
                 backgroundColor: Colors.red),
           ),
-          title: Text(expenseCategory[index].name),
+          title: Text(expenseCategory[index].getDisplayName(context)),
           trailing: const Icon(Icons.drag_handle),
         );
       },
@@ -258,7 +267,8 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
                   ScaffoldMessenger.of(context).removeCurrentSnackBar();
                   ScaffoldMessenger.of(context)
                       .showSnackBar(SnackBar(
-                          content: const Text('Transaction removed'),
+                      content: Text(AppLocalizations.of(context)!
+                              .modifyCategory_SnackBar_category_removed),
                           action: SnackBarAction(
                               label: 'Undo',
                               onPressed: () {
@@ -276,16 +286,16 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
                       bool ret = await DatabaseHelper.instance
                           .deleteCategory(categoryToRemove.id);
                       if (ret == false) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Failed to delete category')));
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(AppLocalizations.of(context)!
+                                .modifyCategory_SnackBar_failed_to_remove_category)));
                       }
                     }
                   });
                 },
                 backgroundColor: Colors.red),
           ),
-          title: Text(incomeCategory[index].name),
+          title: Text(incomeCategory[index].getDisplayName(context)),
           trailing: const Icon(Icons.drag_handle),
         );
       },

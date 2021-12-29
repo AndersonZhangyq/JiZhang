@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ji_zhang/models/categoryList.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:ji_zhang/models/index.dart';
 import 'package:ji_zhang/widget/modifyCategory.dart';
 import 'package:provider/provider.dart';
 
@@ -17,16 +18,16 @@ class CategorySelectorWidget extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                const Text(
-                  'Select Transaction Category',
+                Text(
+                  AppLocalizations.of(context)!.categorySelector_Title,
                   textAlign: TextAlign.start,
                   textScaleFactor: 1.5,
                 ),
-                const TabBar(
+                TabBar(
                   labelColor: Colors.grey,
                   tabs: [
-                    Tab(text: "Expense"),
-                    Tab(text: "Income"),
+                    Tab(text: AppLocalizations.of(context)!.tab_Expense),
+                    Tab(text: AppLocalizations.of(context)!.tab_Income),
                   ],
                 ),
                 Expanded(child: Consumer<CategoryList>(
@@ -76,8 +77,8 @@ class CategorySelectorWidget extends StatelessWidget {
                   },
                   color: Colors.black,
                 ),
-                const Text(
-                  "Settings",
+                Text(
+                  AppLocalizations.of(context)!.categorySelector_LastListItem,
                   overflow: TextOverflow.ellipsis,
                   softWrap: false,
                 ),
@@ -102,7 +103,7 @@ class CategorySelectorWidget extends StatelessWidget {
                 color: value.color,
               ),
               Text(
-                value.name,
+                value.getDisplayName(context),
                 overflow: TextOverflow.ellipsis,
                 softWrap: false,
               ),
@@ -135,8 +136,8 @@ class CategorySelectorWidget extends StatelessWidget {
                   },
                   color: Colors.black,
                 ),
-                const Text(
-                  "Settings",
+                Text(
+                  AppLocalizations.of(context)!.categorySelector_LastListItem,
                   overflow: TextOverflow.ellipsis,
                   softWrap: false,
                 ),
@@ -161,7 +162,7 @@ class CategorySelectorWidget extends StatelessWidget {
                 color: value.color,
               ),
               Text(
-                value.name,
+                value.getDisplayName(context),
                 overflow: TextOverflow.ellipsis,
                 softWrap: false,
               ),

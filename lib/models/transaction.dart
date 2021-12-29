@@ -1,4 +1,4 @@
-import 'package:ji_zhang/common/datetime_extension.dart';
+import 'package:ji_zhang/common/datetimeExtension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'transaction.g.dart';

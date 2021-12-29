@@ -2,12 +2,11 @@ import 'dart:convert';
 
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
-import 'package:ji_zhang/common/datetime_extension.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:ji_zhang/common/catergoryNameHelper.dart';
+import 'package:ji_zhang/common/datetimeExtension.dart';
 import 'package:ji_zhang/common/dbHelper.dart';
-import 'package:ji_zhang/models/categoryList.dart';
 import 'package:ji_zhang/models/index.dart';
-import 'package:ji_zhang/models/labelList.dart';
-import 'package:ji_zhang/models/transactionList.dart';
 import 'package:ji_zhang/widget/categorySelector.dart';
 import 'package:provider/provider.dart';
 
@@ -16,6 +15,7 @@ class CategoryItem implements Comparable {
     id = category.id;
     name = category.name;
     type = category.type;
+    predefined = category.predefined;
     var iconIn = jsonDecode(category.icon);
     icon = IconData(iconIn['codePoint'],
         fontFamily: iconIn['fontFamily'], fontPackage: iconIn['fontPackage']);
@@ -27,6 +27,7 @@ class CategoryItem implements Comparable {
   late String name;
   late String type;
   late int index;
+  late bool predefined;
   late IconData icon;
   late Color color;
 
@@ -36,6 +37,13 @@ class CategoryItem implements Comparable {
       return index.compareTo(other.index);
     }
     return 0;
+  }
+
+  String getDisplayName(BuildContext context) {
+    if (predefined) {
+      return CategoryNameLocalizationHelper.getDisplayName(name, type, context);
+    }
+    return name;
   }
 }
 
@@ -118,7 +126,12 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
             backgroundColor: categoryColor,
             elevation: 0,
             centerTitle: true,
-            title: Text((isAdd ? "Add" : "Edit") + " Transaction"),
+            title: Text((isAdd
+                    ? AppLocalizations.of(context)!.modifyTransactions_Title_add
+                    : AppLocalizations.of(context)!
+                        .modifyTransactions_Title_edit) +
+                AppLocalizations.of(context)!
+                    .modifyTransactions_Title_transaction),
             leading: IconButton(
               icon: const Icon(Icons.close),
               onPressed: () {
@@ -128,7 +141,6 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
             actions: <Widget>[
               IconButton(
                 icon: const Icon(Icons.save),
-                tooltip: 'Save transaction',
                 onPressed: canSave()
                     ? () async {
                   transaction.money = double.parse(moneyController.text);
@@ -137,8 +149,9 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
                               .insertTransaction(transaction);
                           if (0 == id) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Failed to add transaction"),
+                              SnackBar(
+                                content: Text(AppLocalizations.of(context)!
+                                    .modifyTransactions_SnackBar_failed_to_add_transaction),
                               ),
                             );
                           } else {
@@ -152,8 +165,9 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
                               .updateTransaction(transaction);
                           if (false == ret) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Failed to update transaction"),
+                              SnackBar(
+                                content: Text(AppLocalizations.of(context)!
+                                    .modifyTransactions_SnackBar_failed_to_update_transaction),
                               ),
                             );
                           } else {
@@ -236,9 +250,10 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
               keyboardType: TextInputType.multiline,
               minLines: 2,
               maxLines: 4,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 border: InputBorder.none,
-                hintText: "Write a comment",
+                hintText: AppLocalizations.of(context)!
+                    .modifyTransactions_Comment_hint,
               ),
               onChanged: (value) {
                 setState(() {
@@ -249,18 +264,18 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
           ),
           ListTile(
             leading: Icon(Icons.label, color: categoryColor),
-            title: const Text("Labels"),
+            title: Text(AppLocalizations.of(context)!.tags),
             trailing: const Icon(Icons.chevron_right),
           ),
           SizedBox(
             height: 50,
-            child: Consumer<LabelList>(builder: (context, value, child) {
-              final List<Label> labels = value.items;
+            child: Consumer<TagList>(builder: (context, value, child) {
+              final List<Tag> labels = value.items;
               return ListView.builder(
                   itemCount: labels.length,
                   scrollDirection: Axis.horizontal,
                   itemBuilder: (context, index) {
-                    Label? cur = labels[index];
+                    Tag? cur = labels[index];
                     return Padding(
                         padding: const EdgeInsets.all(4.0),
                         child: FilterChip(
@@ -290,7 +305,8 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
       // remove leading zero
       tmp = tmp.replaceFirst(RegExp('^0+'), '');
       // make sure only two number after dot
-      tmp = RegExp("[0-9]*[.]?[0-9]{0,2}").stringMatch(tmp) ?? "0";
+      // use '[0-9]+' to ensure that if tmp is Empty then set to "0"
+      tmp = RegExp("[0-9]+[.]?[0-9]{0,2}").stringMatch(tmp) ?? "0";
       moneyController.text = tmp;
     });
   }

@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ji_zhang/common/dbHelper.dart';
-import 'package:ji_zhang/models/categoryList.dart';
-import 'package:ji_zhang/models/eventList.dart';
 import 'package:ji_zhang/models/index.dart';
-import 'package:ji_zhang/models/labelList.dart';
-import 'package:ji_zhang/models/transactionList.dart';
 import 'package:ji_zhang/widget/modifyTransaction.dart';
 import 'package:ji_zhang/widget/navigationPage/account.dart';
 import 'package:ji_zhang/widget/navigationPage/budget.dart';
@@ -58,18 +55,18 @@ void main() {
         return eventList;
       },
     ),
-    ChangeNotifierProvider<LabelList>(
+    ChangeNotifierProvider<TagList>(
       create: (context) {
-        LabelList labelList = LabelList();
-        DatabaseHelper.instance.getAllLabels().then((ret) {
-          List<Label> retItem = [];
+        TagList tagList = TagList();
+        DatabaseHelper.instance.getAllTags().then((ret) {
+          List<Tag> retItem = [];
           for (var element in ret) {
             retItem.add(element);
             // print(element.id);
           }
-          labelList.addAll(retItem);
+          tagList.addAll(retItem);
         });
-        return labelList;
+        return tagList;
       },
     )
   ], child: const MyApp()));
@@ -82,7 +79,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(
         // This is the theme of your application.
         primaryColor: const Color(0xFF68a1e8),
@@ -148,22 +146,22 @@ class _MyHomePageState extends State<MyHomePage> {
         type: BottomNavigationBarType.fixed,
         onTap: onTabTapped,
         currentIndex: _currentIndex,
-        items: const <BottomNavigationBarItem>[
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.list_alt),
-            label: 'Transactions',
+            label: AppLocalizations.of(context)!.bottomNav_Transactions,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.insert_chart_outlined),
-            label: 'Chart',
+            label: AppLocalizations.of(context)!.bottomNav_Chart,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.attach_money_rounded),
-            label: 'Budgets',
+            label: AppLocalizations.of(context)!.bottomNav_Budgets,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.account_circle_outlined),
-            label: 'Account',
+            label: AppLocalizations.of(context)!.bottomNav_Account,
           ),
         ],
       ),

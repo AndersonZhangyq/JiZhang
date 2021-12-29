@@ -1,17 +1,17 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'label.dart';
+part of 'tag.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-Label _$LabelFromJson(Map<String, dynamic> json) => Label()
+Tag _$TagFromJson(Map<String, dynamic> json) => Tag()
   ..id = json['id'] as num
   ..name = json['name'] as String
   ..createdAt = DateTime.parse(json['createdAt'] as String);
 
-Map<String, dynamic> _$LabelToJson(Label instance) {
+Map<String, dynamic> _$TagToJson(Tag instance) {
   Map<String, dynamic> ret = {
     'name': instance.name,
   };
