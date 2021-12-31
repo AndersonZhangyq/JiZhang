@@ -28,6 +28,7 @@
   "account_RestoreFailure": "Failed to restore",
   "account_RestoreNotFound": "Backup not found",
   "account_RestoreConfirm": "Current data will be removed. Are you sure you want to restore?",
+  "account_NeedStoragePermission": "We need to access the storage for storing and reading backup files.",
   "cancel": "Cancel",
   "ok": "OK",
   "snackBarAction_Undo": "Undo",

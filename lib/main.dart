@@ -131,6 +131,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton.small(
+        heroTag: 'add_transaction',
         elevation: 4.0,
         child: const Icon(Icons.add),
         onPressed: () {

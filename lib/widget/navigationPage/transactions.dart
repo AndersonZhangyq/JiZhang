@@ -268,6 +268,7 @@ class _TransactionListState extends State<TransactionListWidget> {
                     );
                   },
                   leading: FloatingActionButton.small(
+                    heroTag: "transaction_category_$index",
                     child: Icon(
                       curCategoryItem!.icon,
                       color: Colors.white,

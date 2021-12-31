@@ -6,7 +6,7 @@ class CategoryNameLocalizationHelper {
       String categoryName, String categoryType, BuildContext context) {
     var table = AppLocalizations.of(context)!;
     String displayName;
-    if (categoryType == "income")
+    if (categoryType == "income") {
       switch (categoryName) {
         case "Salary":
           displayName = table.category_Income_Salary;
@@ -35,7 +35,7 @@ class CategoryNameLocalizationHelper {
         default:
           throw UnimplementedError();
       }
-    else {
+    } else {
       switch (categoryName) {
         case "Food":
           displayName = table.category_Expense_Food;

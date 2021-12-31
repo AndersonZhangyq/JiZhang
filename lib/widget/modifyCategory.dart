@@ -184,6 +184,7 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
           leading: SizedBox(
             height: 25,
             child: FloatingActionButton.small(
+                heroTag: "remove_expense_$index",
                 elevation: 0,
                 child: const Icon(
                   Icons.horizontal_rule,
@@ -198,7 +199,7 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
                   ScaffoldMessenger.of(context).removeCurrentSnackBar();
                   ScaffoldMessenger.of(context)
                       .showSnackBar(SnackBar(
-                      content: Text(AppLocalizations.of(context)!
+                          content: Text(AppLocalizations.of(context)!
                               .modifyCategory_SnackBar_category_removed),
                           action: SnackBarAction(
                               label: 'Undo',
@@ -253,6 +254,7 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
           leading: SizedBox(
             height: 25,
             child: FloatingActionButton.small(
+                heroTag: "remove_income_$index",
                 elevation: 0,
                 child: const Icon(
                   Icons.horizontal_rule,
@@ -267,7 +269,7 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
                   ScaffoldMessenger.of(context).removeCurrentSnackBar();
                   ScaffoldMessenger.of(context)
                       .showSnackBar(SnackBar(
-                      content: Text(AppLocalizations.of(context)!
+                          content: Text(AppLocalizations.of(context)!
                               .modifyCategory_SnackBar_category_removed),
                           action: SnackBarAction(
                               label: 'Undo',

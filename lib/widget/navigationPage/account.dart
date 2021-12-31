@@ -7,6 +7,7 @@ import 'package:ji_zhang/common/dbHelper.dart';
 import 'package:ji_zhang/models/index.dart';
 import 'package:ji_zhang/widget/modifyTransaction.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 class AccountWidget extends StatelessWidget {
@@ -29,6 +30,17 @@ class _AccountPageState extends State<AccountPageWidget> {
   int backUpPercent = -1;
   int restorePercent = -1;
 
+  Future<bool> _checkStoragePermission() async {
+    var status = await Permission.storage.request();
+    if (!status.isGranted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              AppLocalizations.of(context)!.account_NeedStoragePermission)));
+      return false;
+    }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Expanded(
@@ -46,14 +58,19 @@ class _AccountPageState extends State<AccountPageWidget> {
             ),
             onTap: () async {
               backUpPercent = 0;
+              if (await _checkStoragePermission() == false) return;
               try {
-                final externalDirectory = await getExternalStorageDirectory();
-                await Directory("${externalDirectory!.path}/backup")
+                final externalRoot = (await getExternalStorageDirectory())!
+                    .parent
+                    .parent
+                    .parent
+                    .parent;
+                Directory("${externalRoot.path}/JiZhang/backup")
                     .create(recursive: true);
                 final allTransactions =
                     await DatabaseHelper.instance.getAllTransactions();
                 final transactionsFile =
-                    File("${externalDirectory.path}/backup/transaction.txt");
+                    File("${externalRoot.path}/JiZhang/backup/transaction.txt");
                 setState(() {
                   backUpPercent++;
                 });
@@ -62,21 +79,21 @@ class _AccountPageState extends State<AccountPageWidget> {
                 final allCategories =
                     await DatabaseHelper.instance.getAllCategories();
                 final categoriesFile =
-                    File("${externalDirectory.path}/backup/category.txt");
+                    File("${externalRoot.path}/JiZhang/backup/category.txt");
                 await categoriesFile.writeAsString(jsonEncode(allCategories));
                 setState(() {
                   backUpPercent++;
                 });
                 final allTages = await DatabaseHelper.instance.getAllTags();
                 final tagesFile =
-                    File("${externalDirectory.path}/backup/tag.txt");
+                    File("${externalRoot.path}/JiZhang/backup/tag.txt");
                 await tagesFile.writeAsString(jsonEncode(allTages));
                 final allEvents = await DatabaseHelper.instance.getAllEvents();
                 setState(() {
                   backUpPercent++;
                 });
                 final eventsFile =
-                    File("${externalDirectory.path}/backup/event.txt");
+                    File("${externalRoot.path}/JiZhang/backup/event.txt");
                 await eventsFile.writeAsString(jsonEncode(allEvents));
                 setState(() {
                   backUpPercent++;
@@ -109,17 +126,22 @@ class _AccountPageState extends State<AccountPageWidget> {
             ),
             onTap: () async {
               restorePercent = 0;
+              if (await _checkStoragePermission() == false) return;
               try {
-                final externalDirectory = await getExternalStorageDirectory();
+                final externalRoot = (await getExternalStorageDirectory())!
+                    .parent
+                    .parent
+                    .parent
+                    .parent;
                 final transactionsFile =
-                    File("${externalDirectory!.path}/backup/transaction.txt");
+                    File("${externalRoot.path}/JiZhang/backup/transaction.txt");
                 final categoriesFile =
-                    File("${externalDirectory.path}/backup/category.txt");
+                    File("${externalRoot.path}/JiZhang/backup/category.txt");
                 final tagesFile =
-                    File("${externalDirectory.path}/backup/tag.txt");
+                    File("${externalRoot.path}/JiZhang/backup/tag.txt");
                 final eventsFile =
-                    File("${externalDirectory.path}/backup/event.txt");
-                if (!(await Directory("${externalDirectory.path}/backup")
+                    File("${externalRoot.path}/JiZhang/backup/event.txt");
+                if (!(await Directory("${externalRoot.path}/JiZhang/backup")
                         .exists() &&
                     await transactionsFile.exists() &&
                     await categoriesFile.exists() &&

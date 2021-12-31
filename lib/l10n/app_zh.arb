@@ -28,6 +28,7 @@
   "account_RestoreFailure": "恢复失败",
   "account_RestoreNotFound": "没有找到备份文件",
   "account_RestoreConfirm": "恢复备份会清空当前所有数据，确定要恢复吗？",
+  "account_NeedStoragePermission": "需要读取存储和写入存储权限才能使用备份和恢复功能",
   "cancel": "取消",
   "ok": "确定",
   "snackBarAction_Undo": "撤销",
