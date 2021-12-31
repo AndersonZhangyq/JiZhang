@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:ji_zhang/models/index.dart';
+import 'package:ji_zhang/dbProxy/index.dart';
 import 'package:ji_zhang/widget/modifyCategory.dart';
 import 'package:provider/provider.dart';
 

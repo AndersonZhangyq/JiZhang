@@ -3,9 +3,10 @@ import 'dart:convert';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:ji_zhang/common/catergoryNameHelper.dart';
+import 'package:ji_zhang/common/categoryNameHelper.dart';
 import 'package:ji_zhang/common/datetimeExtension.dart';
 import 'package:ji_zhang/common/dbHelper.dart';
+import 'package:ji_zhang/dbProxy/index.dart';
 import 'package:ji_zhang/models/index.dart';
 import 'package:ji_zhang/widget/categorySelector.dart';
 import 'package:provider/provider.dart';
@@ -127,11 +128,11 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
             elevation: 0,
             centerTitle: true,
             title: Text((isAdd
-                    ? AppLocalizations.of(context)!.modifyTransactions_Title_add
+                    ? AppLocalizations.of(context)!.modifyTransaction_Title_add
                     : AppLocalizations.of(context)!
-                        .modifyTransactions_Title_edit) +
+                        .modifyTransaction_Title_edit) +
                 AppLocalizations.of(context)!
-                    .modifyTransactions_Title_transaction),
+                    .modifyTransaction_Title_transaction),
             leading: IconButton(
               icon: const Icon(Icons.close),
               onPressed: () {
@@ -151,7 +152,7 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(AppLocalizations.of(context)!
-                                    .modifyTransactions_SnackBar_failed_to_add_transaction),
+                                    .modifyTransaction_SnackBar_failed_to_add_transaction),
                               ),
                             );
                           } else {
@@ -167,7 +168,7 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(AppLocalizations.of(context)!
-                                    .modifyTransactions_SnackBar_failed_to_update_transaction),
+                                    .modifyTransaction_SnackBar_failed_to_update_transaction),
                               ),
                             );
                           } else {
@@ -253,7 +254,7 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
               decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: AppLocalizations.of(context)!
-                    .modifyTransactions_Comment_hint,
+                    .modifyTransaction_Comment_hint,
               ),
               onChanged: (value) {
                 setState(() {

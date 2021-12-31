@@ -3,14 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ji_zhang/common/datetimeExtension.dart';
 import 'package:ji_zhang/common/dbHelper.dart';
+import 'package:ji_zhang/dbProxy/index.dart';
 import 'package:ji_zhang/models/index.dart';
 import 'package:ji_zhang/widget/categorySelector.dart';
 import 'package:ji_zhang/widget/modifyTransaction.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:provider/provider.dart';
 
-class TransactionsWidget extends StatelessWidget {
-  const TransactionsWidget({Key? key}) : super(key: key);
+class TransactionWidget extends StatelessWidget {
+  const TransactionWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

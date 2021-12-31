@@ -1,12 +1,8 @@
 # TODO
 
-- [ ] Filter transactions
-   - [✓] By time
-   - [ ] By category
-   - [ ] By event
 - [ ] Budgets
    - [ ] Get, create, modify, delete
-- [ ] Events
+- [ ] Tags
    - [ ] Get, create, modify, delete
 - [ ] Charts
    - [ ] By month

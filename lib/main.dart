@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ji_zhang/common/dbHelper.dart';
+import 'package:ji_zhang/dbProxy/index.dart';
 import 'package:ji_zhang/models/index.dart';
 import 'package:ji_zhang/widget/modifyTransaction.dart';
 import 'package:ji_zhang/widget/navigationPage/account.dart';
@@ -109,7 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   int _currentIndex = 0;
   final List _children = [
-    const TransactionsWidget(),
+    const TransactionWidget(),
     const ChartWidget(),
     const BudgetWidget(),
     const AccountWidget()
