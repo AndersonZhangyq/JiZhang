@@ -3,13 +3,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:ji_zhang/common/dbHelper.dart';
-import 'package:ji_zhang/dbProxy/index.dart';
-import 'package:ji_zhang/models/index.dart';
-import 'package:ji_zhang/widget/modifyTransaction.dart';
+import 'package:ji_zhang/models/database.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:drift/drift.dart' as drift;
 
 class AccountWidget extends StatelessWidget {
   const AccountWidget({Key? key}) : super(key: key);
@@ -30,6 +28,13 @@ class AccountPageWidget extends StatefulWidget {
 class _AccountPageState extends State<AccountPageWidget> {
   int backUpPercent = -1;
   int restorePercent = -1;
+  late MyDatabase db;
+
+  @override
+  void initState() {
+    super.initState();
+    db = Provider.of<MyDatabase>(context, listen: false);
+  }
 
   Future<bool> _checkStoragePermission() async {
     var status = await Permission.storage.request();
@@ -68,8 +73,7 @@ class _AccountPageState extends State<AccountPageWidget> {
                     .parent;
                 Directory("${externalRoot.path}/JiZhang/backup")
                     .create(recursive: true);
-                final allTransactions =
-                    await DatabaseHelper.instance.getAllTransactions();
+                final allTransactions = await db.select(db.transactions).get();
                 final transactionsFile =
                     File("${externalRoot.path}/JiZhang/backup/transaction.txt");
                 setState(() {
@@ -77,19 +81,18 @@ class _AccountPageState extends State<AccountPageWidget> {
                 });
                 await transactionsFile
                     .writeAsString(jsonEncode(allTransactions));
-                final allCategories =
-                    await DatabaseHelper.instance.getAllCategories();
+                final allCategories = await db.select(db.categories).get();
                 final categoriesFile =
                     File("${externalRoot.path}/JiZhang/backup/category.txt");
                 await categoriesFile.writeAsString(jsonEncode(allCategories));
                 setState(() {
                   backUpPercent++;
                 });
-                final allTages = await DatabaseHelper.instance.getAllTags();
+                final allTages = await db.select(db.tags).get();
                 final tagesFile =
                     File("${externalRoot.path}/JiZhang/backup/tag.txt");
                 await tagesFile.writeAsString(jsonEncode(allTages));
-                final allEvents = await DatabaseHelper.instance.getAllEvents();
+                final allEvents = await db.select(db.events).get();
                 setState(() {
                   backUpPercent++;
                 });
@@ -104,6 +107,7 @@ class _AccountPageState extends State<AccountPageWidget> {
                       Text(AppLocalizations.of(context)!.account_BackupSuccess),
                 ));
               } catch (e) {
+                print(e.toString());
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content:
                       Text(AppLocalizations.of(context)!.account_BackupFaliure),
@@ -172,45 +176,31 @@ class _AccountPageState extends State<AccountPageWidget> {
                                 child: Text(AppLocalizations.of(context)!.ok),
                                 onPressed: () async {
                                   try {
-                                    DatabaseHelper.instance
-                                        .truncateTransaction();
-                                    context.read<TransactionList>().removeAll();
-                                    DatabaseHelper.instance.truncateCategory();
-                                    context.read<CategoryList>().removeAll();
-                                    DatabaseHelper.instance.truncateTag();
-                                    context.read<TagList>().removeAll();
-                                    DatabaseHelper.instance.truncateEvent();
-                                    context.read<EventList>().removeAll();
+                                    db.delete(db.transactions);
+                                    db.delete(db.categories);
+                                    db.delete(db.tags);
+                                    db.delete(db.events);
                                     final allTransactions = jsonDecode(
                                         await transactionsFile.readAsString());
                                     allTransactions
                                         .forEach((transaction) async {
-                                      await DatabaseHelper.instance
-                                          .insertTransaction(
-                                              Transaction.fromJson(
-                                                  transaction));
+                                      db
+                                          .into(db.transactions)
+                                          .insertOnConflictUpdate(
+                                              Transaction.fromJson(transaction,
+                                                  serializer:
+                                                      const MyValueSerializer()));
                                     });
-                                    context.read<TransactionList>().addAll(
-                                        await DatabaseHelper.instance
-                                            .getTransactionsByMonth(
-                                                context
-                                                    .read<TransactionList>()
-                                                    .year,
-                                                context
-                                                    .read<TransactionList>()
-                                                    .month));
                                     setState(() {
                                       restorePercent++;
                                     });
                                     final allCategories = jsonDecode(
                                         await categoriesFile.readAsString());
                                     allCategories.forEach((category) async {
-                                      await DatabaseHelper.instance
-                                          .insertCategory(
+                                      db
+                                          .into(db.categories)
+                                          .insertOnConflictUpdate(
                                               Category.fromJson(category));
-                                      context.read<CategoryList>().modify(
-                                          CategoryItem(
-                                              Category.fromJson(category)));
                                     });
                                     setState(() {
                                       restorePercent++;
@@ -218,24 +208,18 @@ class _AccountPageState extends State<AccountPageWidget> {
                                     final allTages = jsonDecode(
                                         await tagesFile.readAsString());
                                     allTages.forEach((tag) async {
-                                      await DatabaseHelper.instance
-                                          .insertTag(Tag.fromJson(tag));
+                                      db.into(db.tags).insertOnConflictUpdate(
+                                          Tag.fromJson(tag));
                                     });
-                                    context.read<TagList>().addAll(
-                                        await DatabaseHelper.instance
-                                            .getAllTags());
                                     setState(() {
                                       restorePercent++;
                                     });
                                     final allEvents = jsonDecode(
                                         await eventsFile.readAsString());
                                     allEvents.forEach((event) async {
-                                      await DatabaseHelper.instance
-                                          .insertEvent(Event.fromJson(event));
+                                      db.into(db.events).insertOnConflictUpdate(
+                                          Event.fromJson(event));
                                     });
-                                    context.read<EventList>().addAll(
-                                        await DatabaseHelper.instance
-                                            .getAllEvents());
                                     setState(() {
                                       restorePercent++;
                                     });

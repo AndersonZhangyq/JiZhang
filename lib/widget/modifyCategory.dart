@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:ji_zhang/common/dbHelper.dart';
-import 'package:ji_zhang/dbProxy/index.dart';
-import 'package:ji_zhang/models/index.dart';
+import 'package:ji_zhang/models/database.dart';
 import 'package:ji_zhang/widget/addCategory.dart';
 import 'package:ji_zhang/widget/modifyTransaction.dart';
 import 'package:provider/provider.dart';
+import 'package:drift/drift.dart' as drift;
 
 class ModifyCategoryWidget extends StatefulWidget {
   const ModifyCategoryWidget({Key? key, required this.tabName})
@@ -17,6 +16,7 @@ class ModifyCategoryWidget extends StatefulWidget {
 }
 
 class _ModifyCategoryState extends State<ModifyCategoryWidget> {
+  late MyDatabase db;
   List<CategoryItem> expenseCategory = [];
   List<CategoryItem> incomeCategory = [];
   int expenseChanged = 0;
@@ -25,16 +25,9 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
   @override
   void initState() {
     super.initState();
-    var categories = context.read<CategoryList>().items;
+    db = Provider.of<MyDatabase>(context);
     expenseCategory.clear();
     incomeCategory.clear();
-    for (var item in categories) {
-      if (item.type == "expense") {
-        expenseCategory.add(item);
-      } else {
-        incomeCategory.add(item);
-      }
-    }
   }
 
   void _saveList() async {
@@ -42,138 +35,151 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
     // save category change
     if (expenseChanged > 0) {
       for (int i = 0; i < expenseCategory.length; i++) {
-        expenseCategory[i].index = i;
-      }
-      Provider.of<CategoryList>(context, listen: false)
-          .updateAll(expenseCategory);
-      for (var element in expenseCategory) {
-        await DatabaseHelper.instance
-            .updateCategory(Category.fromCategoryItem(element));
+        CategoryItem element = expenseCategory[i];
+        db.update(db.categories).replace(CategoriesCompanion(
+              id: drift.Value(element.id),
+              index: drift.Value(element.index),
+            ));
       }
     }
     if (incomeChanged > 0) {
       for (int i = 0; i < incomeCategory.length; i++) {
-        incomeCategory[i].index = i;
-      }
-      Provider.of<CategoryList>(context, listen: false)
-          .updateAll(incomeCategory);
-      for (var element in incomeCategory) {
-        await DatabaseHelper.instance
-            .updateCategory(Category.fromCategoryItem(element));
+        CategoryItem element = incomeCategory[i];
+        db.update(db.categories).replace(CategoriesCompanion(
+              id: drift.Value(element.id),
+              index: drift.Value(element.index),
+            ));
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () {
-        _saveList();
-        return Future<bool>.value(true);
-      },
-      child: Scaffold(
-          appBar: AppBar(
-            title: Text(AppLocalizations.of(context)!.modifyCategory_Title),
-            leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  _saveList();
-                  Navigator.of(context, rootNavigator: true).pop(context);
-                }),
-          ),
-          body: Center(
-            child: DefaultTabController(
-                length: 2,
-                initialIndex: widget.tabName == "expense" ? 0 : 1,
-                child: Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        TabBar(
-                          labelColor: Colors.grey,
-                          tabs: [
-                            Tab(
-                                text:
-                                    AppLocalizations.of(context)!.tab_Expense),
-                            Tab(text: AppLocalizations.of(context)!.tab_Income),
-                          ],
-                        ),
-                        Expanded(
-                            child: TabBarView(
-                          children: [
-                            Column(children: [
+    return StreamBuilder<List<CategoryItem>>(
+        stream: db.getAllCategories(),
+        builder: (context, snapshot) {
+          final categories = snapshot.data!;
+          for (var item in categories) {
+            if (item.type == "expense") {
+              expenseCategory.add(item);
+            } else {
+              incomeCategory.add(item);
+            }
+          }
+          return WillPopScope(
+            onWillPop: () {
+              _saveList();
+              return Future<bool>.value(true);
+            },
+            child: Scaffold(
+                appBar: AppBar(
+                  title:
+                      Text(AppLocalizations.of(context)!.modifyCategory_Title),
+                  leading: IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () {
+                        _saveList();
+                        Navigator.of(context, rootNavigator: true).pop(context);
+                      }),
+                ),
+                body: Center(
+                  child: DefaultTabController(
+                      length: 2,
+                      initialIndex: widget.tabName == "expense" ? 0 : 1,
+                      child: Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              TabBar(
+                                labelColor: Colors.grey,
+                                tabs: [
+                                  Tab(
+                                      text: AppLocalizations.of(context)!
+                                          .tab_Expense),
+                                  Tab(
+                                      text: AppLocalizations.of(context)!
+                                          .tab_Income),
+                                ],
+                              ),
                               Expanded(
-                                  child: _buildExpenseCategoryList(
-                                      expenseCategory)),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const AddCategoryWidget()),
-                                  );
-                                },
-                                child: Container(
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    border: Border(
-                                      top: BorderSide(
-                                        width: 1,
-                                        color: (Colors.grey[300])!,
+                                  child: TabBarView(
+                                children: [
+                                  Column(children: [
+                                    Expanded(
+                                        child: _buildExpenseCategoryList(
+                                            expenseCategory)),
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const AddCategoryWidget()),
+                                        );
+                                      },
+                                      child: Container(
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                          border: Border(
+                                            top: BorderSide(
+                                              width: 1,
+                                              color: (Colors.grey[300])!,
+                                            ),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(AppLocalizations.of(context)!
+                                                .modifyCategory_Add_Category)
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(AppLocalizations.of(context)!
-                                          .modifyCategory_Add_Category)
-                                    ],
-                                  ),
-                                ),
-                              )
-                            ]),
-                            Column(children: [
-                              Expanded(
-                                  child:
-                                      _buildIncomeCategoryList(incomeCategory)),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const AddCategoryWidget()),
-                                  );
-                                },
-                                child: Container(
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    border: Border(
-                                      top: BorderSide(
-                                        width: 1,
-                                        color: (Colors.grey[300])!,
+                                    )
+                                  ]),
+                                  Column(children: [
+                                    Expanded(
+                                        child: _buildIncomeCategoryList(
+                                            incomeCategory)),
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const AddCategoryWidget()),
+                                        );
+                                      },
+                                      child: Container(
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                          border: Border(
+                                            top: BorderSide(
+                                              width: 1,
+                                              color: (Colors.grey[300])!,
+                                            ),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(AppLocalizations.of(context)!
+                                                .modifyCategory_Add_Category)
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(AppLocalizations.of(context)!
-                                          .modifyCategory_Add_Category)
-                                    ],
-                                  ),
-                                ),
-                              )
-                            ])
-                          ],
-                        ))
-                      ],
-                    ))),
-          )),
-    );
+                                    )
+                                  ])
+                                ],
+                              ))
+                            ],
+                          ))),
+                )),
+          );
+        });
   }
 
   _buildExpenseCategoryList(List<CategoryItem> expenseCategory) {
@@ -215,10 +221,10 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
                       .then((value) async {
                     if (value == SnackBarClosedReason.timeout ||
                         value == SnackBarClosedReason.remove) {
-                      context.read<CategoryList>().remove(categoryToRemove);
-                      bool ret = await DatabaseHelper.instance
-                          .deleteCategory(categoryToRemove.id);
-                      if (ret == false) {
+                      int ret = await (db.delete(db.categories)
+                            ..where((t) => t.id.equals(categoryToRemove.id)))
+                          .go();
+                      if (ret == 0) {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                             content: Text(AppLocalizations.of(context)!
                                 .modifyCategory_SnackBar_failed_to_remove_category)));
@@ -285,10 +291,10 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
                       .then((value) async {
                     if (value == SnackBarClosedReason.timeout ||
                         value == SnackBarClosedReason.remove) {
-                      context.read<CategoryList>().remove(categoryToRemove);
-                      bool ret = await DatabaseHelper.instance
-                          .deleteCategory(categoryToRemove.id);
-                      if (ret == false) {
+                      int ret = await (db.delete(db.categories)
+                            ..where((t) => t.id.equals(categoryToRemove.id)))
+                          .go();
+                      if (ret == 0) {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                             content: Text(AppLocalizations.of(context)!
                                 .modifyCategory_SnackBar_failed_to_remove_category)));

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:ji_zhang/dbProxy/index.dart';
+import 'package:ji_zhang/models/database.dart';
+// import 'package:ji_zhang/dbProxy/index.dart';
 import 'package:ji_zhang/widget/modifyCategory.dart';
 import 'package:provider/provider.dart';
 
@@ -11,6 +12,7 @@ class CategorySelectorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final database = Provider.of<MyDatabase>(context);
     return DefaultTabController(
         length: 2,
         child: Padding(
@@ -30,11 +32,14 @@ class CategorySelectorWidget extends StatelessWidget {
                     Tab(text: AppLocalizations.of(context)!.tab_Income),
                   ],
                 ),
-                Expanded(child: Consumer<CategoryList>(
-                  builder: (context, value, child) {
+                Expanded(
+                    child: StreamBuilder<List<CategoryItem>>(
+                  stream: database.getAllCategories(),
+                  builder: (context, snapshot) {
+                    final categories = snapshot.data ?? <CategoryItem>[];
                     List<CategoryItem> expenseCategory = [];
                     List<CategoryItem> incomeCategory = [];
-                    for (var item in value.items) {
+                    for (var item in categories) {
                       if (item.type == "expense") {
                         expenseCategory.add(item);
                       } else {

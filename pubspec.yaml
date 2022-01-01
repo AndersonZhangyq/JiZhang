@@ -44,8 +44,13 @@ dependencies:
   flutter_slidable: ^1.1.0
   month_picker_dialog: ^0.4.0
   permission_handler: ^8.3.0
+  drift: ^1.2.0
+  sqlite3_flutter_libs: ^0.5.0
+  flutter_hooks: ^0.18.2
 
 dev_dependencies:
+  drift_dev: ^1.2.0
+  build_runner: ^2.1.7
   json_model: ^1.0.0
   json_serializable: ^5.0.0
   flutter_test:

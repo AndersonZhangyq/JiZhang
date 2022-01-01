@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:ji_zhang/common/dbHelper.dart';
-import 'package:ji_zhang/dbProxy/index.dart';
-import 'package:ji_zhang/models/index.dart';
+import 'package:ji_zhang/models/database.dart';
 import 'package:ji_zhang/widget/modifyTransaction.dart';
 import 'package:ji_zhang/widget/navigationPage/account.dart';
 import 'package:ji_zhang/widget/navigationPage/budget.dart';
@@ -11,66 +9,13 @@ import 'package:ji_zhang/widget/navigationPage/transactions.dart';
 import 'package:provider/provider.dart';
 
 void main() {
-  runApp(MultiProvider(providers: [
-    ChangeNotifierProvider<CategoryList>(
-      create: (context) {
-        CategoryList categoryList = CategoryList();
-        DatabaseHelper.instance.getAllCategories().then((ret) {
-          List<CategoryItem> retItem = [];
-          for (var element in ret) {
-            retItem.add(CategoryItem(element));
-            // print(element.name);
-          }
-          categoryList.addAll(retItem);
-        });
-        return categoryList;
-      },
+  runApp(
+    Provider<MyDatabase>(
+      create: (context) => MyDatabase(),
+      child: const MyApp(),
+      dispose: (context, db) => db.close(),
     ),
-    ChangeNotifierProvider<TransactionList>(
-      create: (context) {
-        TransactionList transactionList = TransactionList();
-        DatabaseHelper.instance
-            .getTransactionsByMonth(DateTime.now().year, DateTime.now().month)
-            .then((ret) {
-          List<Transaction> retItem = [];
-          for (var element in ret) {
-            retItem.add(element);
-            // print(element.id);
-          }
-          transactionList.addAll(retItem);
-        });
-        return transactionList;
-      },
-    ),
-    ChangeNotifierProvider<EventList>(
-      create: (context) {
-        EventList eventList = EventList();
-        DatabaseHelper.instance.getAllEvents().then((ret) {
-          List<Event> retItem = [];
-          for (var element in ret) {
-            retItem.add(element);
-            // print(element.id);
-          }
-          eventList.addAll(retItem);
-        });
-        return eventList;
-      },
-    ),
-    ChangeNotifierProvider<TagList>(
-      create: (context) {
-        TagList tagList = TagList();
-        DatabaseHelper.instance.getAllTags().then((ret) {
-          List<Tag> retItem = [];
-          for (var element in ret) {
-            retItem.add(element);
-            // print(element.id);
-          }
-          tagList.addAll(retItem);
-        });
-        return tagList;
-      },
-    )
-  ], child: const MyApp()));
+  );
 }
 
 class MyApp extends StatelessWidget {

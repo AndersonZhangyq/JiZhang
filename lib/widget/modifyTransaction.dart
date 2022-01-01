@@ -5,11 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ji_zhang/common/categoryNameHelper.dart';
 import 'package:ji_zhang/common/datetimeExtension.dart';
-import 'package:ji_zhang/common/dbHelper.dart';
-import 'package:ji_zhang/dbProxy/index.dart';
-import 'package:ji_zhang/models/index.dart';
+import 'package:ji_zhang/models/database.dart';
 import 'package:ji_zhang/widget/categorySelector.dart';
 import 'package:provider/provider.dart';
+import 'package:drift/drift.dart' as drift;
 
 class CategoryItem implements Comparable {
   CategoryItem(Category category) {
@@ -24,7 +23,7 @@ class CategoryItem implements Comparable {
     index = category.index;
   }
 
-  late num id;
+  late int id;
   late String name;
   late String type;
   late int index;
@@ -58,8 +57,10 @@ class ModifyTransactionsPage extends StatefulWidget {
 }
 
 class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
-  late Transaction transaction;
+  late MyDatabase db;
   late bool isAdd;
+  late int selectedCategoryId;
+  DateTime selectedDate = DateTime.now().getDateOnly();
   Color categoryColor = const Color(0xFF68a1e8);
   Icon selectedCategoryIcon = const Icon(Icons.add, color: Colors.white);
 
@@ -71,23 +72,24 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
 
   final TextEditingController commentController =
       TextEditingController(text: "");
-  late DatabaseHelper dbHelper;
 
   @override
   void initState() {
     super.initState();
     if (null == widget.transaction) {
       isAdd = true;
-      transaction = Transaction();
       WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
         showCategorySelector(context);
       });
     } else {
-      isAdd = false;
-      transaction = Transaction.fromJson(widget.transaction!.toJson());
-      moneyController.text = transaction.money.toStringAsFixed(2);
-      dateController.text = transaction.date.format("yyyy-MM-dd");
-      commentController.text = transaction.comment ?? "";
+      setState(() {
+        isAdd = false;
+        moneyController.text = widget.transaction!.money.toStringAsFixed(2);
+        dateController.text = widget.transaction!.date.format("yyyy-MM-dd");
+        commentController.text = widget.transaction!.comment ?? "";
+        selectedCategoryId = widget.transaction!.categoryId;
+        selectedDate = widget.transaction!.date;
+      });
     }
   }
 
@@ -106,7 +108,7 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
         setState(() {
           categoryColor = value["color"];
           selectedCategoryIcon = Icon(value["icon"], color: Colors.white);
-          transaction.categoryId = value["id"] as int;
+          selectedCategoryId = value["id"] as int;
         });
       }
     });
@@ -114,12 +116,16 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
 
   @override
   Widget build(BuildContext context) {
+    db = Provider.of<MyDatabase>(context);
     if (!isAdd) {
-      CategoryItem categoryItem =
-          context.read<CategoryList>().itemsMap[transaction.categoryId]!;
-      setState(() {
-        categoryColor = categoryItem.color;
-        selectedCategoryIcon = Icon(categoryItem.icon, color: Colors.white);
+      (db.select(db.categories)..where((t) => t.id.equals(selectedCategoryId)))
+          .getSingleOrNull()
+          .then((value) {
+        CategoryItem categoryItem = CategoryItem(value!);
+        setState(() {
+          categoryColor = categoryItem.color;
+          selectedCategoryIcon = Icon(categoryItem.icon, color: Colors.white);
+        });
       });
     }
     return Scaffold(
@@ -144,10 +150,19 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
                 icon: const Icon(Icons.save),
                 onPressed: canSave()
                     ? () async {
-                        transaction.money = double.parse(moneyController.text);
+                        final money = double.parse(moneyController.text);
                         if (isAdd) {
-                          int id = await DatabaseHelper.instance
-                              .insertTransaction(transaction);
+                          int id = await db
+                              .into(db.transactions)
+                              .insert(TransactionsCompanion.insert(
+                                money: money,
+                                date: selectedDate,
+                                categoryId: selectedCategoryId,
+                                comment: drift.Value(
+                                    commentController.text.isEmpty
+                                        ? null
+                                        : commentController.text),
+                              ));
                           if (0 == id) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
@@ -156,14 +171,21 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
                               ),
                             );
                           } else {
-                            transaction.id = id;
-                            context.read<TransactionList>().modify(transaction);
                             Navigator.of(context, rootNavigator: true)
                                 .pop(context);
                           }
                         } else {
-                          bool ret = await DatabaseHelper.instance
-                              .updateTransaction(transaction);
+                          bool ret = await db.update(db.transactions).replace(
+                                TransactionsCompanion(
+                                    id: drift.Value(widget.transaction!.id),
+                                    money: drift.Value(money),
+                                    date: drift.Value(selectedDate),
+                                    categoryId: drift.Value(selectedCategoryId),
+                                    comment: drift.Value(
+                                        commentController.text.isEmpty
+                                            ? null
+                                            : commentController.text)),
+                              );
                           if (false == ret) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
@@ -172,7 +194,6 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
                               ),
                             );
                           } else {
-                            context.read<TransactionList>().modify(transaction);
                             Navigator.of(context, rootNavigator: true)
                                 .pop(context);
                           }
@@ -232,13 +253,13 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
               onTap: () {
                 showDatePicker(
                         context: context,
-                        initialDate: transaction.date,
+                        initialDate: selectedDate,
                         firstDate: DateTime(1900),
                         lastDate: DateTime(3000))
                     .then((value) {
                   setState(() {
-                    if (null != value) transaction.date = value;
-                    dateController.text = transaction.date.format("yyyy-MM-dd");
+                    if (null != value) selectedDate = value;
+                    dateController.text = selectedDate.format("yyyy-MM-dd");
                   });
                 });
               },
@@ -256,11 +277,6 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
                 hintText: AppLocalizations.of(context)!
                     .modifyTransaction_Comment_hint,
               ),
-              onChanged: (value) {
-                setState(() {
-                  transaction.comment = value;
-                });
-              },
             ),
           ),
           ListTile(
@@ -269,24 +285,25 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
             trailing: const Icon(Icons.chevron_right),
           ),
           SizedBox(
-            height: 50,
-            child: Consumer<TagList>(builder: (context, value, child) {
-              final List<Tag> labels = value.items;
-              return ListView.builder(
-                  itemCount: labels.length,
-                  scrollDirection: Axis.horizontal,
-                  itemBuilder: (context, index) {
-                    Tag? cur = labels[index];
-                    return Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: FilterChip(
-                          backgroundColor: categoryColor.withOpacity(0.1),
-                          label: Text(cur.name),
-                          onSelected: (bool value) {},
-                        ));
-                  });
-            }),
-          ),
+              height: 50,
+              child: StreamBuilder<List<Tag>>(
+                  stream: null,
+                  builder: (context, snapshot) {
+                    final tags = snapshot.data ?? <Tag>[];
+                    return ListView.builder(
+                        itemCount: tags.length,
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (context, index) {
+                          Tag cur = tags[index];
+                          return Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: FilterChip(
+                                backgroundColor: categoryColor.withOpacity(0.1),
+                                label: Text(cur.name),
+                                onSelected: (bool value) {},
+                              ));
+                        });
+                  })),
           const Spacer(),
           Center(child: _buildNumberTablet())
         ]));
