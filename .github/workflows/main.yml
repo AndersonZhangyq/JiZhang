@@ -1,0 +1,45 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ build_apk ]
+  pull_request:
+    branches: [ build_apk ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Flutter action
+        # You may pin to the exact commit or the version.
+        # uses: subosito/flutter-action@4389e6cbc6cb8a4b18c628ff96ff90be0e926aa8
+        uses: subosito/flutter-action@v1.5.3
+        with:
+          # The Flutter version to make available on the path
+          flutter-version: 2.8.1
+          
+      - name: Build apk
+        run: flutter build apk --no-tree-shake-icons
+        
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v2.3.1
+        with:
+          # A file, directory or wildcard pattern that describes what to upload
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 3
+        
