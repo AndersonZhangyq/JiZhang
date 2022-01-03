@@ -20,6 +20,7 @@
   "transactions_SnackBar_failed_to_update_transaction": "更新账单失败",
   "transactions_SnackBar_Remove_Transaction": "账单已删除",
   "transactions_ListView_No_Transaction": "这里空空如也~",
+  "account_title": "我的",
   "account_Backup": "备份",
   "account_BackupSuccess": "备份成功",
   "account_BackupFaliure": "备份失败",

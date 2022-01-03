@@ -20,6 +20,7 @@
   "transactions_SnackBar_failed_to_update_transaction": "Failed to update transaction",
   "transactions_SnackBar_Remove_Transaction": "Transaction removed",
   "transactions_ListView_No_Transaction": "No transactions found",
+  "account_title": "Account",
   "account_Backup": "Backup",
   "account_BackupSuccess": "Backup sucessfully",
   "account_BackupFaliure": "Backup failed",

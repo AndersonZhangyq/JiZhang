@@ -25,7 +25,6 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
   @override
   void initState() {
     super.initState();
-    db = Provider.of<MyDatabase>(context);
     expenseCategory.clear();
     incomeCategory.clear();
   }
@@ -55,8 +54,10 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
 
   @override
   Widget build(BuildContext context) {
+    db = Provider.of<MyDatabase>(context);
     return StreamBuilder<List<CategoryItem>>(
         stream: db.getAllCategories(),
+        initialData: const <CategoryItem>[],
         builder: (context, snapshot) {
           final categories = snapshot.data!;
           for (var item in categories) {

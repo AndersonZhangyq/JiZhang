@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:ji_zhang/common/categoryNameHelper.dart';
 import 'package:ji_zhang/common/datetimeExtension.dart';
 import 'package:ji_zhang/models/database.dart';
@@ -117,196 +118,213 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
   @override
   Widget build(BuildContext context) {
     db = Provider.of<MyDatabase>(context);
-    if (!isAdd) {
-      (db.select(db.categories)..where((t) => t.id.equals(selectedCategoryId)))
-          .getSingleOrNull()
-          .then((value) {
-        CategoryItem categoryItem = CategoryItem(value!);
-        setState(() {
-          categoryColor = categoryItem.color;
-          selectedCategoryIcon = Icon(categoryItem.icon, color: Colors.white);
-        });
-      });
-    }
-    return Scaffold(
-        appBar: AppBar(
-            backgroundColor: categoryColor,
-            elevation: 0,
-            centerTitle: true,
-            title: Text((isAdd
-                    ? AppLocalizations.of(context)!.modifyTransaction_Title_add
-                    : AppLocalizations.of(context)!
-                        .modifyTransaction_Title_edit) +
-                AppLocalizations.of(context)!
-                    .modifyTransaction_Title_transaction),
-            leading: IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: () {
-                Navigator.of(context, rootNavigator: true).pop(context);
-              },
-            ),
-            actions: <Widget>[
-              IconButton(
-                icon: const Icon(Icons.save),
-                onPressed: canSave()
-                    ? () async {
-                        final money = double.parse(moneyController.text);
-                        if (isAdd) {
-                          int id = await db
-                              .into(db.transactions)
-                              .insert(TransactionsCompanion.insert(
-                                money: money,
-                                date: selectedDate,
-                                categoryId: selectedCategoryId,
-                                comment: drift.Value(
-                                    commentController.text.isEmpty
-                                        ? null
-                                        : commentController.text),
-                              ));
-                          if (0 == id) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(AppLocalizations.of(context)!
-                                    .modifyTransaction_SnackBar_failed_to_add_transaction),
-                              ),
-                            );
-                          } else {
-                            Navigator.of(context, rootNavigator: true)
-                                .pop(context);
-                          }
-                        } else {
-                          bool ret = await db.update(db.transactions).replace(
-                                TransactionsCompanion(
-                                    id: drift.Value(widget.transaction!.id),
-                                    money: drift.Value(money),
-                                    date: drift.Value(selectedDate),
-                                    categoryId: drift.Value(selectedCategoryId),
-                                    comment: drift.Value(
-                                        commentController.text.isEmpty
-                                            ? null
-                                            : commentController.text)),
-                              );
-                          if (false == ret) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(AppLocalizations.of(context)!
-                                    .modifyTransaction_SnackBar_failed_to_update_transaction),
-                              ),
-                            );
-                          } else {
-                            Navigator.of(context, rootNavigator: true)
-                                .pop(context);
-                          }
-                        }
-                      }
-                    : null,
-              ),
-            ]),
-        body: Column(children: [
-          Container(
-            color: categoryColor,
-            child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    DottedBorder(
-                      borderType: BorderType.Circle,
-                      color: Colors.white,
-                      padding: const EdgeInsets.all(0),
-                      dashPattern: const [6],
-                      child: MaterialButton(
-                        onPressed: () {
-                          showCategorySelector(context);
-                        },
-                        child: selectedCategoryIcon,
-                        shape: const CircleBorder(),
-                      ),
+    return FutureProvider<Category?>(
+        create: (_) {
+          if (!isAdd) {
+            return (db.select(db.categories)
+                  ..where((t) => t.id.equals(selectedCategoryId)))
+                .getSingleOrNull();
+          } else {
+            return Future.value(null);
+          }
+        },
+        initialData: null,
+        child: Consumer<Category?>(builder: (_, value, __) {
+          if (value != null) {
+            CategoryItem categoryItem = CategoryItem(value);
+            categoryColor = categoryItem.color;
+            selectedCategoryIcon = Icon(categoryItem.icon, color: Colors.white);
+          }
+          return Scaffold(
+              resizeToAvoidBottomInset: false,
+              appBar: AppBar(
+                  backgroundColor: categoryColor,
+                  elevation: 0,
+                  centerTitle: true,
+                  title: Text((isAdd
+                          ? AppLocalizations.of(context)!
+                              .modifyTransaction_Title_add
+                          : AppLocalizations.of(context)!
+                              .modifyTransaction_Title_edit) +
+                      AppLocalizations.of(context)!
+                          .modifyTransaction_Title_transaction),
+                  leading: IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      Navigator.of(context, rootNavigator: true).pop(context);
+                    },
+                  ),
+                  actions: <Widget>[
+                    IconButton(
+                      icon: const Icon(Icons.save),
+                      onPressed: canSave()
+                          ? () async {
+                              final money = double.parse(moneyController.text);
+                              if (isAdd) {
+                                int id = await db
+                                    .into(db.transactions)
+                                    .insert(TransactionsCompanion.insert(
+                                      money: money,
+                                      date: selectedDate,
+                                      categoryId: selectedCategoryId,
+                                      comment: drift.Value(
+                                          commentController.text.isEmpty
+                                              ? null
+                                              : commentController.text),
+                                    ));
+                                if (0 == id) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(AppLocalizations.of(
+                                              context)!
+                                          .modifyTransaction_SnackBar_failed_to_add_transaction),
+                                    ),
+                                  );
+                                } else {
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop(context);
+                                }
+                              } else {
+                                bool ret = await db
+                                    .update(db.transactions)
+                                    .replace(
+                                      TransactionsCompanion(
+                                          id: drift.Value(
+                                              widget.transaction!.id),
+                                          money: drift.Value(money),
+                                          date: drift.Value(selectedDate),
+                                          categoryId:
+                                              drift.Value(selectedCategoryId),
+                                          comment: drift.Value(
+                                              commentController.text.isEmpty
+                                                  ? null
+                                                  : commentController.text)),
+                                    );
+                                if (false == ret) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(AppLocalizations.of(
+                                              context)!
+                                          .modifyTransaction_SnackBar_failed_to_update_transaction),
+                                    ),
+                                  );
+                                } else {
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop(context);
+                                }
+                              }
+                            }
+                          : null,
                     ),
-                    // const Spacer(),
-                    Expanded(
-                      child: TextFormField(
-                        controller: moneyController,
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 24),
-                        textAlign: TextAlign.end,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          // border: OutlineInputBorder(),
-                          border: InputBorder.none,
-                        ),
-                        readOnly: true,
-                      ),
-                    )
-                  ],
-                )),
-          ),
-          ListTile(
-            leading: Icon(Icons.calendar_today, color: categoryColor),
-            title: TextField(
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-              ),
-              showCursor: false,
-              readOnly: true,
-              controller: dateController,
-              onTap: () {
-                showDatePicker(
-                        context: context,
-                        initialDate: selectedDate,
-                        firstDate: DateTime(1900),
-                        lastDate: DateTime(3000))
-                    .then((value) {
-                  setState(() {
-                    if (null != value) selectedDate = value;
-                    dateController.text = selectedDate.format("yyyy-MM-dd");
-                  });
-                });
-              },
-            ),
-          ),
-          ListTile(
-            leading: Icon(Icons.note, color: categoryColor),
-            title: TextField(
-              controller: commentController,
-              keyboardType: TextInputType.multiline,
-              minLines: 2,
-              maxLines: 4,
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: AppLocalizations.of(context)!
-                    .modifyTransaction_Comment_hint,
-              ),
-            ),
-          ),
-          ListTile(
-            leading: Icon(Icons.label, color: categoryColor),
-            title: Text(AppLocalizations.of(context)!.tags),
-            trailing: const Icon(Icons.chevron_right),
-          ),
-          SizedBox(
-              height: 50,
-              child: StreamBuilder<List<Tag>>(
-                  stream: null,
-                  builder: (context, snapshot) {
-                    final tags = snapshot.data ?? <Tag>[];
-                    return ListView.builder(
-                        itemCount: tags.length,
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (context, index) {
-                          Tag cur = tags[index];
-                          return Padding(
-                              padding: const EdgeInsets.all(4.0),
-                              child: FilterChip(
-                                backgroundColor: categoryColor.withOpacity(0.1),
-                                label: Text(cur.name),
-                                onSelected: (bool value) {},
-                              ));
+                  ]),
+              body: Column(children: [
+                Container(
+                  color: categoryColor,
+                  child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Row(
+                        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          DottedBorder(
+                            borderType: BorderType.Circle,
+                            color: Colors.white,
+                            padding: const EdgeInsets.all(0),
+                            dashPattern: const [6],
+                            child: MaterialButton(
+                              onPressed: () {
+                                showCategorySelector(context);
+                              },
+                              child: selectedCategoryIcon,
+                              shape: const CircleBorder(),
+                            ),
+                          ),
+                          // const Spacer(),
+                          Expanded(
+                            child: TextFormField(
+                              controller: moneyController,
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 24),
+                              textAlign: TextAlign.end,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                // border: OutlineInputBorder(),
+                                border: InputBorder.none,
+                              ),
+                              readOnly: true,
+                            ),
+                          )
+                        ],
+                      )),
+                ),
+                ListTile(
+                  leading: Icon(Icons.calendar_today, color: categoryColor),
+                  title: TextField(
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                    ),
+                    showCursor: false,
+                    readOnly: true,
+                    controller: dateController,
+                    onTap: () {
+                      showDatePicker(
+                              context: context,
+                              initialDate: selectedDate,
+                              firstDate: DateTime(1900),
+                              lastDate: DateTime(3000))
+                          .then((value) {
+                        setState(() {
+                          if (null != value) selectedDate = value;
+                          dateController.text =
+                              selectedDate.format("yyyy-MM-dd");
                         });
-                  })),
-          const Spacer(),
-          Center(child: _buildNumberTablet())
-        ]));
+                      });
+                    },
+                  ),
+                ),
+                ListTile(
+                  leading: Icon(Icons.note, color: categoryColor),
+                  title: TextField(
+                    controller: commentController,
+                    keyboardType: TextInputType.multiline,
+                    minLines: 2,
+                    maxLines: 4,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: AppLocalizations.of(context)!
+                          .modifyTransaction_Comment_hint,
+                    ),
+                  ),
+                ),
+                ListTile(
+                  leading: Icon(Icons.label, color: categoryColor),
+                  title: Text(AppLocalizations.of(context)!.tags),
+                  trailing: const Icon(Icons.chevron_right),
+                ),
+                SizedBox(
+                    height: 50,
+                    child: StreamBuilder<List<Tag>>(
+                        stream: null,
+                        builder: (context, snapshot) {
+                          final tags = snapshot.data ?? <Tag>[];
+                          return ListView.builder(
+                              itemCount: tags.length,
+                              scrollDirection: Axis.horizontal,
+                              itemBuilder: (context, index) {
+                                Tag cur = tags[index];
+                                return Padding(
+                                    padding: const EdgeInsets.all(4.0),
+                                    child: FilterChip(
+                                      backgroundColor:
+                                          categoryColor.withOpacity(0.1),
+                                      label: Text(cur.name),
+                                      onSelected: (bool value) {},
+                                    ));
+                              });
+                        })),
+                const Spacer(),
+                Center(child: _buildNumberTablet())
+              ]));
+        }));
   }
 
   void _onNumberTabletPressed(
