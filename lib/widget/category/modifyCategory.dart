@@ -1,10 +1,10 @@
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ji_zhang/models/database.dart';
-import 'package:ji_zhang/widget/addCategory.dart';
-import 'package:ji_zhang/widget/modifyTransaction.dart';
+import 'package:ji_zhang/widget/category/addCategory.dart';
+import 'package:ji_zhang/widget/transaction/modifyTransaction.dart';
 import 'package:provider/provider.dart';
-import 'package:drift/drift.dart' as drift;
 
 class ModifyCategoryWidget extends StatefulWidget {
   const ModifyCategoryWidget({Key? key, required this.tabName})
@@ -36,18 +36,18 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
       for (int i = 0; i < expenseCategory.length; i++) {
         CategoryItem element = expenseCategory[i];
         db.update(db.categories).replace(CategoriesCompanion(
-              id: drift.Value(element.id),
-              index: drift.Value(element.index),
-            ));
+          id: drift.Value(element.id),
+          index: drift.Value(element.index),
+        ));
       }
     }
     if (incomeChanged > 0) {
       for (int i = 0; i < incomeCategory.length; i++) {
         CategoryItem element = incomeCategory[i];
         db.update(db.categories).replace(CategoriesCompanion(
-              id: drift.Value(element.id),
-              index: drift.Value(element.index),
-            ));
+          id: drift.Value(element.id),
+          index: drift.Value(element.index),
+        ));
       }
     }
   }
@@ -75,7 +75,7 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
             child: Scaffold(
                 appBar: AppBar(
                   title:
-                      Text(AppLocalizations.of(context)!.modifyCategory_Title),
+                  Text(AppLocalizations.of(context)!.modifyCategory_Title),
                   leading: IconButton(
                       icon: const Icon(Icons.arrow_back),
                       onPressed: () {
@@ -105,77 +105,77 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
                               ),
                               Expanded(
                                   child: TabBarView(
-                                children: [
-                                  Column(children: [
-                                    Expanded(
-                                        child: _buildExpenseCategoryList(
-                                            expenseCategory)),
-                                    GestureDetector(
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
+                                    children: [
+                                      Column(children: [
+                                        Expanded(
+                                            child: _buildExpenseCategoryList(
+                                                expenseCategory)),
+                                        GestureDetector(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
                                                   const AddCategoryWidget()),
-                                        );
-                                      },
-                                      child: Container(
-                                        height: 50,
-                                        decoration: BoxDecoration(
-                                          border: Border(
-                                            top: BorderSide(
-                                              width: 1,
-                                              color: (Colors.grey[300])!,
+                                            );
+                                          },
+                                          child: Container(
+                                            height: 50,
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                top: BorderSide(
+                                                  width: 1,
+                                                  color: (Colors.grey[300])!,
+                                                ),
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                              children: [
+                                                Text(AppLocalizations.of(context)!
+                                                    .modifyCategory_Add_Category)
+                                              ],
                                             ),
                                           ),
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(AppLocalizations.of(context)!
-                                                .modifyCategory_Add_Category)
-                                          ],
-                                        ),
-                                      ),
-                                    )
-                                  ]),
-                                  Column(children: [
-                                    Expanded(
-                                        child: _buildIncomeCategoryList(
-                                            incomeCategory)),
-                                    GestureDetector(
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
+                                        )
+                                      ]),
+                                      Column(children: [
+                                        Expanded(
+                                            child: _buildIncomeCategoryList(
+                                                incomeCategory)),
+                                        GestureDetector(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
                                                   const AddCategoryWidget()),
-                                        );
-                                      },
-                                      child: Container(
-                                        height: 50,
-                                        decoration: BoxDecoration(
-                                          border: Border(
-                                            top: BorderSide(
-                                              width: 1,
-                                              color: (Colors.grey[300])!,
+                                            );
+                                          },
+                                          child: Container(
+                                            height: 50,
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                top: BorderSide(
+                                                  width: 1,
+                                                  color: (Colors.grey[300])!,
+                                                ),
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                              children: [
+                                                Text(AppLocalizations.of(context)!
+                                                    .modifyCategory_Add_Category)
+                                              ],
                                             ),
                                           ),
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(AppLocalizations.of(context)!
-                                                .modifyCategory_Add_Category)
-                                          ],
-                                        ),
-                                      ),
-                                    )
-                                  ])
-                                ],
-                              ))
+                                        )
+                                      ])
+                                    ],
+                                  ))
                             ],
                           ))),
                 )),
@@ -207,23 +207,23 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
                   ScaffoldMessenger.of(context).removeCurrentSnackBar();
                   ScaffoldMessenger.of(context)
                       .showSnackBar(SnackBar(
-                          content: Text(AppLocalizations.of(context)!
-                              .modifyCategory_SnackBar_category_removed),
-                          action: SnackBarAction(
-                              label: 'Undo',
-                              onPressed: () {
-                                expenseChanged--;
-                                setState(() {
-                                  expenseCategory.insert(
-                                      index, categoryToRemove);
-                                });
-                              })))
+                      content: Text(AppLocalizations.of(context)!
+                          .modifyCategory_SnackBar_category_removed),
+                      action: SnackBarAction(
+                          label: 'Undo',
+                          onPressed: () {
+                            expenseChanged--;
+                            setState(() {
+                              expenseCategory.insert(
+                                  index, categoryToRemove);
+                            });
+                          })))
                       .closed
                       .then((value) async {
                     if (value == SnackBarClosedReason.timeout ||
                         value == SnackBarClosedReason.remove) {
                       int ret = await (db.delete(db.categories)
-                            ..where((t) => t.id.equals(categoryToRemove.id)))
+                        ..where((t) => t.id.equals(categoryToRemove.id)))
                           .go();
                       if (ret == 0) {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -277,23 +277,23 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
                   ScaffoldMessenger.of(context).removeCurrentSnackBar();
                   ScaffoldMessenger.of(context)
                       .showSnackBar(SnackBar(
-                          content: Text(AppLocalizations.of(context)!
-                              .modifyCategory_SnackBar_category_removed),
-                          action: SnackBarAction(
-                              label: 'Undo',
-                              onPressed: () {
-                                incomeChanged--;
-                                setState(() {
-                                  incomeCategory.insert(
-                                      index, categoryToRemove);
-                                });
-                              })))
+                      content: Text(AppLocalizations.of(context)!
+                          .modifyCategory_SnackBar_category_removed),
+                      action: SnackBarAction(
+                          label: 'Undo',
+                          onPressed: () {
+                            incomeChanged--;
+                            setState(() {
+                              incomeCategory.insert(
+                                  index, categoryToRemove);
+                            });
+                          })))
                       .closed
                       .then((value) async {
                     if (value == SnackBarClosedReason.timeout ||
                         value == SnackBarClosedReason.remove) {
                       int ret = await (db.delete(db.categories)
-                            ..where((t) => t.id.equals(categoryToRemove.id)))
+                        ..where((t) => t.id.equals(categoryToRemove.id)))
                           .go();
                       if (ret == 0) {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(

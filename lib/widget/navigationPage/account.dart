@@ -7,7 +7,6 @@ import 'package:ji_zhang/models/database.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:drift/drift.dart' as drift;
 
 class AccountWidget extends StatelessWidget {
   const AccountWidget({Key? key}) : super(key: key);
