@@ -300,7 +300,8 @@ class _TransactionListState extends State<TransactionWidget> {
                       });
                     },
                   ),
-                  title: Text(curTransaction.comment ?? curCategoryItem.name),
+                  title: Text(curTransaction.comment ??
+                      curCategoryItem.getDisplayName(context)),
                   trailing: Text(
                       (curCategoryItem.type == "expense" ? "-" : "") +
                           curTransaction.money.toStringAsFixed(2),

@@ -5,7 +5,7 @@ import 'package:ji_zhang/widget/modifyTransaction.dart';
 import 'package:ji_zhang/widget/navigationPage/account.dart';
 import 'package:ji_zhang/widget/navigationPage/budget.dart';
 import 'package:ji_zhang/widget/navigationPage/chart.dart';
-import 'package:ji_zhang/widget/navigationPage/transactions.dart';
+import 'package:ji_zhang/widget/navigationPage/transaction.dart';
 import 'package:provider/provider.dart';
 
 void main() {
