@@ -109,7 +109,15 @@ class _AccountPageState extends State<AccountPageWidget> {
                 final allBudgets = await db.select(db.budgets).get();
                 final budgetsFile =
                     File("${externalRoot.path}/backup/budget.txt");
-                await budgetsFile.writeAsString(jsonEncode(allBudgets));
+                await budgetsFile
+                    .writeAsString(jsonEncode(allBudgets, toEncodable: (value) {
+                  if (value is Budget) {
+                    var ret = value.toJson();
+                    ret['recurrence'] = value.recurrence.index;
+                    return ret;
+                  }
+                  return value;
+                }));
                 setState(() {
                   backUpPercent++;
                 });
@@ -237,11 +245,11 @@ class _AccountPageState extends State<AccountPageWidget> {
                                     });
                                     final allBudgets = jsonDecode(
                                         await budgetsFile.readAsString());
-                                    allBudgets.forEach((event) async {
-                                      db
-                                          .into(db.budgets)
-                                          .insertOnConflictUpdate(
-                                              Budget.fromJson(event));
+                                    allBudgets.forEach((budget) async {
+                                      db.into(db.budgets).insertOnConflictUpdate(
+                                          Budget.fromJson(budget,
+                                              serializer:
+                                                  const MyValueSerializer()));
                                     });
                                     setState(() {
                                       restorePercent++;

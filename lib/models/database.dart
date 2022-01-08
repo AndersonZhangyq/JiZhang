@@ -120,6 +120,10 @@ class MyValueSerializer extends ValueSerializer {
       return asList as T;
     }
 
+    if (T == RECURRENCE_TYPE && json is int) {
+      return RECURRENCE_TYPE.values[json] as T;
+    }
+
     return json as T;
   }
 
