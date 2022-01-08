@@ -49,7 +49,15 @@ class _TransactionListState extends State<TransactionWidget> {
                   int.parse(selectedYear), int.parse(selectedMonth)),
               builder: (context, snapshot) {
                 if (snapshot.hasData == false) {
-                  return const CircularProgressIndicator();
+                  return Center(
+                    child: Text(
+                      "Loading...",
+                      style: TextStyle(
+                          color: Colors.grey[400],
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  );
                 }
                 List<Transaction> transactions =
                     snapshot.data ?? <Transaction>[];
@@ -67,10 +75,10 @@ class _TransactionListState extends State<TransactionWidget> {
                   for (var transaction in transactions) {
                     switch (categories[transaction.categoryId]!.type) {
                       case "expense":
-                        expense += transaction.money;
+                        expense += transaction.amount;
                         break;
                       case "income":
-                        income += transaction.money;
+                        income += transaction.amount;
                         break;
                       default:
                     }
@@ -304,7 +312,7 @@ class _TransactionListState extends State<TransactionWidget> {
                       curCategoryItem.getDisplayName(context)),
                   trailing: Text(
                       (curCategoryItem.type == "expense" ? "-" : "") +
-                          curTransaction.money.toStringAsFixed(2),
+                          curTransaction.amount.toStringAsFixed(2),
                       style: curCategoryItem.type == "expense"
                           ? const TextStyle(color: Colors.red)
                           : const TextStyle(color: Colors.green)),

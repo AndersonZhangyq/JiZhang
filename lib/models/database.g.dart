@@ -604,7 +604,7 @@ class $EventsTable extends Events with TableInfo<$EventsTable, Event> {
 
 class Transaction extends DataClass implements Insertable<Transaction> {
   final int id;
-  final double money;
+  final double amount;
   final DateTime date;
   final int categoryId;
   final String? recurrence;
@@ -613,7 +613,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   final DateTime createdAt;
   Transaction(
       {required this.id,
-      required this.money,
+      required this.amount,
       required this.date,
       required this.categoryId,
       this.recurrence,
@@ -625,8 +625,8 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     return Transaction(
       id: const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      money: const RealType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}money'])!,
+      amount: const RealType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}amount'])!,
       date: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}date'])!,
       categoryId: const IntType()
@@ -645,7 +645,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['money'] = Variable<double>(money);
+    map['amount'] = Variable<double>(amount);
     map['date'] = Variable<DateTime>(date);
     map['category_id'] = Variable<int>(categoryId);
     if (!nullToAbsent || recurrence != null) {
@@ -665,7 +665,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   TransactionsCompanion toCompanion(bool nullToAbsent) {
     return TransactionsCompanion(
       id: Value(id),
-      money: Value(money),
+      amount: Value(amount),
       date: Value(date),
       categoryId: Value(categoryId),
       recurrence: recurrence == null && nullToAbsent
@@ -685,7 +685,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Transaction(
       id: serializer.fromJson<int>(json['id']),
-      money: serializer.fromJson<double>(json['money']),
+      amount: serializer.fromJson<double>(json['amount']),
       date: serializer.fromJson<DateTime>(json['date']),
       categoryId: serializer.fromJson<int>(json['categoryId']),
       recurrence: serializer.fromJson<String?>(json['recurrence']),
@@ -699,7 +699,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'money': serializer.toJson<double>(money),
+      'amount': serializer.toJson<double>(amount),
       'date': serializer.toJson<DateTime>(date),
       'categoryId': serializer.toJson<int>(categoryId),
       'recurrence': serializer.toJson<String?>(recurrence),
@@ -711,7 +711,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
 
   Transaction copyWith(
           {int? id,
-          double? money,
+          double? amount,
           DateTime? date,
           int? categoryId,
           String? recurrence,
@@ -720,7 +720,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           DateTime? createdAt}) =>
       Transaction(
         id: id ?? this.id,
-        money: money ?? this.money,
+        amount: amount ?? this.amount,
         date: date ?? this.date,
         categoryId: categoryId ?? this.categoryId,
         recurrence: recurrence ?? this.recurrence,
@@ -732,7 +732,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   String toString() {
     return (StringBuffer('Transaction(')
           ..write('id: $id, ')
-          ..write('money: $money, ')
+          ..write('amount: $amount, ')
           ..write('date: $date, ')
           ..write('categoryId: $categoryId, ')
           ..write('recurrence: $recurrence, ')
@@ -745,13 +745,13 @@ class Transaction extends DataClass implements Insertable<Transaction> {
 
   @override
   int get hashCode => Object.hash(
-      id, money, date, categoryId, recurrence, tagIds, comment, createdAt);
+      id, amount, date, categoryId, recurrence, tagIds, comment, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Transaction &&
           other.id == this.id &&
-          other.money == this.money &&
+          other.amount == this.amount &&
           other.date == this.date &&
           other.categoryId == this.categoryId &&
           other.recurrence == this.recurrence &&
@@ -762,7 +762,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
 
 class TransactionsCompanion extends UpdateCompanion<Transaction> {
   final Value<int> id;
-  final Value<double> money;
+  final Value<double> amount;
   final Value<DateTime> date;
   final Value<int> categoryId;
   final Value<String?> recurrence;
@@ -771,7 +771,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
   final Value<DateTime> createdAt;
   const TransactionsCompanion({
     this.id = const Value.absent(),
-    this.money = const Value.absent(),
+    this.amount = const Value.absent(),
     this.date = const Value.absent(),
     this.categoryId = const Value.absent(),
     this.recurrence = const Value.absent(),
@@ -781,19 +781,19 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
   });
   TransactionsCompanion.insert({
     this.id = const Value.absent(),
-    required double money,
+    required double amount,
     required DateTime date,
     required int categoryId,
     this.recurrence = const Value.absent(),
     this.tagIds = const Value.absent(),
     this.comment = const Value.absent(),
     this.createdAt = const Value.absent(),
-  })  : money = Value(money),
+  })  : amount = Value(amount),
         date = Value(date),
         categoryId = Value(categoryId);
   static Insertable<Transaction> custom({
     Expression<int>? id,
-    Expression<double>? money,
+    Expression<double>? amount,
     Expression<DateTime>? date,
     Expression<int>? categoryId,
     Expression<String?>? recurrence,
@@ -803,7 +803,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (money != null) 'money': money,
+      if (amount != null) 'amount': amount,
       if (date != null) 'date': date,
       if (categoryId != null) 'category_id': categoryId,
       if (recurrence != null) 'recurrence': recurrence,
@@ -815,7 +815,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
 
   TransactionsCompanion copyWith(
       {Value<int>? id,
-      Value<double>? money,
+      Value<double>? amount,
       Value<DateTime>? date,
       Value<int>? categoryId,
       Value<String?>? recurrence,
@@ -824,7 +824,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       Value<DateTime>? createdAt}) {
     return TransactionsCompanion(
       id: id ?? this.id,
-      money: money ?? this.money,
+      amount: amount ?? this.amount,
       date: date ?? this.date,
       categoryId: categoryId ?? this.categoryId,
       recurrence: recurrence ?? this.recurrence,
@@ -840,8 +840,8 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     if (id.present) {
       map['id'] = Variable<int>(id.value);
     }
-    if (money.present) {
-      map['money'] = Variable<double>(money.value);
+    if (amount.present) {
+      map['amount'] = Variable<double>(amount.value);
     }
     if (date.present) {
       map['date'] = Variable<DateTime>(date.value);
@@ -869,7 +869,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
   String toString() {
     return (StringBuffer('TransactionsCompanion(')
           ..write('id: $id, ')
-          ..write('money: $money, ')
+          ..write('amount: $amount, ')
           ..write('date: $date, ')
           ..write('categoryId: $categoryId, ')
           ..write('recurrence: $recurrence, ')
@@ -893,10 +893,10 @@ class $TransactionsTable extends Transactions
       type: const IntType(),
       requiredDuringInsert: false,
       defaultConstraints: 'PRIMARY KEY AUTOINCREMENT');
-  final VerificationMeta _moneyMeta = const VerificationMeta('money');
+  final VerificationMeta _amountMeta = const VerificationMeta('amount');
   @override
-  late final GeneratedColumn<double?> money = GeneratedColumn<double?>(
-      'money', aliasedName, false,
+  late final GeneratedColumn<double?> amount = GeneratedColumn<double?>(
+      'amount', aliasedName, false,
       type: const RealType(), requiredDuringInsert: true);
   final VerificationMeta _dateMeta = const VerificationMeta('date');
   @override
@@ -933,7 +933,7 @@ class $TransactionsTable extends Transactions
       defaultValue: currentDateAndTime);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, money, date, categoryId, recurrence, tagIds, comment, createdAt];
+      [id, amount, date, categoryId, recurrence, tagIds, comment, createdAt];
   @override
   String get aliasedName => _alias ?? 'transactions';
   @override
@@ -946,11 +946,11 @@ class $TransactionsTable extends Transactions
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
-    if (data.containsKey('money')) {
-      context.handle(
-          _moneyMeta, money.isAcceptableOrUnknown(data['money']!, _moneyMeta));
+    if (data.containsKey('amount')) {
+      context.handle(_amountMeta,
+          amount.isAcceptableOrUnknown(data['amount']!, _amountMeta));
     } else if (isInserting) {
-      context.missing(_moneyMeta);
+      context.missing(_amountMeta);
     }
     if (data.containsKey('date')) {
       context.handle(
@@ -1204,15 +1204,342 @@ class $TagsTable extends Tags with TableInfo<$TagsTable, Tag> {
   }
 }
 
+class Budget extends DataClass implements Insertable<Budget> {
+  final int id;
+  final String name;
+  final double amount;
+  final List<int> categoryIds;
+  final RECURRENCE_TYPE recurrence;
+  final DateTime createdAt;
+  Budget(
+      {required this.id,
+      required this.name,
+      required this.amount,
+      required this.categoryIds,
+      required this.recurrence,
+      required this.createdAt});
+  factory Budget.fromData(Map<String, dynamic> data, {String? prefix}) {
+    final effectivePrefix = prefix ?? '';
+    return Budget(
+      id: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
+      name: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}name'])!,
+      amount: const RealType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}amount'])!,
+      categoryIds: $BudgetsTable.$converter0.mapToDart(const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}category_ids']))!,
+      recurrence: $BudgetsTable.$converter1.mapToDart(const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}recurrence']))!,
+      createdAt: const DateTimeType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])!,
+    );
+  }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['amount'] = Variable<double>(amount);
+    {
+      final converter = $BudgetsTable.$converter0;
+      map['category_ids'] = Variable<String>(converter.mapToSql(categoryIds)!);
+    }
+    {
+      final converter = $BudgetsTable.$converter1;
+      map['recurrence'] = Variable<int>(converter.mapToSql(recurrence)!);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  BudgetsCompanion toCompanion(bool nullToAbsent) {
+    return BudgetsCompanion(
+      id: Value(id),
+      name: Value(name),
+      amount: Value(amount),
+      categoryIds: Value(categoryIds),
+      recurrence: Value(recurrence),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory Budget.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Budget(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      amount: serializer.fromJson<double>(json['amount']),
+      categoryIds: serializer.fromJson<List<int>>(json['categoryIds']),
+      recurrence: serializer.fromJson<RECURRENCE_TYPE>(json['recurrence']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'amount': serializer.toJson<double>(amount),
+      'categoryIds': serializer.toJson<List<int>>(categoryIds),
+      'recurrence': serializer.toJson<RECURRENCE_TYPE>(recurrence),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  Budget copyWith(
+          {int? id,
+          String? name,
+          double? amount,
+          List<int>? categoryIds,
+          RECURRENCE_TYPE? recurrence,
+          DateTime? createdAt}) =>
+      Budget(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        amount: amount ?? this.amount,
+        categoryIds: categoryIds ?? this.categoryIds,
+        recurrence: recurrence ?? this.recurrence,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('Budget(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('amount: $amount, ')
+          ..write('categoryIds: $categoryIds, ')
+          ..write('recurrence: $recurrence, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, name, amount, categoryIds, recurrence, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Budget &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.amount == this.amount &&
+          other.categoryIds == this.categoryIds &&
+          other.recurrence == this.recurrence &&
+          other.createdAt == this.createdAt);
+}
+
+class BudgetsCompanion extends UpdateCompanion<Budget> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<double> amount;
+  final Value<List<int>> categoryIds;
+  final Value<RECURRENCE_TYPE> recurrence;
+  final Value<DateTime> createdAt;
+  const BudgetsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.categoryIds = const Value.absent(),
+    this.recurrence = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  BudgetsCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required double amount,
+    required List<int> categoryIds,
+    required RECURRENCE_TYPE recurrence,
+    this.createdAt = const Value.absent(),
+  })  : name = Value(name),
+        amount = Value(amount),
+        categoryIds = Value(categoryIds),
+        recurrence = Value(recurrence);
+  static Insertable<Budget> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<double>? amount,
+    Expression<List<int>>? categoryIds,
+    Expression<RECURRENCE_TYPE>? recurrence,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (amount != null) 'amount': amount,
+      if (categoryIds != null) 'category_ids': categoryIds,
+      if (recurrence != null) 'recurrence': recurrence,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  BudgetsCompanion copyWith(
+      {Value<int>? id,
+      Value<String>? name,
+      Value<double>? amount,
+      Value<List<int>>? categoryIds,
+      Value<RECURRENCE_TYPE>? recurrence,
+      Value<DateTime>? createdAt}) {
+    return BudgetsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      amount: amount ?? this.amount,
+      categoryIds: categoryIds ?? this.categoryIds,
+      recurrence: recurrence ?? this.recurrence,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<double>(amount.value);
+    }
+    if (categoryIds.present) {
+      final converter = $BudgetsTable.$converter0;
+      map['category_ids'] =
+          Variable<String>(converter.mapToSql(categoryIds.value)!);
+    }
+    if (recurrence.present) {
+      final converter = $BudgetsTable.$converter1;
+      map['recurrence'] = Variable<int>(converter.mapToSql(recurrence.value)!);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BudgetsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('amount: $amount, ')
+          ..write('categoryIds: $categoryIds, ')
+          ..write('recurrence: $recurrence, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, Budget> {
+  final GeneratedDatabase _db;
+  final String? _alias;
+  $BudgetsTable(this._db, [this._alias]);
+  final VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
+      'id', aliasedName, false,
+      type: const IntType(),
+      requiredDuringInsert: false,
+      defaultConstraints: 'PRIMARY KEY AUTOINCREMENT');
+  final VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
+      'name', aliasedName, false,
+      type: const StringType(), requiredDuringInsert: true);
+  final VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<double?> amount = GeneratedColumn<double?>(
+      'amount', aliasedName, false,
+      type: const RealType(), requiredDuringInsert: true);
+  final VerificationMeta _categoryIdsMeta =
+      const VerificationMeta('categoryIds');
+  @override
+  late final GeneratedColumnWithTypeConverter<List<int>, String?> categoryIds =
+      GeneratedColumn<String?>('category_ids', aliasedName, false,
+              type: const StringType(), requiredDuringInsert: true)
+          .withConverter<List<int>>($BudgetsTable.$converter0);
+  final VerificationMeta _recurrenceMeta = const VerificationMeta('recurrence');
+  @override
+  late final GeneratedColumnWithTypeConverter<RECURRENCE_TYPE, int?>
+      recurrence = GeneratedColumn<int?>('recurrence', aliasedName, false,
+              type: const IntType(), requiredDuringInsert: true)
+          .withConverter<RECURRENCE_TYPE>($BudgetsTable.$converter1);
+  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime?> createdAt = GeneratedColumn<DateTime?>(
+      'created_at', aliasedName, false,
+      type: const IntType(),
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, name, amount, categoryIds, recurrence, createdAt];
+  @override
+  String get aliasedName => _alias ?? 'budgets';
+  @override
+  String get actualTableName => 'budgets';
+  @override
+  VerificationContext validateIntegrity(Insertable<Budget> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(_amountMeta,
+          amount.isAcceptableOrUnknown(data['amount']!, _amountMeta));
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    context.handle(_categoryIdsMeta, const VerificationResult.success());
+    context.handle(_recurrenceMeta, const VerificationResult.success());
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Budget map(Map<String, dynamic> data, {String? tablePrefix}) {
+    return Budget.fromData(data,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+  }
+
+  @override
+  $BudgetsTable createAlias(String alias) {
+    return $BudgetsTable(_db, alias);
+  }
+
+  static TypeConverter<List<int>, String> $converter0 =
+      const IntegerListConverter();
+  static TypeConverter<RECURRENCE_TYPE, int> $converter1 =
+      const EnumIndexConverter<RECURRENCE_TYPE>(RECURRENCE_TYPE.values);
+}
+
 abstract class _$MyDatabase extends GeneratedDatabase {
   _$MyDatabase(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
   late final $CategoriesTable categories = $CategoriesTable(this);
   late final $EventsTable events = $EventsTable(this);
   late final $TransactionsTable transactions = $TransactionsTable(this);
   late final $TagsTable tags = $TagsTable(this);
+  late final $BudgetsTable budgets = $BudgetsTable(this);
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [categories, events, transactions, tags];
+      [categories, events, transactions, tags, budgets];
 }

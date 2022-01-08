@@ -65,38 +65,35 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
   Color categoryColor = const Color(0xFF68a1e8);
   Icon selectedCategoryIcon = const Icon(Icons.add, color: Colors.white);
 
-  final TextEditingController moneyController =
-      TextEditingController(text: "0");
+  final TextEditingController amountController = TextEditingController();
 
   final TextEditingController dateController =
       TextEditingController(text: DateTime.now().format("yyyy-MM-dd"));
 
-  final TextEditingController commentController =
-      TextEditingController(text: "");
+  final TextEditingController commentController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    db = Provider.of<MyDatabase>(context);
     if (null == widget.transaction) {
       isAdd = true;
       WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
         showCategorySelector(context);
       });
     } else {
-      setState(() {
-        isAdd = false;
-        moneyController.text = widget.transaction!.money.toStringAsFixed(2);
-        dateController.text = widget.transaction!.date.format("yyyy-MM-dd");
-        commentController.text = widget.transaction!.comment ?? "";
-        selectedCategoryId = widget.transaction!.categoryId;
-        selectedDate = widget.transaction!.date;
-      });
+      isAdd = false;
+      amountController.text = widget.transaction!.amount.toStringAsFixed(2);
+      dateController.text = widget.transaction!.date.format("yyyy-MM-dd");
+      commentController.text = widget.transaction!.comment ?? "";
+      selectedCategoryId = widget.transaction!.categoryId;
+      selectedDate = widget.transaction!.date;
     }
   }
 
   bool canSave() {
-    return moneyController.text.isNotEmpty &&
-        0 != double.tryParse(moneyController.text) &&
+    return amountController.text.isNotEmpty &&
+        0 != double.tryParse(amountController.text) &&
         Icons.add != selectedCategoryIcon.icon;
   }
 
@@ -117,7 +114,6 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
 
   @override
   Widget build(BuildContext context) {
-    db = Provider.of<MyDatabase>(context);
     return FutureProvider<Category?>(
         create: (_) {
           if (!isAdd) {
@@ -159,12 +155,13 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
                       icon: const Icon(Icons.save),
                       onPressed: canSave()
                           ? () async {
-                              final money = double.parse(moneyController.text);
+                              final amount =
+                                  double.parse(amountController.text);
                               if (isAdd) {
                                 int id = await db
                                     .into(db.transactions)
                                     .insert(TransactionsCompanion.insert(
-                                      money: money,
+                                      amount: amount,
                                       date: selectedDate,
                                       categoryId: selectedCategoryId,
                                       comment: drift.Value(
@@ -191,7 +188,7 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
                                       TransactionsCompanion(
                                           id: drift.Value(
                                               widget.transaction!.id),
-                                          money: drift.Value(money),
+                                          amount: drift.Value(amount),
                                           date: drift.Value(selectedDate),
                                           categoryId:
                                               drift.Value(selectedCategoryId),
@@ -241,7 +238,7 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
                           // const Spacer(),
                           Expanded(
                             child: TextFormField(
-                              controller: moneyController,
+                              controller: amountController,
                               style: const TextStyle(
                                   color: Colors.white, fontSize: 24),
                               textAlign: TextAlign.end,
@@ -323,7 +320,14 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
                         })),
                 const Spacer(),
                 Center(
-                    child: MoneyNumberTablet(moneyController: moneyController))
+                    child: MoneyNumberTablet(
+                  moneyController: amountController,
+                  callback: (text) {
+                    setState(() {
+                      amountController.text = text;
+                    });
+                  },
+                ))
               ]));
         }));
   }

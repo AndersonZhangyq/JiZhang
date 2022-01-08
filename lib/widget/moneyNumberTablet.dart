@@ -1,27 +1,32 @@
 import 'package:flutter/material.dart';
 
 class MoneyNumberTablet extends StatelessWidget {
-  const MoneyNumberTablet({Key? key, required this.moneyController})
+  const MoneyNumberTablet(
+      {Key? key, required this.moneyController, required this.callback})
       : super(key: key);
 
   final TextEditingController moneyController;
 
+  final void Function(String text)? callback;
+
   void _onNumberTabletPressed(
       {int? number, bool isDot = false, bool isRemove = false}) {
-    String tmp = moneyController.text;
+    String ret = moneyController.text;
     if (isRemove) {
-      tmp = tmp.substring(0, tmp.length - 1);
+      ret = ret.substring(0, ret.length - 1);
     } else if (isDot) {
-      tmp = tmp + ".";
+      ret = ret + ".";
     } else if (number != null) {
-      tmp = tmp + number.toString();
+      ret = ret + number.toString();
     }
     // remove leading zero
-    tmp = tmp.replaceFirst(RegExp('^0+'), '');
+    ret = ret.replaceFirst(RegExp('^0+'), '');
     // make sure only two number after dot
     // use '[0-9]+' to ensure that if tmp is Empty then set to "0"
-    tmp = RegExp("[0-9]+[.]?[0-9]{0,2}").stringMatch(tmp) ?? "0";
-    moneyController.text = tmp;
+    ret = RegExp("[0-9]+[.]?[0-9]{0,2}").stringMatch(ret) ?? "0";
+    if (callback != null) {
+      callback!(ret);
+    }
   }
 
   @override

@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart' as ui;
 import 'package:ji_zhang/common/predefinedCategory.dart';
+import 'package:ji_zhang/common/predefinedRecurrence.dart';
 import 'package:ji_zhang/widget/transaction/modifyTransaction.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -49,7 +50,7 @@ class Tags extends Table {
 class Transactions extends Table {
   IntColumn get id => integer().autoIncrement()();
 
-  RealColumn get money => real()();
+  RealColumn get amount => real()();
 
   DateTimeColumn get date => dateTime()();
 
@@ -65,16 +66,16 @@ class Transactions extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
-class Budget extends Table {
+class Budgets extends Table {
   IntColumn get id => integer().autoIncrement()();
 
   TextColumn get name => text()();
 
-  RealColumn get money => real()();
+  RealColumn get amount => real()();
 
   TextColumn get categoryIds => text().map(const IntegerListConverter())();
 
-  TextColumn get recurrence => text().nullable()();
+  IntColumn get recurrence => intEnum<RECURRENCE_TYPE>()();
 
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
@@ -161,7 +162,7 @@ LazyDatabase _openConnection() {
   });
 }
 
-@DriftDatabase(tables: [Categories, Events, Transactions, Tags])
+@DriftDatabase(tables: [Categories, Events, Transactions, Tags, Budgets])
 class MyDatabase extends _$MyDatabase {
   // we tell the database where to store the data with this constructor
   MyDatabase() : super(_openConnection());
@@ -221,7 +222,7 @@ class MyDatabase extends _$MyDatabase {
   // you should bump this number whenever you change or add a table definition. Migrations
   // are covered later in this readme.
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 15;
 
   Stream<List<Transaction>>? getTransactionsByMonth(int year, int month) {
     DateTime startDate = DateTime(year, month);
