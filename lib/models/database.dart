@@ -4,8 +4,10 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart' as ui;
+import 'package:ji_zhang/common/datetimeExtension.dart';
 import 'package:ji_zhang/common/predefinedCategory.dart';
 import 'package:ji_zhang/common/predefinedRecurrence.dart';
+import 'package:ji_zhang/widget/navigationPage/budget.dart';
 import 'package:ji_zhang/widget/transaction/modifyTransaction.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -253,5 +255,54 @@ class MyDatabase extends _$MyDatabase {
       }
       return ret;
     });
+  }
+
+  Future<List<BudgetItem>>? getBudgetItems() async {
+    DateTime now = DateTime.now().getDateOnly();
+    int currentYear = now.year;
+    int currentMonth = now.month;
+    int currentDay = now.day;
+    int currentWeek = now.weekday;
+    var budgetItems = await select(budgets).map((value) {
+      return BudgetItem(value);
+    }).get();
+    for (final budget in budgetItems) {
+      switch (budget.recurrence) {
+        case RECURRENCE_TYPE.daily:
+          break;
+        case RECURRENCE_TYPE.biweekly:
+          break;
+        case RECURRENCE_TYPE.weekly:
+          break;
+        case RECURRENCE_TYPE.monthly:
+          DateTime startDate = DateTime(currentYear, currentMonth);
+          DateTime endDate = DateTime(currentYear, currentMonth + 1)
+              .subtract(const Duration(days: 1));
+          var curTransactions = await (select(transactions)
+                ..where((t) => t.date.isBetween(
+                    CustomExpression(
+                        (startDate.millisecondsSinceEpoch / 1000).toString(),
+                        precedence: Precedence.primary),
+                    CustomExpression(
+                        (endDate.millisecondsSinceEpoch / 1000).toString(),
+                        precedence: Precedence.primary)))
+                ..orderBy([
+                  (t) => OrderingTerm(expression: t.id, mode: OrderingMode.desc)
+                ]))
+              .get();
+          var totalExpenses = 0.0;
+          var categoryExpenses = budget.categoryIds;
+          for (final transaction in curTransactions) {
+            if (categoryExpenses.contains(transaction.categoryId)) {
+              totalExpenses += transaction.amount;
+            }
+          }
+          budget.used = totalExpenses;
+          break;
+        case RECURRENCE_TYPE.yearly:
+          break;
+      }
+    }
+    return budgetItems;
   }
 }

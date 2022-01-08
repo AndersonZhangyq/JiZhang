@@ -72,10 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[_children[_currentIndex]],
-        ),
+        child: _children[_currentIndex],
       ),
       floatingActionButton: _currentIndex == 1 || _currentIndex == 3
           ? null
