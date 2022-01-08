@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ji_zhang/models/database.dart';
-// import 'package:ji_zhang/dbProxy/index.dart';
-import 'package:ji_zhang/widget/modifyCategory.dart';
+import 'package:ji_zhang/widget/category/modifyCategory.dart';
 import 'package:provider/provider.dart';
 
-import 'modifyTransaction.dart';
+import 'transaction/modifyTransaction.dart';
 
 class CategorySelectorWidget extends StatelessWidget {
   const CategorySelectorWidget({Key? key}) : super(key: key);

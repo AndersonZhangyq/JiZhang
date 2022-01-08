@@ -1,10 +1,10 @@
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ji_zhang/models/database.dart';
-import 'package:ji_zhang/widget/addCategory.dart';
-import 'package:ji_zhang/widget/modifyTransaction.dart';
+import 'package:ji_zhang/widget/category/addCategory.dart';
+import 'package:ji_zhang/widget/transaction/modifyTransaction.dart';
 import 'package:provider/provider.dart';
-import 'package:drift/drift.dart' as drift;
 
 class ModifyCategoryWidget extends StatefulWidget {
   const ModifyCategoryWidget({Key? key, required this.tabName})
@@ -27,6 +27,12 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
     super.initState();
     expenseCategory.clear();
     incomeCategory.clear();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    db = Provider.of<MyDatabase>(context);
   }
 
   void _saveList() async {
@@ -54,7 +60,6 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
 
   @override
   Widget build(BuildContext context) {
-    db = Provider.of<MyDatabase>(context);
     return StreamBuilder<List<CategoryItem>>(
         stream: db.getAllCategories(),
         initialData: const <CategoryItem>[],

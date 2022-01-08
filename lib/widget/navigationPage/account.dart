@@ -7,7 +7,6 @@ import 'package:ji_zhang/models/database.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:drift/drift.dart' as drift;
 
 class AccountWidget extends StatelessWidget {
   const AccountWidget({Key? key}) : super(key: key);
@@ -39,6 +38,7 @@ class _AccountPageState extends State<AccountPageWidget> {
   Future<bool> _checkStoragePermission() async {
     var status = await Permission.storage.request();
     if (!status.isGranted) {
+      ScaffoldMessenger.of(context).removeCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(
               AppLocalizations.of(context)!.account_NeedStoragePermission)));
@@ -62,7 +62,7 @@ class _AccountPageState extends State<AccountPageWidget> {
             title: Text(AppLocalizations.of(context)!.account_Backup),
             trailing: Visibility(
               child: CircularProgressIndicator(
-                value: backUpPercent / 4,
+                value: backUpPercent / 5,
               ),
               visible: backUpPercent != -1,
             ),
@@ -76,11 +76,11 @@ class _AccountPageState extends State<AccountPageWidget> {
                 final allTransactions = await db.select(db.transactions).get();
                 final transactionsFile =
                     File("${externalRoot.path}/backup/transaction.txt");
+                await transactionsFile
+                    .writeAsString(jsonEncode(allTransactions));
                 setState(() {
                   backUpPercent++;
                 });
-                await transactionsFile
-                    .writeAsString(jsonEncode(allTransactions));
                 final allCategories = await db.select(db.categories).get();
                 final categoriesFile =
                     File("${externalRoot.path}/backup/category.txt");
@@ -89,25 +89,38 @@ class _AccountPageState extends State<AccountPageWidget> {
                   backUpPercent++;
                 });
                 final allTages = await db.select(db.tags).get();
-                final tagesFile =
-                    File("${externalRoot.path}/backup/tag.txt");
+                final tagesFile = File("${externalRoot.path}/backup/tag.txt");
                 await tagesFile.writeAsString(jsonEncode(allTages));
-                final allEvents = await db.select(db.events).get();
                 setState(() {
                   backUpPercent++;
                 });
+                final allEvents = await db.select(db.events).get();
                 final eventsFile =
                     File("${externalRoot.path}/backup/event.txt");
                 await eventsFile.writeAsString(jsonEncode(allEvents));
                 setState(() {
                   backUpPercent++;
                 });
+                ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content:
+                      Text(AppLocalizations.of(context)!.account_BackupSuccess),
+                ));
+                final allBudgets = await db.select(db.budgets).get();
+                final budgetsFile =
+                    File("${externalRoot.path}/backup/budget.txt");
+                await budgetsFile.writeAsString(jsonEncode(allBudgets));
+                setState(() {
+                  backUpPercent++;
+                });
+                ScaffoldMessenger.of(context).removeCurrentSnackBar();
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content:
                       Text(AppLocalizations.of(context)!.account_BackupSuccess),
                 ));
               } catch (e) {
                 print(e.toString());
+                ScaffoldMessenger.of(context).removeCurrentSnackBar();
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content:
                       Text(AppLocalizations.of(context)!.account_BackupFaliure),
@@ -125,7 +138,7 @@ class _AccountPageState extends State<AccountPageWidget> {
             title: Text(AppLocalizations.of(context)!.account_Restore),
             trailing: Visibility(
               child: CircularProgressIndicator(
-                value: restorePercent / 4,
+                value: restorePercent / 5,
               ),
               visible: restorePercent != -1,
             ),
@@ -138,16 +151,18 @@ class _AccountPageState extends State<AccountPageWidget> {
                     File("${externalRoot.path}/backup/transaction.txt");
                 final categoriesFile =
                     File("${externalRoot.path}/backup/category.txt");
-                final tagesFile =
-                    File("${externalRoot.path}/backup/tag.txt");
+                final tagesFile = File("${externalRoot.path}/backup/tag.txt");
                 final eventsFile =
                     File("${externalRoot.path}/backup/event.txt");
-                if (!(await Directory("${externalRoot.path}/backup")
-                        .exists() &&
+                final budgetsFile =
+                    File("${externalRoot.path}/backup/budget.txt");
+                if (!(await Directory("${externalRoot.path}/backup").exists() &&
                     await transactionsFile.exists() &&
                     await categoriesFile.exists() &&
                     await tagesFile.exists() &&
-                    await eventsFile.exists())) {
+                    await eventsFile.exists() &&
+                    await budgetsFile.exists())) {
+                  ScaffoldMessenger.of(context).removeCurrentSnackBar();
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content: Text(
                         AppLocalizations.of(context)!.account_RestoreNotFound),
@@ -172,10 +187,11 @@ class _AccountPageState extends State<AccountPageWidget> {
                                 child: Text(AppLocalizations.of(context)!.ok),
                                 onPressed: () async {
                                   try {
-                                    db.delete(db.transactions);
-                                    db.delete(db.categories);
-                                    db.delete(db.tags);
-                                    db.delete(db.events);
+                                    await db.delete(db.transactions).go();
+                                    await db.delete(db.categories).go();
+                                    await db.delete(db.tags).go();
+                                    await db.delete(db.events).go();
+                                    await db.delete(db.budgets).go();
                                     final allTransactions = jsonDecode(
                                         await transactionsFile.readAsString());
                                     allTransactions
@@ -219,6 +235,19 @@ class _AccountPageState extends State<AccountPageWidget> {
                                     setState(() {
                                       restorePercent++;
                                     });
+                                    final allBudgets = jsonDecode(
+                                        await budgetsFile.readAsString());
+                                    allBudgets.forEach((event) async {
+                                      db
+                                          .into(db.budgets)
+                                          .insertOnConflictUpdate(
+                                              Budget.fromJson(event));
+                                    });
+                                    setState(() {
+                                      restorePercent++;
+                                    });
+                                    ScaffoldMessenger.of(context)
+                                        .removeCurrentSnackBar();
                                     ScaffoldMessenger.of(context)
                                         .showSnackBar(SnackBar(
                                       content: Text(
@@ -226,6 +255,8 @@ class _AccountPageState extends State<AccountPageWidget> {
                                               .account_RestoreSuccess),
                                     ));
                                   } catch (e) {
+                                    ScaffoldMessenger.of(context)
+                                        .removeCurrentSnackBar();
                                     ScaffoldMessenger.of(context)
                                         .showSnackBar(SnackBar(
                                       content: Text(
@@ -247,6 +278,7 @@ class _AccountPageState extends State<AccountPageWidget> {
                       });
                 }
               } catch (e) {
+                ScaffoldMessenger.of(context).removeCurrentSnackBar();
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text(
                       AppLocalizations.of(context)!.account_RestoreFailure),

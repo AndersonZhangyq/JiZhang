@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ji_zhang/models/database.dart';
-import 'package:ji_zhang/widget/modifyTransaction.dart';
+import 'package:ji_zhang/widget/budget/modifyBudget.dart';
 import 'package:ji_zhang/widget/navigationPage/account.dart';
 import 'package:ji_zhang/widget/navigationPage/budget.dart';
 import 'package:ji_zhang/widget/navigationPage/chart.dart';
-import 'package:ji_zhang/widget/navigationPage/transactions.dart';
+import 'package:ji_zhang/widget/navigationPage/transaction.dart';
+import 'package:ji_zhang/widget/transaction/modifyTransaction.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -76,19 +77,33 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[_children[_currentIndex]],
         ),
       ),
-      floatingActionButton: FloatingActionButton.small(
-        heroTag: 'add_transaction',
-        elevation: 4.0,
-        child: const Icon(Icons.add),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    const ModifyTransactionsPage(transaction: null)),
-          );
-        },
-      ),
+      floatingActionButton: _currentIndex == 1 || _currentIndex == 3
+          ? null
+          : FloatingActionButton.small(
+              heroTag: 'add_transaction',
+              elevation: 4.0,
+              child: const Icon(Icons.add),
+              onPressed: () {
+                switch (_currentIndex) {
+                  case 0:
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              const ModifyTransactionsPage(transaction: null)),
+                    );
+                    break;
+                  case 2:
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              const ModifyBudgetPage(budget: null)),
+                    );
+                    break;
+                }
+              },
+            ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         onTap: onTabTapped,

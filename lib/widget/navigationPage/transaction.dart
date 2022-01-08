@@ -5,7 +5,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ji_zhang/common/datetimeExtension.dart';
 import 'package:ji_zhang/models/database.dart';
 import 'package:ji_zhang/widget/categorySelector.dart';
-import 'package:ji_zhang/widget/modifyTransaction.dart';
+import 'package:ji_zhang/widget/transaction/modifyTransaction.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:provider/provider.dart';
 
@@ -49,7 +49,15 @@ class _TransactionListState extends State<TransactionWidget> {
                   int.parse(selectedYear), int.parse(selectedMonth)),
               builder: (context, snapshot) {
                 if (snapshot.hasData == false) {
-                  return const CircularProgressIndicator();
+                  return Center(
+                    child: Text(
+                      "Loading...",
+                      style: TextStyle(
+                          color: Colors.grey[400],
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  );
                 }
                 List<Transaction> transactions =
                     snapshot.data ?? <Transaction>[];
@@ -67,10 +75,10 @@ class _TransactionListState extends State<TransactionWidget> {
                   for (var transaction in transactions) {
                     switch (categories[transaction.categoryId]!.type) {
                       case "expense":
-                        expense += transaction.money;
+                        expense += transaction.amount;
                         break;
                       case "income":
-                        income += transaction.money;
+                        income += transaction.amount;
                         break;
                       default:
                     }
@@ -300,10 +308,11 @@ class _TransactionListState extends State<TransactionWidget> {
                       });
                     },
                   ),
-                  title: Text(curTransaction.comment ?? curCategoryItem.name),
+                  title: Text(curTransaction.comment ??
+                      curCategoryItem.getDisplayName(context)),
                   trailing: Text(
                       (curCategoryItem.type == "expense" ? "-" : "") +
-                          curTransaction.money.toStringAsFixed(2),
+                          curTransaction.amount.toStringAsFixed(2),
                       style: curCategoryItem.type == "expense"
                           ? const TextStyle(color: Colors.red)
                           : const TextStyle(color: Colors.green)),
