@@ -31,6 +31,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         // This is the theme of your application.
         primaryColor: const Color(0xFF68a1e8),
+        pageTransitionsTheme: const PageTransitionsTheme(builders: {
+          TargetPlatform.android: ZoomPageTransitionsBuilder(),
+        }),
       ),
       home: const MyHomePage(),
     );

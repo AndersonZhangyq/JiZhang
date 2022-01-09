@@ -80,9 +80,7 @@ class _BudgetWidgetState extends State<BudgetWidget> {
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                                AppLocalizations.of(context)!
-                                    .transactions_ListView_No_Transaction,
+                            Text(AppLocalizations.of(context)!.listView_Empty,
                                 style: TextStyle(
                                     fontSize: 20,
                                     color: Colors.grey[300],

@@ -33,7 +33,7 @@
   "transactions_SnackBar_failed_to_delete_transaction": "删除账单失败",
   "transactions_SnackBar_failed_to_update_transaction": "更新账单失败",
   "transactions_SnackBar_Remove_Transaction": "账单已删除",
-  "transactions_ListView_No_Transaction": "这里空空如也~",
+  "listView_Empty": "这里空空如也~",
   "budget_total": "共",
   "budget_AppBarTitle": "所有预算",
   "chart_Title_TotalExpense": "总支出",

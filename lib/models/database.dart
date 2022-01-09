@@ -341,4 +341,23 @@ class MyDatabase extends _$MyDatabase {
       return ui.DateTimeRange(start: DateTime.now(), end: DateTime.now());
     });
   }
+
+  Stream<List<Transaction>>? getTransactionsByMonthAndCategoryId(
+      int year, int month, int categoryId) {
+    DateTime startDate = DateTime(year, month);
+    DateTime endDate =
+        DateTime(year, month + 1).subtract(const Duration(days: 1));
+    return (select(transactions)
+          ..where((t) => t.date.isBetween(
+              CustomExpression(
+                  (startDate.millisecondsSinceEpoch / 1000).toString(),
+                  precedence: Precedence.primary),
+              CustomExpression(
+                  (endDate.millisecondsSinceEpoch / 1000).toString(),
+                  precedence: Precedence.primary)))
+          ..where((t) => t.categoryId.equals(categoryId))
+          ..orderBy(
+              [(t) => OrderingTerm(expression: t.id, mode: OrderingMode.desc)]))
+        .watch();
+  }
 }

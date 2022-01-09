@@ -236,14 +236,12 @@ class _ModifyBudgetPageState extends State<ModifyBudgetPage> {
                                           itemBuilder: (BuildContext context,
                                               int index) {
                                             bool selected =
-                                                predefinedRecurrences[index] ==
-                                                    budgetRecurrence.name;
+                                                index == budgetRecurrence.index;
                                             return ListTile(
                                               onTap: () {
                                                 Navigator.pop(context, {
-                                                  'recurrence':
-                                                      predefinedRecurrences[
-                                                          index],
+                                                  'recurrence': RECURRENCE_TYPE
+                                                      .values[index],
                                                 });
                                               },
                                               selected: selected,
