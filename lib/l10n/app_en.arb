@@ -36,6 +36,8 @@
   "transactions_ListView_No_Transaction": "No transactions found",
   "budget_total": "Total",
   "budget_AppBarTitle": "All Budgets",
+  "chart_Title_TotalExpense": "Total Expense",
+  "chart_Title_TotalIncome": "Total Income",
   "selectExpense_Title": "Select Expenses",
   "account_title": "Account",
   "account_Backup": "Backup",

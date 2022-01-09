@@ -228,7 +228,7 @@ class MyDatabase extends _$MyDatabase {
   // you should bump this number whenever you change or add a table definition. Migrations
   // are covered later in this readme.
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   Stream<List<Transaction>>? getTransactionsByMonth(int year, int month) {
     DateTime startDate = DateTime(year, month);
@@ -283,7 +283,10 @@ class MyDatabase extends _$MyDatabase {
     var budgetItems = await select(budgets).map((value) {
       return BudgetItem(value);
     }).get();
+    var curTransactions = <Transaction>[];
     for (final budget in budgetItems) {
+      DateTime? startDate;
+      DateTime? endDate;
       switch (budget.recurrence) {
         case RECURRENCE_TYPE.daily:
           break;
@@ -292,34 +295,50 @@ class MyDatabase extends _$MyDatabase {
         case RECURRENCE_TYPE.weekly:
           break;
         case RECURRENCE_TYPE.monthly:
-          DateTime startDate = DateTime(currentYear, currentMonth);
-          DateTime endDate = DateTime(currentYear, currentMonth + 1)
+          startDate = DateTime(currentYear, currentMonth);
+          endDate = DateTime(currentYear, currentMonth + 1)
               .subtract(const Duration(days: 1));
-          var curTransactions = await (select(transactions)
-                ..where((t) => t.date.isBetween(
-                    CustomExpression(
-                        (startDate.millisecondsSinceEpoch / 1000).toString(),
-                        precedence: Precedence.primary),
-                    CustomExpression(
-                        (endDate.millisecondsSinceEpoch / 1000).toString(),
-                        precedence: Precedence.primary)))
-                ..orderBy([
-                  (t) => OrderingTerm(expression: t.id, mode: OrderingMode.desc)
-                ]))
-              .get();
-          var totalExpenses = 0.0;
-          var categoryExpenses = budget.categoryIds;
-          for (final transaction in curTransactions) {
-            if (categoryExpenses.contains(transaction.categoryId)) {
-              totalExpenses += transaction.amount;
-            }
-          }
-          budget.used = totalExpenses;
           break;
         case RECURRENCE_TYPE.yearly:
           break;
       }
+      if (startDate != null && endDate != null) {
+        curTransactions = await (select(transactions)
+              ..where((t) => t.date.isBetween(
+                  CustomExpression(
+                      (startDate!.millisecondsSinceEpoch / 1000).toString(),
+                      precedence: Precedence.primary),
+                  CustomExpression(
+                      (endDate!.millisecondsSinceEpoch / 1000).toString(),
+                      precedence: Precedence.primary)))
+              ..orderBy([
+                (t) => OrderingTerm(expression: t.id, mode: OrderingMode.desc)
+              ]))
+            .get();
+      }
+      var totalExpenses = 0.0;
+      var categoryExpenses = budget.categoryIds;
+      for (final transaction in curTransactions) {
+        if (categoryExpenses.contains(transaction.categoryId)) {
+          totalExpenses += transaction.amount;
+        }
+      }
+      budget.used = totalExpenses;
     }
     return budgetItems;
+  }
+
+  Stream<ui.DateTimeRange>? getTransactionRange() {
+    final minDate = transactions.date.min();
+    final maxDate = transactions.date.max();
+    return (selectOnly(transactions)..addColumns([minDate, maxDate]))
+        .watchSingleOrNull()
+        .map((row) {
+      if (row != null) {
+        return ui.DateTimeRange(
+            start: row.read(minDate), end: row.read(maxDate));
+      }
+      return ui.DateTimeRange(start: DateTime.now(), end: DateTime.now());
+    });
   }
 }

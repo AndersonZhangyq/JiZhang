@@ -59,13 +59,13 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
   Widget build(BuildContext context) {
     return StreamBuilder<List<CategoryItem>>(
         stream: db.watchCategoriesByType("expense"),
-        initialData: const <CategoryItem>[],
+        // initialData: const <CategoryItem>[],
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             expenseCategory = snapshot.data!;
             return StreamBuilder<List<CategoryItem>>(
                 stream: db.watchCategoriesByType("income"),
-                initialData: const <CategoryItem>[],
+                // initialData: const <CategoryItem>[],
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     incomeCategory = snapshot.data!;

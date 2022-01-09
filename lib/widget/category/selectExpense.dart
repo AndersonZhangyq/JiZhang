@@ -28,7 +28,7 @@ class _SelectExpenseWidgetState extends State<SelectExpenseWidget> {
   Widget build(BuildContext context) {
     return StreamBuilder<List<CategoryItem>>(
         stream: db.watchAllCategories(),
-        initialData: const <CategoryItem>[],
+        // initialData: const <CategoryItem>[],
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data!.isNotEmpty) {
             final categories = snapshot.data!;

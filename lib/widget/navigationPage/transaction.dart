@@ -49,13 +49,15 @@ class _TransactionListState extends State<TransactionWidget> {
                   int.parse(selectedYear), int.parse(selectedMonth)),
               builder: (context, snapshot) {
                 if (snapshot.hasData == false) {
-                  return Center(
-                    child: Text(
-                      "Loading...",
-                      style: TextStyle(
-                          color: Colors.grey[400],
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold),
+                  return Expanded(
+                    child: Center(
+                      child: Text(
+                        "Loading...",
+                        style: TextStyle(
+                            color: Colors.grey[400],
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold),
+                      ),
                     ),
                   );
                 }
