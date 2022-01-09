@@ -33,7 +33,7 @@
   "transactions_SnackBar_failed_to_delete_transaction": "Failed to delete transaction",
   "transactions_SnackBar_failed_to_update_transaction": "Failed to update transaction",
   "transactions_SnackBar_Remove_Transaction": "Transaction removed",
-  "transactions_ListView_No_Transaction": "No transactions found",
+  "listView_Empty": "No transactions found",
   "budget_total": "Total",
   "budget_AppBarTitle": "All Budgets",
   "chart_Title_TotalExpense": "Total Expense",

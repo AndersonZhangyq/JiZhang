@@ -258,7 +258,7 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
                       )),
                 ),
                 ListTile(
-                  leading: Icon(Icons.calendar_today, color: categoryColor),
+                  leading: Icon(Icons.date_range, color: categoryColor),
                   title: TextField(
                     decoration: const InputDecoration(
                       border: InputBorder.none,
