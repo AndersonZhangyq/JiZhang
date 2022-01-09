@@ -13,7 +13,7 @@ class Category extends DataClass implements Insertable<Category> {
   final String type;
   final String icon;
   final String color;
-  final int index;
+  final int pos;
   final int predefined;
   final DateTime createdAt;
   Category(
@@ -22,7 +22,7 @@ class Category extends DataClass implements Insertable<Category> {
       required this.type,
       required this.icon,
       required this.color,
-      required this.index,
+      required this.pos,
       required this.predefined,
       required this.createdAt});
   factory Category.fromData(Map<String, dynamic> data, {String? prefix}) {
@@ -38,8 +38,8 @@ class Category extends DataClass implements Insertable<Category> {
           .mapFromDatabaseResponse(data['${effectivePrefix}icon'])!,
       color: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}color'])!,
-      index: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}index'])!,
+      pos: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}pos'])!,
       predefined: const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}predefined'])!,
       createdAt: const DateTimeType()
@@ -54,7 +54,7 @@ class Category extends DataClass implements Insertable<Category> {
     map['type'] = Variable<String>(type);
     map['icon'] = Variable<String>(icon);
     map['color'] = Variable<String>(color);
-    map['index'] = Variable<int>(index);
+    map['pos'] = Variable<int>(pos);
     map['predefined'] = Variable<int>(predefined);
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
@@ -67,7 +67,7 @@ class Category extends DataClass implements Insertable<Category> {
       type: Value(type),
       icon: Value(icon),
       color: Value(color),
-      index: Value(index),
+      pos: Value(pos),
       predefined: Value(predefined),
       createdAt: Value(createdAt),
     );
@@ -82,7 +82,7 @@ class Category extends DataClass implements Insertable<Category> {
       type: serializer.fromJson<String>(json['type']),
       icon: serializer.fromJson<String>(json['icon']),
       color: serializer.fromJson<String>(json['color']),
-      index: serializer.fromJson<int>(json['index']),
+      pos: serializer.fromJson<int>(json['pos']),
       predefined: serializer.fromJson<int>(json['predefined']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
@@ -96,7 +96,7 @@ class Category extends DataClass implements Insertable<Category> {
       'type': serializer.toJson<String>(type),
       'icon': serializer.toJson<String>(icon),
       'color': serializer.toJson<String>(color),
-      'index': serializer.toJson<int>(index),
+      'pos': serializer.toJson<int>(pos),
       'predefined': serializer.toJson<int>(predefined),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
@@ -108,7 +108,7 @@ class Category extends DataClass implements Insertable<Category> {
           String? type,
           String? icon,
           String? color,
-          int? index,
+          int? pos,
           int? predefined,
           DateTime? createdAt}) =>
       Category(
@@ -117,7 +117,7 @@ class Category extends DataClass implements Insertable<Category> {
         type: type ?? this.type,
         icon: icon ?? this.icon,
         color: color ?? this.color,
-        index: index ?? this.index,
+        pos: pos ?? this.pos,
         predefined: predefined ?? this.predefined,
         createdAt: createdAt ?? this.createdAt,
       );
@@ -129,7 +129,7 @@ class Category extends DataClass implements Insertable<Category> {
           ..write('type: $type, ')
           ..write('icon: $icon, ')
           ..write('color: $color, ')
-          ..write('index: $index, ')
+          ..write('pos: $pos, ')
           ..write('predefined: $predefined, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
@@ -138,7 +138,7 @@ class Category extends DataClass implements Insertable<Category> {
 
   @override
   int get hashCode =>
-      Object.hash(id, name, type, icon, color, index, predefined, createdAt);
+      Object.hash(id, name, type, icon, color, pos, predefined, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -148,7 +148,7 @@ class Category extends DataClass implements Insertable<Category> {
           other.type == this.type &&
           other.icon == this.icon &&
           other.color == this.color &&
-          other.index == this.index &&
+          other.pos == this.pos &&
           other.predefined == this.predefined &&
           other.createdAt == this.createdAt);
 }
@@ -159,7 +159,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
   final Value<String> type;
   final Value<String> icon;
   final Value<String> color;
-  final Value<int> index;
+  final Value<int> pos;
   final Value<int> predefined;
   final Value<DateTime> createdAt;
   const CategoriesCompanion({
@@ -168,7 +168,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     this.type = const Value.absent(),
     this.icon = const Value.absent(),
     this.color = const Value.absent(),
-    this.index = const Value.absent(),
+    this.pos = const Value.absent(),
     this.predefined = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
@@ -178,14 +178,14 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     required String type,
     required String icon,
     required String color,
-    required int index,
+    required int pos,
     required int predefined,
     this.createdAt = const Value.absent(),
   })  : name = Value(name),
         type = Value(type),
         icon = Value(icon),
         color = Value(color),
-        index = Value(index),
+        pos = Value(pos),
         predefined = Value(predefined);
   static Insertable<Category> custom({
     Expression<int>? id,
@@ -193,7 +193,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     Expression<String>? type,
     Expression<String>? icon,
     Expression<String>? color,
-    Expression<int>? index,
+    Expression<int>? pos,
     Expression<int>? predefined,
     Expression<DateTime>? createdAt,
   }) {
@@ -203,7 +203,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       if (type != null) 'type': type,
       if (icon != null) 'icon': icon,
       if (color != null) 'color': color,
-      if (index != null) 'index': index,
+      if (pos != null) 'pos': pos,
       if (predefined != null) 'predefined': predefined,
       if (createdAt != null) 'created_at': createdAt,
     });
@@ -215,7 +215,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       Value<String>? type,
       Value<String>? icon,
       Value<String>? color,
-      Value<int>? index,
+      Value<int>? pos,
       Value<int>? predefined,
       Value<DateTime>? createdAt}) {
     return CategoriesCompanion(
@@ -224,7 +224,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       type: type ?? this.type,
       icon: icon ?? this.icon,
       color: color ?? this.color,
-      index: index ?? this.index,
+      pos: pos ?? this.pos,
       predefined: predefined ?? this.predefined,
       createdAt: createdAt ?? this.createdAt,
     );
@@ -248,8 +248,8 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     if (color.present) {
       map['color'] = Variable<String>(color.value);
     }
-    if (index.present) {
-      map['index'] = Variable<int>(index.value);
+    if (pos.present) {
+      map['pos'] = Variable<int>(pos.value);
     }
     if (predefined.present) {
       map['predefined'] = Variable<int>(predefined.value);
@@ -268,7 +268,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
           ..write('type: $type, ')
           ..write('icon: $icon, ')
           ..write('color: $color, ')
-          ..write('index: $index, ')
+          ..write('pos: $pos, ')
           ..write('predefined: $predefined, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
@@ -308,10 +308,10 @@ class $CategoriesTable extends Categories
   late final GeneratedColumn<String?> color = GeneratedColumn<String?>(
       'color', aliasedName, false,
       type: const StringType(), requiredDuringInsert: true);
-  final VerificationMeta _indexMeta = const VerificationMeta('index');
+  final VerificationMeta _posMeta = const VerificationMeta('pos');
   @override
-  late final GeneratedColumn<int?> index = GeneratedColumn<int?>(
-      'index', aliasedName, false,
+  late final GeneratedColumn<int?> pos = GeneratedColumn<int?>(
+      'pos', aliasedName, false,
       type: const IntType(), requiredDuringInsert: true);
   final VerificationMeta _predefinedMeta = const VerificationMeta('predefined');
   @override
@@ -327,7 +327,7 @@ class $CategoriesTable extends Categories
       defaultValue: currentDateAndTime);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, name, type, icon, color, index, predefined, createdAt];
+      [id, name, type, icon, color, pos, predefined, createdAt];
   @override
   String get aliasedName => _alias ?? 'categories';
   @override
@@ -364,11 +364,11 @@ class $CategoriesTable extends Categories
     } else if (isInserting) {
       context.missing(_colorMeta);
     }
-    if (data.containsKey('index')) {
+    if (data.containsKey('pos')) {
       context.handle(
-          _indexMeta, index.isAcceptableOrUnknown(data['index']!, _indexMeta));
+          _posMeta, pos.isAcceptableOrUnknown(data['pos']!, _posMeta));
     } else if (isInserting) {
-      context.missing(_indexMeta);
+      context.missing(_posMeta);
     }
     if (data.containsKey('predefined')) {
       context.handle(

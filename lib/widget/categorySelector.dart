@@ -33,7 +33,7 @@ class CategorySelectorWidget extends StatelessWidget {
                 ),
                 Expanded(
                     child: StreamBuilder<List<CategoryItem>>(
-                  stream: database.getAllCategories(),
+                  stream: database.watchAllCategories(),
                   builder: (context, snapshot) {
                     final categories = snapshot.data ?? <CategoryItem>[];
                     List<CategoryItem> expenseCategory = [];

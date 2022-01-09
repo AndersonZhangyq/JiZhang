@@ -27,7 +27,7 @@ class _SelectExpenseWidgetState extends State<SelectExpenseWidget> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<CategoryItem>>(
-        stream: db.getAllCategories(),
+        stream: db.watchAllCategories(),
         initialData: const <CategoryItem>[],
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data!.isNotEmpty) {
@@ -50,40 +50,42 @@ class _SelectExpenseWidgetState extends State<SelectExpenseWidget> {
                                 .pop(selectedCategoryIds);
                           }),
                     ),
-                    body: Center(
-                      child: Expanded(
-                          child: ListView.builder(
-                        itemBuilder: (context, index) {
-                          final curCategory = categories[index];
-                          return ListTile(
-                            onTap: () {
-                              if (selectedCategoryIds
-                                  .contains(curCategory.id)) {
-                                setState(() {
-                                  selectedCategoryIds.remove(curCategory.id);
-                                });
-                              } else {
-                                setState(() {
-                                  selectedCategoryIds.add(curCategory.id);
-                                });
-                              }
-                            },
-                            leading: Icon(
-                              curCategory.icon,
-                              color: curCategory.color,
-                            ),
-                            title: Text(curCategory.getDisplayName(context)),
-                            trailing:
-                                selectedCategoryIds.contains(curCategory.id)
-                                    ? Icon(
-                                        Icons.check_circle_rounded,
-                                        color: Colors.green[300],
-                                      )
-                                    : null,
-                          );
-                        },
-                        itemCount: categories.length,
-                      )),
+                    body: Column(
+                      children: [
+                        Expanded(
+                            child: ListView.builder(
+                          itemBuilder: (context, index) {
+                            final curCategory = categories[index];
+                            return ListTile(
+                              onTap: () {
+                                if (selectedCategoryIds
+                                    .contains(curCategory.id)) {
+                                  setState(() {
+                                    selectedCategoryIds.remove(curCategory.id);
+                                  });
+                                } else {
+                                  setState(() {
+                                    selectedCategoryIds.add(curCategory.id);
+                                  });
+                                }
+                              },
+                              leading: Icon(
+                                curCategory.icon,
+                                color: curCategory.color,
+                              ),
+                              title: Text(curCategory.getDisplayName(context)),
+                              trailing:
+                                  selectedCategoryIds.contains(curCategory.id)
+                                      ? Icon(
+                                          Icons.check_circle_rounded,
+                                          color: Colors.green[300],
+                                        )
+                                      : null,
+                            );
+                          },
+                          itemCount: categories.length,
+                        )),
+                      ],
                     )));
           }
           return Center(

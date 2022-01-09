@@ -5,8 +5,10 @@ class ChartWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return const Expanded(
+        child: SafeArea(
+            child: Center(
       child: Text("Chart"),
-    );
+    )));
   }
 }

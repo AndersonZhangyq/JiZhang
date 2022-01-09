@@ -38,7 +38,7 @@ class BudgetWidget extends StatefulWidget {
 
 class _BudgetWidgetState extends State<BudgetWidget> {
   late MyDatabase db;
-  List<BudgetItem>? budgets = null;
+  List<BudgetItem>? budgets;
 
   @override
   void didChangeDependencies() {
@@ -77,15 +77,18 @@ class _BudgetWidgetState extends State<BudgetWidget> {
                         snapshot.hasData) {
                       var budgets = snapshot.data;
                       if (budgets!.isEmpty) {
-                        return Expanded(
-                            child: Center(
-                                child: Text(
-                                    AppLocalizations.of(context)!
-                                        .transactions_ListView_No_Transaction,
-                                    style: TextStyle(
-                                        fontSize: 20,
-                                        color: Colors.grey[300],
-                                        fontWeight: FontWeight.bold))));
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                                AppLocalizations.of(context)!
+                                    .transactions_ListView_No_Transaction,
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    color: Colors.grey[300],
+                                    fontWeight: FontWeight.bold)),
+                          ],
+                        );
                       } else {
                         return ListView.builder(
                             itemBuilder: (context, index) {

@@ -34,7 +34,7 @@ class Categories extends Table {
 
   TextColumn get color => text()();
 
-  IntColumn get index => integer()();
+  IntColumn get pos => integer()();
 
   IntColumn get predefined => integer()();
 
@@ -190,7 +190,7 @@ class MyDatabase extends _$MyDatabase {
           }),
           color: color.value.toString(),
           predefined: 1,
-          index: i));
+          pos: i));
     }
     var incomeCategoryColorKeys = incomeCategoryIconInfo.keys.toList();
     for (int i = 0; i < incomeCategoryColorKeys.length; ++i) {
@@ -208,7 +208,7 @@ class MyDatabase extends _$MyDatabase {
           }),
           color: color.value.toString(),
           predefined: 1,
-          index: i));
+          pos: i));
     }
   }
 
@@ -228,7 +228,7 @@ class MyDatabase extends _$MyDatabase {
   // you should bump this number whenever you change or add a table definition. Migrations
   // are covered later in this readme.
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 1;
 
   Stream<List<Transaction>>? getTransactionsByMonth(int year, int month) {
     DateTime startDate = DateTime(year, month);
@@ -247,8 +247,25 @@ class MyDatabase extends _$MyDatabase {
         .watch();
   }
 
-  Stream<List<CategoryItem>>? getAllCategories() {
-    return select(categories).watch().map((value) {
+  Stream<List<CategoryItem>>? watchAllCategories() {
+    return (select(categories)
+          ..orderBy([(u) => OrderingTerm(expression: u.pos)]))
+        .watch()
+        .map((value) {
+      List<CategoryItem> ret = [];
+      for (var item in value) {
+        ret.add(CategoryItem(item));
+      }
+      return ret;
+    });
+  }
+
+  Stream<List<CategoryItem>>? watchCategoriesByType(String type) {
+    return (select(categories)
+          ..where((c) => c.type.equals(type))
+          ..orderBy([(u) => OrderingTerm(expression: u.pos)]))
+        .watch()
+        .map((value) {
       List<CategoryItem> ret = [];
       for (var item in value) {
         ret.add(CategoryItem(item));

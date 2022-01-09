@@ -164,12 +164,8 @@ class _AccountPageState extends State<AccountPageWidget> {
                     File("${externalRoot.path}/backup/event.txt");
                 final budgetsFile =
                     File("${externalRoot.path}/backup/budget.txt");
-                if (!(await Directory("${externalRoot.path}/backup").exists() &&
-                    await transactionsFile.exists() &&
-                    await categoriesFile.exists() &&
-                    await tagesFile.exists() &&
-                    await eventsFile.exists() &&
-                    await budgetsFile.exists())) {
+                if (!(await Directory("${externalRoot.path}/backup")
+                    .exists())) {
                   ScaffoldMessenger.of(context).removeCurrentSnackBar();
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content: Text(
@@ -195,65 +191,80 @@ class _AccountPageState extends State<AccountPageWidget> {
                                 child: Text(AppLocalizations.of(context)!.ok),
                                 onPressed: () async {
                                   try {
-                                    await db.delete(db.transactions).go();
-                                    await db.delete(db.categories).go();
-                                    await db.delete(db.tags).go();
-                                    await db.delete(db.events).go();
-                                    await db.delete(db.budgets).go();
-                                    final allTransactions = jsonDecode(
-                                        await transactionsFile.readAsString());
-                                    allTransactions
-                                        .forEach((transaction) async {
-                                      db
-                                          .into(db.transactions)
-                                          .insertOnConflictUpdate(
-                                              Transaction.fromJson(transaction,
-                                                  serializer:
-                                                      const MyValueSerializer()));
-                                    });
-                                    setState(() {
-                                      restorePercent++;
-                                    });
-                                    final allCategories = jsonDecode(
-                                        await categoriesFile.readAsString());
-                                    allCategories.forEach((category) async {
-                                      db
-                                          .into(db.categories)
-                                          .insertOnConflictUpdate(
-                                              Category.fromJson(category));
-                                    });
-                                    setState(() {
-                                      restorePercent++;
-                                    });
-                                    final allTages = jsonDecode(
-                                        await tagesFile.readAsString());
-                                    allTages.forEach((tag) async {
-                                      db.into(db.tags).insertOnConflictUpdate(
-                                          Tag.fromJson(tag));
-                                    });
-                                    setState(() {
-                                      restorePercent++;
-                                    });
-                                    final allEvents = jsonDecode(
-                                        await eventsFile.readAsString());
-                                    allEvents.forEach((event) async {
-                                      db.into(db.events).insertOnConflictUpdate(
-                                          Event.fromJson(event));
-                                    });
-                                    setState(() {
-                                      restorePercent++;
-                                    });
-                                    final allBudgets = jsonDecode(
-                                        await budgetsFile.readAsString());
-                                    allBudgets.forEach((budget) async {
-                                      db.into(db.budgets).insertOnConflictUpdate(
-                                          Budget.fromJson(budget,
-                                              serializer:
-                                                  const MyValueSerializer()));
-                                    });
-                                    setState(() {
-                                      restorePercent++;
-                                    });
+                                    if (await transactionsFile.exists()) {
+                                      await db.delete(db.transactions).go();
+                                      final allTransactions = jsonDecode(
+                                          await transactionsFile
+                                              .readAsString());
+                                      allTransactions
+                                          .forEach((transaction) async {
+                                        db
+                                            .into(db.transactions)
+                                            .insertOnConflictUpdate(
+                                                Transaction.fromJson(
+                                                    transaction,
+                                                    serializer:
+                                                        const MyValueSerializer()));
+                                      });
+                                      setState(() {
+                                        restorePercent++;
+                                      });
+                                    }
+
+                                    if (await categoriesFile.exists()) {
+                                      await db.delete(db.categories).go();
+                                      final allCategories = jsonDecode(
+                                          await categoriesFile.readAsString());
+                                      allCategories.forEach((category) async {
+                                        db
+                                            .into(db.categories)
+                                            .insertOnConflictUpdate(
+                                                Category.fromJson(category));
+                                      });
+                                      setState(() {
+                                        restorePercent++;
+                                      });
+                                    }
+                                    if (await tagesFile.exists()) {
+                                      await db.delete(db.tags).go();
+                                      final allTages = jsonDecode(
+                                          await tagesFile.readAsString());
+                                      allTages.forEach((tag) async {
+                                        db.into(db.tags).insertOnConflictUpdate(
+                                            Tag.fromJson(tag));
+                                      });
+                                      setState(() {
+                                        restorePercent++;
+                                      });
+                                    }
+                                    if (await eventsFile.exists()) {
+                                      await db.delete(db.events).go();
+                                      final allEvents = jsonDecode(
+                                          await eventsFile.readAsString());
+                                      allEvents.forEach((event) async {
+                                        db
+                                            .into(db.events)
+                                            .insertOnConflictUpdate(
+                                                Event.fromJson(event));
+                                      });
+                                      setState(() {
+                                        restorePercent++;
+                                      });
+                                    }
+                                    if (await budgetsFile.exists()) {
+                                      await db.delete(db.budgets).go();
+                                      final allBudgets = jsonDecode(
+                                          await budgetsFile.readAsString());
+                                      allBudgets.forEach((budget) async {
+                                        db.into(db.budgets).insertOnConflictUpdate(
+                                            Budget.fromJson(budget,
+                                                serializer:
+                                                    const MyValueSerializer()));
+                                      });
+                                      setState(() {
+                                        restorePercent++;
+                                      });
+                                    }
                                     ScaffoldMessenger.of(context)
                                         .removeCurrentSnackBar();
                                     ScaffoldMessenger.of(context)

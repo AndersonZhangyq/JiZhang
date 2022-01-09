@@ -10,9 +10,16 @@
             "request": "attach"
         },
         {
-            "name": "JiZhang",
+            "name": "JiZhang debug",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "flutterMode": "debug"
+        },
+        {
+            "name": "JiZhang release",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
         },
         {
             "name": "JiZhang (profile mode)",

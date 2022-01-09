@@ -35,7 +35,7 @@ class _TransactionListState extends State<TransactionWidget> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<Map<int, CategoryItem>>(
-        stream: db.getAllCategories()!.map<Map<int, CategoryItem>>((value) {
+        stream: db.watchAllCategories()!.map<Map<int, CategoryItem>>((value) {
           Map<int, CategoryItem> ret = {};
           for (final item in value) {
             ret[item.id] = item;

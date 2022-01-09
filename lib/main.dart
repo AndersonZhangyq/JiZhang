@@ -71,8 +71,10 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: _children[_currentIndex],
+      body: Column(
+        children: [
+          _children[_currentIndex],
+        ],
       ),
       floatingActionButton: _currentIndex == 1 || _currentIndex == 3
           ? null
@@ -107,19 +109,19 @@ class _MyHomePageState extends State<MyHomePage> {
         currentIndex: _currentIndex,
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.list_alt),
+            icon: const Icon(Icons.list_alt),
             label: AppLocalizations.of(context)!.bottomNav_Transactions,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.insert_chart_outlined),
+            icon: const Icon(Icons.insert_chart_outlined),
             label: AppLocalizations.of(context)!.bottomNav_Chart,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.attach_money_rounded),
+            icon: const Icon(Icons.attach_money_rounded),
             label: AppLocalizations.of(context)!.bottomNav_Budgets,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.account_circle_outlined),
+            icon: const Icon(Icons.account_circle_outlined),
             label: AppLocalizations.of(context)!.bottomNav_Account,
           ),
         ],

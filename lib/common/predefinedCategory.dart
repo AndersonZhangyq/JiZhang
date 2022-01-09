@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 final Map<String, Icon> expenseCategoryIconInfo = {
   "Food": const Icon(Icons.fastfood),
   "Shopping": const Icon(Icons.shopping_cart),
-  "Transport": const Icon(Icons.directions_car),
+  "Transport": const Icon(Icons.airport_shuttle),
   "Home": const Icon(Icons.home),
   "Bills": const Icon(Icons.attach_money),
-  "Entertainment": const Icon(Icons.local_movies),
+  "Entertainment": const Icon(Icons.videogame_asset),
   "Car": const Icon(Icons.directions_car),
   "Travel": const Icon(Icons.airplanemode_active),
   "Family": const Icon(Icons.people),
@@ -23,7 +23,7 @@ final Map<String, Icon> expenseCategoryIconInfo = {
 final Map<String, Color> expenseCategoryColorInfo = {
   "Food": Colors.orange,
   "Shopping": Colors.pink,
-  "Transport": Colors.yellow,
+  "Transport": Colors.lime,
   "Home": Colors.brown,
   "Bills": Colors.green,
   "Entertainment": Colors.deepOrange,

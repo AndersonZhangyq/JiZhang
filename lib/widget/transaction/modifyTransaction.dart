@@ -17,25 +17,29 @@ class CategoryItem implements Comparable {
     name = category.name;
     type = category.type;
     predefined = category.predefined;
+    originColor = category.color;
+    originIcon = category.icon;
     var iconIn = jsonDecode(category.icon);
     icon = IconData(iconIn['codePoint'],
         fontFamily: iconIn['fontFamily'], fontPackage: iconIn['fontPackage']);
     color = Color(int.parse(category.color));
-    index = category.index;
+    pos = category.pos;
   }
 
   late int id;
   late String name;
   late String type;
-  late int index;
+  late int pos;
   late int predefined;
   late IconData icon;
   late Color color;
+  late String originIcon;
+  late String originColor;
 
   @override
   int compareTo(other) {
     if (other is CategoryItem) {
-      return index.compareTo(other.index);
+      return pos.compareTo(other.pos);
     }
     return 0;
   }

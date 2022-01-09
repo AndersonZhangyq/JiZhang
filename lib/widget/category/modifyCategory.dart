@@ -23,13 +23,6 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
   int incomeChanged = 0;
 
   @override
-  void initState() {
-    super.initState();
-    expenseCategory.clear();
-    incomeCategory.clear();
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     db = Provider.of<MyDatabase>(context);
@@ -37,153 +30,193 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
 
   void _saveList() async {
     ScaffoldMessenger.of(context).removeCurrentSnackBar();
-    // save category change
-    if (expenseChanged > 0) {
-      for (int i = 0; i < expenseCategory.length; i++) {
-        CategoryItem element = expenseCategory[i];
-        db.update(db.categories).replace(CategoriesCompanion(
-              id: drift.Value(element.id),
-              index: drift.Value(element.index),
-            ));
+    db.transaction(() async {
+      // save category change
+      if (expenseChanged > 0) {
+        for (int i = 0; i < expenseCategory.length; i++) {
+          CategoryItem element = expenseCategory[i];
+          await (db.update(db.categories)
+                ..where((t) => t.id.equals(element.id)))
+              .write(CategoriesCompanion(
+            pos: drift.Value(i),
+          ));
+        }
       }
-    }
-    if (incomeChanged > 0) {
-      for (int i = 0; i < incomeCategory.length; i++) {
-        CategoryItem element = incomeCategory[i];
-        db.update(db.categories).replace(CategoriesCompanion(
-              id: drift.Value(element.id),
-              index: drift.Value(element.index),
-            ));
+      if (incomeChanged > 0) {
+        for (int i = 0; i < incomeCategory.length; i++) {
+          CategoryItem element = incomeCategory[i];
+          await (db.update(db.categories)
+                ..where((t) => t.id.equals(element.id)))
+              .write(CategoriesCompanion(
+            pos: drift.Value(i),
+          ));
+        }
       }
-    }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<CategoryItem>>(
-        stream: db.getAllCategories(),
+        stream: db.watchCategoriesByType("expense"),
         initialData: const <CategoryItem>[],
         builder: (context, snapshot) {
-          final categories = snapshot.data!;
-          for (var item in categories) {
-            if (item.type == "expense") {
-              expenseCategory.add(item);
-            } else {
-              incomeCategory.add(item);
-            }
-          }
-          return WillPopScope(
-            onWillPop: () {
-              _saveList();
-              return Future<bool>.value(true);
-            },
-            child: Scaffold(
-                appBar: AppBar(
-                  title:
-                      Text(AppLocalizations.of(context)!.modifyCategory_Title),
-                  leading: IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () {
+          if (snapshot.hasData) {
+            expenseCategory = snapshot.data!;
+            return StreamBuilder<List<CategoryItem>>(
+                stream: db.watchCategoriesByType("income"),
+                initialData: const <CategoryItem>[],
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    incomeCategory = snapshot.data!;
+                    return WillPopScope(
+                      onWillPop: () {
                         _saveList();
-                        Navigator.of(context, rootNavigator: true).pop(context);
-                      }),
-                ),
-                body: Center(
-                  child: DefaultTabController(
-                      length: 2,
-                      initialIndex: widget.tabName == "expense" ? 0 : 1,
-                      child: Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              TabBar(
-                                labelColor: Colors.grey,
-                                tabs: [
-                                  Tab(
-                                      text: AppLocalizations.of(context)!
-                                          .tab_Expense),
-                                  Tab(
-                                      text: AppLocalizations.of(context)!
-                                          .tab_Income),
-                                ],
-                              ),
-                              Expanded(
-                                  child: TabBarView(
-                                children: [
-                                  Column(children: [
-                                    Expanded(
-                                        child: _buildExpenseCategoryList(
-                                            expenseCategory)),
-                                    GestureDetector(
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const AddCategoryWidget()),
-                                        );
-                                      },
-                                      child: Container(
-                                        height: 50,
-                                        decoration: BoxDecoration(
-                                          border: Border(
-                                            top: BorderSide(
-                                              width: 1,
-                                              color: (Colors.grey[300])!,
-                                            ),
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(AppLocalizations.of(context)!
-                                                .modifyCategory_Add_Category)
+                        return Future<bool>.value(true);
+                      },
+                      child: Scaffold(
+                          appBar: AppBar(
+                            title: Text(AppLocalizations.of(context)!
+                                .modifyCategory_Title),
+                            leading: IconButton(
+                                icon: const Icon(Icons.arrow_back),
+                                onPressed: () {
+                                  _saveList();
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop(context);
+                                }),
+                          ),
+                          body: Center(
+                            child: DefaultTabController(
+                                length: 2,
+                                initialIndex:
+                                    widget.tabName == "expense" ? 0 : 1,
+                                child: Padding(
+                                    padding: const EdgeInsets.only(top: 8),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        TabBar(
+                                          labelColor: Colors.grey,
+                                          tabs: [
+                                            Tab(
+                                                text: AppLocalizations.of(
+                                                        context)!
+                                                    .tab_Expense),
+                                            Tab(
+                                                text: AppLocalizations.of(
+                                                        context)!
+                                                    .tab_Income),
                                           ],
                                         ),
-                                      ),
-                                    )
-                                  ]),
-                                  Column(children: [
-                                    Expanded(
-                                        child: _buildIncomeCategoryList(
-                                            incomeCategory)),
-                                    GestureDetector(
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const AddCategoryWidget()),
-                                        );
-                                      },
-                                      child: Container(
-                                        height: 50,
-                                        decoration: BoxDecoration(
-                                          border: Border(
-                                            top: BorderSide(
-                                              width: 1,
-                                              color: (Colors.grey[300])!,
-                                            ),
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
+                                        Expanded(
+                                            child: TabBarView(
                                           children: [
-                                            Text(AppLocalizations.of(context)!
-                                                .modifyCategory_Add_Category)
+                                            Column(children: [
+                                              Expanded(
+                                                  child:
+                                                      _buildExpenseCategoryList(
+                                                          expenseCategory)),
+                                              GestureDetector(
+                                                onTap: () {
+                                                  _saveList();
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            const AddCategoryWidget()),
+                                                  );
+                                                },
+                                                child: Container(
+                                                  height: 50,
+                                                  decoration: BoxDecoration(
+                                                    border: Border(
+                                                      top: BorderSide(
+                                                        width: 1,
+                                                        color:
+                                                            (Colors.grey[300])!,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Text(AppLocalizations.of(
+                                                              context)!
+                                                          .modifyCategory_Add_Category)
+                                                    ],
+                                                  ),
+                                                ),
+                                              )
+                                            ]),
+                                            Column(children: [
+                                              Expanded(
+                                                  child:
+                                                      _buildIncomeCategoryList(
+                                                          incomeCategory)),
+                                              GestureDetector(
+                                                onTap: () {
+                                                  _saveList();
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            const AddCategoryWidget()),
+                                                  );
+                                                },
+                                                child: Container(
+                                                  height: 50,
+                                                  decoration: BoxDecoration(
+                                                    border: Border(
+                                                      top: BorderSide(
+                                                        width: 1,
+                                                        color:
+                                                            (Colors.grey[300])!,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Text(AppLocalizations.of(
+                                                              context)!
+                                                          .modifyCategory_Add_Category)
+                                                    ],
+                                                  ),
+                                                ),
+                                              )
+                                            ])
                                           ],
-                                        ),
-                                      ),
-                                    )
-                                  ])
-                                ],
-                              ))
-                            ],
-                          ))),
-                )),
+                                        ))
+                                      ],
+                                    ))),
+                          )),
+                    );
+                  }
+                  return Center(
+                    child: Text(
+                      "Loading...",
+                      style: TextStyle(
+                          color: Colors.grey[400],
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  );
+                });
+          }
+          return Center(
+            child: Text(
+              "Loading...",
+              style: TextStyle(
+                  color: Colors.grey[400],
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold),
+            ),
           );
         });
   }
@@ -203,40 +236,29 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
                   Icons.horizontal_rule,
                   size: 15,
                 ),
-                onPressed: () {
+                onPressed: () async {
                   final categoryToRemove = expenseCategory[index];
-                  setState(() {
-                    expenseCategory.removeAt(index);
-                    expenseChanged++;
-                  });
+                  expenseChanged++;
+                  await (db.delete(db.categories)
+                        ..where((t) => t.id.equals(categoryToRemove.id)))
+                      .go();
                   ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(SnackBar(
-                          content: Text(AppLocalizations.of(context)!
-                              .modifyCategory_SnackBar_category_removed),
-                          action: SnackBarAction(
-                              label: 'Undo',
-                              onPressed: () {
-                                expenseChanged--;
-                                setState(() {
-                                  expenseCategory.insert(
-                                      index, categoryToRemove);
-                                });
-                              })))
-                      .closed
-                      .then((value) async {
-                    if (value == SnackBarClosedReason.timeout ||
-                        value == SnackBarClosedReason.remove) {
-                      int ret = await (db.delete(db.categories)
-                            ..where((t) => t.id.equals(categoryToRemove.id)))
-                          .go();
-                      if (ret == 0) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text(AppLocalizations.of(context)!
-                                .modifyCategory_SnackBar_failed_to_remove_category)));
-                      }
-                    }
-                  });
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(AppLocalizations.of(context)!
+                          .modifyCategory_SnackBar_category_removed),
+                      action: SnackBarAction(
+                          label: 'Undo',
+                          onPressed: () {
+                            expenseChanged--;
+                            db.into(db.categories).insert(
+                                CategoriesCompanion.insert(
+                                    name: categoryToRemove.name,
+                                    type: categoryToRemove.type,
+                                    icon: categoryToRemove.originIcon,
+                                    color: categoryToRemove.originColor,
+                                    pos: categoryToRemove.pos,
+                                    predefined: categoryToRemove.predefined));
+                          })));
                 },
                 backgroundColor: Colors.red),
           ),
@@ -247,13 +269,11 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
       itemCount: expenseCategory.length,
       onReorder: (int oldIndex, int newIndex) {
         expenseChanged++;
-        setState(() {
-          if (oldIndex < newIndex) {
-            newIndex -= 1;
-          }
-          final CategoryItem item = expenseCategory.removeAt(oldIndex);
-          expenseCategory.insert(newIndex, item);
-        });
+        if (oldIndex < newIndex) {
+          newIndex -= 1;
+        }
+        final CategoryItem item = expenseCategory.removeAt(oldIndex);
+        expenseCategory.insert(newIndex, item);
       },
     );
   }
@@ -273,40 +293,29 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
                   Icons.horizontal_rule,
                   size: 15,
                 ),
-                onPressed: () {
+                onPressed: () async {
                   final categoryToRemove = incomeCategory[index];
-                  setState(() {
-                    incomeCategory.removeAt(index);
-                    incomeChanged++;
-                  });
+                  incomeChanged++;
+                  await (db.delete(db.categories)
+                        ..where((t) => t.id.equals(categoryToRemove.id)))
+                      .go();
                   ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(SnackBar(
-                          content: Text(AppLocalizations.of(context)!
-                              .modifyCategory_SnackBar_category_removed),
-                          action: SnackBarAction(
-                              label: 'Undo',
-                              onPressed: () {
-                                incomeChanged--;
-                                setState(() {
-                                  incomeCategory.insert(
-                                      index, categoryToRemove);
-                                });
-                              })))
-                      .closed
-                      .then((value) async {
-                    if (value == SnackBarClosedReason.timeout ||
-                        value == SnackBarClosedReason.remove) {
-                      int ret = await (db.delete(db.categories)
-                            ..where((t) => t.id.equals(categoryToRemove.id)))
-                          .go();
-                      if (ret == 0) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text(AppLocalizations.of(context)!
-                                .modifyCategory_SnackBar_failed_to_remove_category)));
-                      }
-                    }
-                  });
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(AppLocalizations.of(context)!
+                          .modifyCategory_SnackBar_category_removed),
+                      action: SnackBarAction(
+                          label: 'Undo',
+                          onPressed: () {
+                            incomeChanged--;
+                            db.into(db.categories).insert(
+                                CategoriesCompanion.insert(
+                                    name: categoryToRemove.name,
+                                    type: categoryToRemove.type,
+                                    icon: categoryToRemove.originIcon,
+                                    color: categoryToRemove.originColor,
+                                    pos: categoryToRemove.pos,
+                                    predefined: categoryToRemove.predefined));
+                          })));
                 },
                 backgroundColor: Colors.red),
           ),
@@ -317,13 +326,11 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
       itemCount: incomeCategory.length,
       onReorder: (int oldIndex, int newIndex) {
         incomeChanged++;
-        setState(() {
-          if (oldIndex < newIndex) {
-            newIndex -= 1;
-          }
-          final CategoryItem item = incomeCategory.removeAt(oldIndex);
-          incomeCategory.insert(newIndex, item);
-        });
+        if (oldIndex < newIndex) {
+          newIndex -= 1;
+        }
+        final CategoryItem item = incomeCategory.removeAt(oldIndex);
+        incomeCategory.insert(newIndex, item);
       },
     );
   }

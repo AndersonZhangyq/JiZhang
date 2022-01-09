@@ -45,9 +45,7 @@ class _ModifyBudgetPageState extends State<ModifyBudgetPage> {
     }
     db = Provider.of<MyDatabase>(context);
     primaryColor = Theme.of(context).primaryColor;
-    setState(() {
-      if (isAdd) budgetCategoryIds = categoryIds;
-    });
+    if (isAdd) budgetCategoryIds = categoryIds;
   }
 
   bool canSave() {
@@ -239,7 +237,7 @@ class _ModifyBudgetPageState extends State<ModifyBudgetPage> {
                                               int index) {
                                             bool selected =
                                                 predefinedRecurrences[index] ==
-                                                    budgetRecurrence;
+                                                    budgetRecurrence.name;
                                             return ListTile(
                                               onTap: () {
                                                 Navigator.pop(context, {
