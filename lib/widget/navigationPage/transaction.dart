@@ -78,7 +78,7 @@ class _TransactionListState extends State<TransactionWidget> {
     double totalIncome = 0.0;
     double totalExpense = 0.0;
     for (var element in transactions) {
-      if (categories[element.id]?.type == "income") {
+      if (categories[element.categoryId]!.type == "income") {
         totalIncome += element.amount;
       } else {
         totalExpense += element.amount;
