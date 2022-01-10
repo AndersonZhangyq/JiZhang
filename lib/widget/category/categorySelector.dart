@@ -4,7 +4,7 @@ import 'package:ji_zhang/models/database.dart';
 import 'package:ji_zhang/widget/category/modifyCategory.dart';
 import 'package:provider/provider.dart';
 
-import 'transaction/modifyTransaction.dart';
+import 'package:ji_zhang/widget/transaction/modifyTransaction.dart';
 
 class CategorySelectorWidget extends StatelessWidget {
   const CategorySelectorWidget({Key? key}) : super(key: key);

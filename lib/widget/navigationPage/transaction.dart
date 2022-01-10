@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ji_zhang/models/database.dart';
+import 'package:ji_zhang/widget/loading.dart';
 import 'package:ji_zhang/widget/transaction/modifyTransaction.dart';
 import 'package:ji_zhang/widget/transaction/transactionList.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
@@ -41,16 +42,8 @@ class _TransactionListState extends State<TransactionWidget> {
                   int.parse(selectedYear), int.parse(selectedMonth)),
               builder: (context, snapshot) {
                 if (snapshot.hasData == false) {
-                  return Expanded(
-                    child: Center(
-                      child: Text(
-                        "Loading...",
-                        style: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    ),
+                  return const Expanded(
+                    child: LoadingWidget(),
                   );
                 }
                 List<Transaction> transactions =

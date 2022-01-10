@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ji_zhang/models/database.dart';
+import 'package:ji_zhang/widget/loading.dart';
 import 'package:ji_zhang/widget/transaction/modifyTransaction.dart';
 import 'package:provider/provider.dart';
 
@@ -88,15 +89,7 @@ class _SelectExpenseWidgetState extends State<SelectExpenseWidget> {
                       ],
                     )));
           }
-          return Center(
-            child: Text(
-              "Loading...",
-              style: TextStyle(
-                  color: Colors.grey[400],
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold),
-            ),
-          );
+          return const LoadingWidget();
         });
   }
 }

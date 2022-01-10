@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ji_zhang/common/datetimeExtension.dart';
 import 'package:ji_zhang/models/database.dart';
+import 'package:ji_zhang/widget/loading.dart';
 import 'package:ji_zhang/widget/transaction/conditionedTransaction.dart';
 import 'package:ji_zhang/widget/transaction/modifyTransaction.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
@@ -36,15 +37,7 @@ class _ChartWidgetState extends State<ChartWidget> {
                 stream: db.getTransactionRange(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
-                    return Center(
-                      child: Text(
-                        "Loading...",
-                        style: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    );
+                    return const LoadingWidget();
                   }
                   final dateRange = snapshot.data!;
                   return Column(
@@ -56,14 +49,7 @@ class _ChartWidgetState extends State<ChartWidget> {
                               stream: db.watchCategoriesByType(categoryType),
                               builder: (context, snapshot) {
                                 if (!snapshot.hasData) {
-                                  return Center(
-                                      child: Text(
-                                    "Loading...",
-                                    style: TextStyle(
-                                        color: Colors.grey[400],
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold),
-                                  ));
+                                  return const LoadingWidget();
                                 }
                                 final categoryItems = <int, CategoryItem>{};
                                 for (var element in snapshot.data!) {
@@ -75,14 +61,7 @@ class _ChartWidgetState extends State<ChartWidget> {
                                         selectedDate.year, selectedDate.month),
                                     builder: (context, snapshot) {
                                       if (!snapshot.hasData) {
-                                        return Center(
-                                            child: Text(
-                                          "Loading...",
-                                          style: TextStyle(
-                                              color: Colors.grey[400],
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold),
-                                        ));
+                                        return const LoadingWidget();
                                       }
                                       final transactions = snapshot.data!;
                                       transactions.removeWhere((element) =>

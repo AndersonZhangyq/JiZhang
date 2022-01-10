@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ji_zhang/models/database.dart';
-import 'package:ji_zhang/widget/categorySelector.dart';
+import 'package:ji_zhang/widget/category/categorySelector.dart';
 import 'package:ji_zhang/widget/transaction/modifyTransaction.dart';
 import "package:collection/collection.dart";
 import 'package:ji_zhang/common/datetimeExtension.dart';
@@ -30,8 +30,6 @@ class TransactionListWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     var groupedTransaction = groupBy(transactions, (Transaction t) => t.date);
     List<ListItem> listItems = [];
-    double totalIncome = 0;
-    double totalExpense = 0;
     groupedTransaction.keys.sorted((a, b) => -a.compareTo(b)).forEach((date) {
       List<Transaction> transactions = groupedTransaction[date]!;
       double income = 0.0, expense = 0.0;
@@ -54,8 +52,6 @@ class TransactionListWidget extends StatelessWidget {
         ..type = "date"
         ..item = {"date": date, "total": income - expense});
       listItems.addAll(tmpTrans);
-      totalIncome += income;
-      totalExpense += expense;
     });
     if (listItems.isEmpty) {
       return Expanded(
@@ -78,6 +74,7 @@ class TransactionListWidget extends StatelessWidget {
                   categories[curTransaction.categoryId];
               return Dismissible(
                 key: Key(curTransaction.id.toString()),
+                background: Container(color: Colors.redAccent),
                 onDismissed: (direction) async {
                   // Remove the item from the data source.
                   final transactionToRemove = curTransaction;
@@ -105,7 +102,6 @@ class TransactionListWidget extends StatelessWidget {
                             })));
                   }
                 },
-                background: Container(color: Colors.red),
                 child: ListTile(
                   onTap: () {
                     Navigator.push(

@@ -36,6 +36,8 @@
   "listView_Empty": "No transactions found",
   "budget_total": "Total",
   "budget_AppBarTitle": "All Budgets",
+  "budgets_SnackBar_failed_to_delete_budget": "Failed to delete budget",
+  "budgets_SnackBar_Remove_Budget": "Budget removed",
   "chart_Title_TotalExpense": "Total Expense",
   "chart_Title_TotalIncome": "Total Income",
   "selectExpense_Title": "Select Expenses",

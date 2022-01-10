@@ -7,7 +7,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ji_zhang/common/categoryNameHelper.dart';
 import 'package:ji_zhang/common/datetimeExtension.dart';
 import 'package:ji_zhang/models/database.dart';
-import 'package:ji_zhang/widget/categorySelector.dart';
+import 'package:ji_zhang/widget/category/categorySelector.dart';
 import 'package:ji_zhang/widget/moneyNumberTablet.dart';
 import 'package:provider/provider.dart';
 

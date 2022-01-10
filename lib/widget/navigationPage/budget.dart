@@ -4,6 +4,7 @@ import 'package:ji_zhang/common/animation_progress_bar.dart';
 import 'package:ji_zhang/common/predefinedRecurrence.dart';
 import 'package:ji_zhang/models/database.dart';
 import 'package:ji_zhang/widget/budget/modifyBudget.dart';
+import 'package:ji_zhang/widget/loading.dart';
 import 'package:provider/provider.dart';
 
 class BudgetItem {
@@ -12,21 +13,15 @@ class BudgetItem {
   late final Budget budget;
   double used = 0.0;
 
-  String get name {
-    return budget.name;
-  }
+  int get id => budget.id;
 
-  double get amount {
-    return budget.amount;
-  }
+  String get name => budget.name;
 
-  RECURRENCE_TYPE get recurrence {
-    return budget.recurrence;
-  }
+  double get amount => budget.amount;
 
-  Set<int> get categoryIds {
-    return Set<int>.from(budget.categoryIds);
-  }
+  RECURRENCE_TYPE get recurrence => budget.recurrence;
+
+  Set<int> get categoryIds => Set<int>.from(budget.categoryIds);
 }
 
 class BudgetWidget extends StatefulWidget {
@@ -70,105 +65,25 @@ class _BudgetWidgetState extends State<BudgetWidget> {
               color: Colors.grey[300],
             ),
             Expanded(
-              child: FutureBuilder<List<BudgetItem>>(
-                  future: db.getBudgetItems(),
+              child: StreamBuilder<List<BudgetItem>>(
+                  stream: db.watchBudgetItems(),
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done &&
-                        snapshot.hasData) {
+                    if (snapshot.hasData) {
                       var budgets = snapshot.data;
                       if (budgets!.isEmpty) {
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(AppLocalizations.of(context)!.listView_Empty,
-                                style: TextStyle(
-                                    fontSize: 20,
-                                    color: Colors.grey[300],
-                                    fontWeight: FontWeight.bold)),
-                          ],
+                        return Center(
+                          child: Text(
+                              AppLocalizations.of(context)!.listView_Empty,
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  color: Colors.grey[300],
+                                  fontWeight: FontWeight.bold)),
                         );
                       } else {
-                        return ListView.builder(
-                            itemBuilder: (context, index) {
-                              final budget = budgets[index];
-                              return GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => ModifyBudgetPage(
-                                              budget: budget.budget,
-                                            )),
-                                  ).then((value) => setState(() {}));
-                                },
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    ListTile(
-                                      title: Text(budget.name),
-                                      subtitle: Row(
-                                        children: [
-                                          Text(
-                                            budget.used.toStringAsFixed(2),
-                                            style: const TextStyle(
-                                                color: Colors.green,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 18),
-                                          ),
-                                          Text(
-                                              " " +
-                                                  AppLocalizations.of(context)!
-                                                      .budget_total +
-                                                  " ",
-                                              style: const TextStyle(
-                                                  fontSize: 12)),
-                                          Text(budget.amount.toStringAsFixed(2),
-                                              style: const TextStyle(
-                                                  fontSize: 12)),
-                                        ],
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 16.0),
-                                      child: FAProgressBar(
-                                        currentValue:
-                                            (budget.used / budget.amount * 100)
-                                                .toInt(),
-                                        size: 25,
-                                        backgroundColor: Colors.grey[200]!,
-                                        progressColor: Colors.blue[300]!,
-                                        displayText: '%',
-                                        displayTextStyle: (budget.used /
-                                                    budget.amount *
-                                                    100) <
-                                                10
-                                            ? const TextStyle(
-                                                color: Colors.black,
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 12)
-                                            : const TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 12),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                            itemCount: budgets.length);
+                        return _buildBudgetList(budgets);
                       }
                     } else {
-                      return Center(
-                        child: Text(
-                          "Loading...",
-                          style: TextStyle(
-                              color: Colors.grey[400],
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      );
+                      return const LoadingWidget();
                     }
                   }),
             ),
@@ -176,5 +91,100 @@ class _BudgetWidgetState extends State<BudgetWidget> {
         ),
       ),
     );
+  }
+
+  Widget _buildBudgetList(List<BudgetItem> budgets) {
+    return ListView.builder(
+        itemBuilder: (context, index) {
+          final budget = budgets[index];
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ModifyBudgetPage(
+                          budget: budget.budget,
+                        )),
+              ).then((value) => setState(() {}));
+            },
+            child: Dismissible(
+              key: Key(budget.id.toString()),
+              background: Container(color: Colors.redAccent),
+              onDismissed: (direction) async {
+                // Remove the item from the data source.
+                final budgetToRemove = budget.budget;
+                int ret = await (db.delete(db.budgets)
+                      ..where((t) => t.id.equals(budgetToRemove.id)))
+                    .go();
+                if (ret == 0) {
+                  ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(AppLocalizations.of(context)!
+                          .budgets_SnackBar_failed_to_delete_budget)));
+                } else {
+                  // Then show a snackbar.
+                  ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(AppLocalizations.of(context)!
+                          .budgets_SnackBar_Remove_Budget),
+                      action: SnackBarAction(
+                          label:
+                              AppLocalizations.of(context)!.snackBarAction_Undo,
+                          onPressed: () async {
+                            await db
+                                .into(db.budgets)
+                                .insertOnConflictUpdate(budgetToRemove);
+                          })));
+                }
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    title: Text(budget.name),
+                    subtitle: Row(
+                      children: [
+                        Text(
+                          budget.used.toStringAsFixed(2),
+                          style: const TextStyle(
+                              color: Colors.green,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18),
+                        ),
+                        Text(
+                            " " +
+                                AppLocalizations.of(context)!.budget_total +
+                                " ",
+                            style: const TextStyle(fontSize: 12)),
+                        Text(budget.amount.toStringAsFixed(2),
+                            style: const TextStyle(fontSize: 12)),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: FAProgressBar(
+                      currentValue: (budget.used / budget.amount * 100).toInt(),
+                      size: 25,
+                      backgroundColor: Colors.grey[200]!,
+                      progressColor: Colors.blue[300]!,
+                      displayText: '%',
+                      displayTextStyle: (budget.used / budget.amount * 100) < 10
+                          ? const TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12)
+                          : const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+        itemCount: budgets.length);
   }
 }

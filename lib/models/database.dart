@@ -274,17 +274,30 @@ class MyDatabase extends _$MyDatabase {
     });
   }
 
-  Future<List<BudgetItem>>? getBudgetItems() async {
+  Stream<Map<String, List<CategoryItem>>>? watchCategoriesGroupByType() {
+    return (select(categories)
+          ..orderBy([(u) => OrderingTerm(expression: u.pos)]))
+        .watch()
+        .map((value) {
+      Map<String, List<CategoryItem>> ret = {};
+      for (var item in value) {
+        if (ret[item.type] == null) {
+          ret[item.type] = [];
+        }
+        ret[item.type]!.add(CategoryItem(item));
+      }
+      return ret;
+    });
+  }
+
+  Stream<List<BudgetItem>>? watchBudgetItems() {
     DateTime now = DateTime.now().getDateOnly();
     int currentYear = now.year;
     int currentMonth = now.month;
     int currentDay = now.day;
     int currentWeek = now.weekday;
-    var budgetItems = await select(budgets).map((value) {
-      return BudgetItem(value);
-    }).get();
-    var curTransactions = <Transaction>[];
-    for (final budget in budgetItems) {
+    Future<BudgetItem> process(BudgetItem budget) async {
+      var curTransactions = <Transaction>[];
       DateTime? startDate;
       DateTime? endDate;
       switch (budget.recurrence) {
@@ -324,8 +337,14 @@ class MyDatabase extends _$MyDatabase {
         }
       }
       budget.used = totalExpenses;
+      return budget;
     }
-    return budgetItems;
+
+    return select(budgets)
+        .map((t) => BudgetItem(t))
+        .watch()
+        .asyncMap<List<BudgetItem>>((budgetItems) =>
+            Future.wait([for (final budget in budgetItems) process(budget)]));
   }
 
   Stream<ui.DateTimeRange>? getTransactionRange() {
