@@ -8,8 +8,12 @@ import 'package:ji_zhang/widget/navigationPage/chart.dart';
 import 'package:ji_zhang/widget/navigationPage/transaction.dart';
 import 'package:ji_zhang/widget/transaction/modifyTransaction.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   runApp(
     Provider<MyDatabase>(
       create: (context) => MyDatabase(),

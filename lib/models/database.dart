@@ -228,7 +228,7 @@ class MyDatabase extends _$MyDatabase {
   // you should bump this number whenever you change or add a table definition. Migrations
   // are covered later in this readme.
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 6;
 
   Stream<List<Transaction>>? getTransactionsByMonth(int year, int month) {
     DateTime startDate = DateTime(year, month);
@@ -295,17 +295,26 @@ class MyDatabase extends _$MyDatabase {
     int currentYear = now.year;
     int currentMonth = now.month;
     int currentDay = now.day;
-    int currentWeek = now.weekday;
+    int currentWeekDay = now.weekday;
     Future<BudgetItem> process(BudgetItem budget) async {
       var curTransactions = <Transaction>[];
       DateTime? startDate;
       DateTime? endDate;
       switch (budget.recurrence) {
         case RECURRENCE_TYPE.daily:
+          startDate = endDate = now;
           break;
         case RECURRENCE_TYPE.biweekly:
+          startDate = DateTime(currentYear, currentMonth, currentDay)
+              .subtract(Duration(days: currentWeekDay - 1));
+          endDate = DateTime(currentYear, currentMonth, currentDay)
+              .add(Duration(days: 14 - currentWeekDay));
           break;
         case RECURRENCE_TYPE.weekly:
+          startDate = DateTime(currentYear, currentMonth, currentDay)
+              .subtract(Duration(days: currentWeekDay - 1));
+          endDate = DateTime(currentYear, currentMonth, currentDay)
+              .add(Duration(days: 7 - currentWeekDay));
           break;
         case RECURRENCE_TYPE.monthly:
           startDate = DateTime(currentYear, currentMonth);
@@ -313,22 +322,22 @@ class MyDatabase extends _$MyDatabase {
               .subtract(const Duration(days: 1));
           break;
         case RECURRENCE_TYPE.yearly:
+          startDate = DateTime(currentYear);
+          endDate = DateTime(currentYear + 1).subtract(const Duration(days: 1));
           break;
       }
-      if (startDate != null && endDate != null) {
-        curTransactions = await (select(transactions)
-              ..where((t) => t.date.isBetween(
-                  CustomExpression(
-                      (startDate!.millisecondsSinceEpoch / 1000).toString(),
-                      precedence: Precedence.primary),
-                  CustomExpression(
-                      (endDate!.millisecondsSinceEpoch / 1000).toString(),
-                      precedence: Precedence.primary)))
-              ..orderBy([
-                (t) => OrderingTerm(expression: t.id, mode: OrderingMode.desc)
-              ]))
-            .get();
-      }
+      curTransactions = await (select(transactions)
+            ..where((t) => t.date.isBetween(
+                CustomExpression(
+                    (startDate!.millisecondsSinceEpoch / 1000).toString(),
+                    precedence: Precedence.primary),
+                CustomExpression(
+                    (endDate!.millisecondsSinceEpoch / 1000).toString(),
+                    precedence: Precedence.primary)))
+            ..orderBy([
+              (t) => OrderingTerm(expression: t.id, mode: OrderingMode.desc)
+            ]))
+          .get();
       var totalExpenses = 0.0;
       var categoryExpenses = budget.categoryIds;
       for (final transaction in curTransactions) {

@@ -286,9 +286,6 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
                   leading: Icon(Icons.note, color: categoryColor),
                   title: TextField(
                     controller: commentController,
-                    keyboardType: TextInputType.multiline,
-                    minLines: 2,
-                    maxLines: 4,
                     decoration: InputDecoration(
                       border: InputBorder.none,
                       hintText: AppLocalizations.of(context)!

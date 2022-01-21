@@ -265,6 +265,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.0.1"
+  flutter_font_icons:
+    dependency: "direct main"
+    description:
+      name: flutter_font_icons
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.2.4"
   flutter_hooks:
     dependency: "direct main"
     description:

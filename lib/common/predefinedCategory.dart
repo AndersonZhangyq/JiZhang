@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_font_icons/flutter_font_icons.dart';
 
 final Map<String, Icon> expenseCategoryIconInfo = {
-  "Food": const Icon(Icons.fastfood),
+  "Food": const Icon(MaterialCommunityIcons.silverware_fork_knife),
   "Shopping": const Icon(Icons.shopping_cart),
   "Transport": const Icon(Icons.airport_shuttle),
   "Home": const Icon(Icons.home),
-  "Bills": const Icon(Icons.attach_money),
-  "Entertainment": const Icon(Icons.videogame_asset),
+  "Bills": const Icon(Icons.payments),
+  "Entertainment": const Icon(Entypo.game_controller),
   "Car": const Icon(Icons.directions_car),
-  "Travel": const Icon(Icons.airplanemode_active),
+  "Travel": const Icon(FontAwesome.plane),
   "Family": const Icon(Icons.people),
   "Healthcare": const Icon(Icons.local_hospital),
   "Education": const Icon(Icons.school),
-  "Groceries": const Icon(Icons.local_grocery_store),
   "Gifts": const Icon(Icons.card_giftcard),
   "Sports": const Icon(Icons.directions_run),
   "Beauty": const Icon(Icons.face),
@@ -32,7 +32,6 @@ final Map<String, Color> expenseCategoryColorInfo = {
   "Family": Colors.blueGrey,
   "Healthcare": Colors.purple,
   "Education": Colors.amber,
-  "Groceries": Colors.blueAccent,
   "Gifts": Colors.greenAccent,
   "Sports": Colors.lightGreen,
   "Beauty": Colors.purpleAccent,
