@@ -46,6 +46,20 @@ class _AccountPageState extends State<AccountPageWidget> {
             title: Text(AppLocalizations.of(context)!.account_title),
             leading: null,
           ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16.0, 8.0, 0.0, 8.0),
+            child: FutureBuilder<Directory?>(
+                future: getExternalStorageDirectory(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData && snapshot.data != null) {
+                    return Text(AppLocalizations.of(context)!.account_DataPath +
+                        "\n" +
+                        snapshot.data!.path +
+                        "/backup");
+                  }
+                  return const Text("");
+                }),
+          ),
           _buildBackupButton(),
           _buildRestoreButton()
         ],

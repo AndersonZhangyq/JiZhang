@@ -42,6 +42,7 @@
   "chart_Title_TotalIncome": "Total Income",
   "selectExpense_Title": "Select Expenses",
   "account_title": "Account",
+  "account_DataPath": "Backup/Restore file is stored at",
   "account_Backup": "Backup",
   "account_BackupSuccess": "Backup sucessfully",
   "account_BackupFaliure": "Backup failed",
