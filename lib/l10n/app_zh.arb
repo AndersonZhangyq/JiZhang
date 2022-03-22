@@ -42,6 +42,7 @@
   "chart_Title_TotalIncome": "总收入",
   "selectExpense_Title": "选择支出类别",
   "account_title": "我的",
+  "account_DataPath": "备份/恢复数据存放路径",
   "account_Backup": "备份",
   "account_BackupSuccess": "备份成功",
   "account_BackupFaliure": "备份失败",
