@@ -68,6 +68,7 @@
   "category_Income_Other": "Other",
   "category_Expense_Food": "Food",
   "category_Expense_Shopping": "Shopping",
+  "category_Expense_Shopping_Family": "Shopping_Family",
   "category_Expense_Transport": "Transport",
   "category_Expense_Home": "Home",
   "category_Expense_Bills": "Bills",

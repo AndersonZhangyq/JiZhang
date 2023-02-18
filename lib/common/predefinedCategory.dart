@@ -4,6 +4,7 @@ import 'package:flutter_font_icons/flutter_font_icons.dart';
 final Map<String, Icon> expenseCategoryIconInfo = {
   "Food": const Icon(MaterialCommunityIcons.silverware_fork_knife),
   "Shopping": const Icon(Icons.shopping_cart),
+  "Shopping_Family": const Icon(Icons.shopping_cart),
   "Transport": const Icon(Icons.airport_shuttle),
   "Home": const Icon(Icons.home),
   "Bills": const Icon(Icons.payments),
@@ -23,6 +24,7 @@ final Map<String, Icon> expenseCategoryIconInfo = {
 final Map<String, Color> expenseCategoryColorInfo = {
   "Food": Colors.orange,
   "Shopping": Colors.pink,
+  "Shopping_Family": Colors.pink,
   "Transport": Colors.lime,
   "Home": Colors.brown,
   "Bills": Colors.green,

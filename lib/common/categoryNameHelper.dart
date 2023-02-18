@@ -43,6 +43,9 @@ class CategoryNameLocalizationHelper {
         case "Shopping":
           displayName = table.category_Expense_Shopping;
           break;
+        case "Shopping_Family":
+          displayName = table.category_Expense_Shopping_Family;
+          break;
         case "Transport":
           displayName = table.category_Expense_Transport;
           break;

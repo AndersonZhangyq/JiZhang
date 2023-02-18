@@ -6,7 +6,7 @@ part of 'database.dart';
 // MoorGenerator
 // **************************************************************************
 
-// ignore_for_file: unnecessary_brace_in_string_interps, unnecessary_this
+// ignore_for_file: type=lint
 class Category extends DataClass implements Insertable<Category> {
   final int id;
   final String name;
@@ -278,9 +278,10 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
 
 class $CategoriesTable extends Categories
     with TableInfo<$CategoriesTable, Category> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $CategoriesTable(this._db, [this._alias]);
+  $CategoriesTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
@@ -395,7 +396,7 @@ class $CategoriesTable extends Categories
 
   @override
   $CategoriesTable createAlias(String alias) {
-    return $CategoriesTable(_db, alias);
+    return $CategoriesTable(attachedDatabase, alias);
   }
 }
 
@@ -539,9 +540,10 @@ class EventsCompanion extends UpdateCompanion<Event> {
 }
 
 class $EventsTable extends Events with TableInfo<$EventsTable, Event> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $EventsTable(this._db, [this._alias]);
+  $EventsTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
@@ -598,7 +600,7 @@ class $EventsTable extends Events with TableInfo<$EventsTable, Event> {
 
   @override
   $EventsTable createAlias(String alias) {
-    return $EventsTable(_db, alias);
+    return $EventsTable(attachedDatabase, alias);
   }
 }
 
@@ -883,9 +885,10 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
 
 class $TransactionsTable extends Transactions
     with TableInfo<$TransactionsTable, Transaction> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $TransactionsTable(this._db, [this._alias]);
+  $TransactionsTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
@@ -994,7 +997,7 @@ class $TransactionsTable extends Transactions
 
   @override
   $TransactionsTable createAlias(String alias) {
-    return $TransactionsTable(_db, alias);
+    return $TransactionsTable(attachedDatabase, alias);
   }
 
   static TypeConverter<List<int>, String> $converter0 =
@@ -1141,9 +1144,10 @@ class TagsCompanion extends UpdateCompanion<Tag> {
 }
 
 class $TagsTable extends Tags with TableInfo<$TagsTable, Tag> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $TagsTable(this._db, [this._alias]);
+  $TagsTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
@@ -1200,7 +1204,7 @@ class $TagsTable extends Tags with TableInfo<$TagsTable, Tag> {
 
   @override
   $TagsTable createAlias(String alias) {
-    return $TagsTable(_db, alias);
+    return $TagsTable(attachedDatabase, alias);
   }
 }
 
@@ -1435,9 +1439,10 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
 }
 
 class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, Budget> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $BudgetsTable(this._db, [this._alias]);
+  $BudgetsTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
@@ -1521,7 +1526,7 @@ class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, Budget> {
 
   @override
   $BudgetsTable createAlias(String alias) {
-    return $BudgetsTable(_db, alias);
+    return $BudgetsTable(attachedDatabase, alias);
   }
 
   static TypeConverter<List<int>, String> $converter0 =

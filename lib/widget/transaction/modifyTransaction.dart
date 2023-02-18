@@ -82,7 +82,7 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
     db = Provider.of<MyDatabase>(context);
     if (null == widget.transaction) {
       isAdd = true;
-      WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         showCategorySelector(context);
       });
     } else {

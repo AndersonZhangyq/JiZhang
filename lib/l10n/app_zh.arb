@@ -68,6 +68,7 @@
   "category_Income_Other": "其他",
   "category_Expense_Food": "饮食",
   "category_Expense_Shopping": "购物",
+  "category_Expense_Shopping_Family": "购物-家庭",
   "category_Expense_Transport": "交通",
   "category_Expense_Home": "住房",
   "category_Expense_Bills": "账单",
