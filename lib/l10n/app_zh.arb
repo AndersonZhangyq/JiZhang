@@ -38,6 +38,8 @@
   "budget_AppBarTitle": "所有预算",
   "budgets_SnackBar_failed_to_delete_budget": "删除预算失败",
   "budgets_SnackBar_Remove_Budget": "预算已删除",
+  "chart_Top_DataRange_Month": "月",
+  "chart_Top_DataRange_Year": "年",
   "chart_Title_TotalExpense": "总支出",
   "chart_Title_TotalIncome": "总收入",
   "selectExpense_Title": "选择支出类别",

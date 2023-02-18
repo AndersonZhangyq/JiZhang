@@ -12,4 +12,12 @@ extension DateTimeExtension on DateTime {
   DateTime getDateOnly() {
     return DateTime(year, month, day);
   }
+
+  DateTime getDateTillMonth() {
+    return DateTime(year, month);
+  }
+
+  DateTime getDateTillYear() {
+    return DateTime(year);
+  }
 }

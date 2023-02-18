@@ -1,4 +1,6 @@
 // import 'package:charts_flutter/flutter.dart' as charts;
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ji_zhang/common/datetimeExtension.dart';
@@ -6,8 +8,8 @@ import 'package:ji_zhang/models/database.dart';
 import 'package:ji_zhang/widget/loading.dart';
 import 'package:ji_zhang/widget/transaction/conditionedTransaction.dart';
 import 'package:ji_zhang/widget/transaction/modifyTransaction.dart';
-import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:provider/provider.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:syncfusion_flutter_charts/charts.dart' as charts;
 
 class ChartWidget extends StatefulWidget {
@@ -19,9 +21,12 @@ class ChartWidget extends StatefulWidget {
 
 class _ChartWidgetState extends State<ChartWidget> {
   late MyDatabase db;
-  DateTime selectedDate = DateTime.now();
+  DateTime selectedDate = DateTime.now().getDateTillMonth();
   String categoryType = "expense";
-  List<bool> isSelected = [true, false];
+  String dateRange = "month";
+  List<bool> isSelectedCategoryType = [true, false];
+  List<bool> isSelectedDateRange = [true, false];
+  final ItemScrollController _scrollController = ItemScrollController();
 
   @override
   void didChangeDependencies() async {
@@ -57,8 +62,12 @@ class _ChartWidgetState extends State<ChartWidget> {
                                       element.id, () => element);
                                 }
                                 return StreamBuilder<List<Transaction>>(
-                                    stream: db.getTransactionsByMonth(
-                                        selectedDate.year, selectedDate.month),
+                                    stream: this.dateRange == "month"
+                                        ? db.getTransactionsByMonth(
+                                            selectedDate.year,
+                                            selectedDate.month)
+                                        : db.getTransactionsByYear(
+                                            selectedDate.year),
                                     builder: (context, snapshot) {
                                       if (!snapshot.hasData) {
                                         return const LoadingWidget();
@@ -97,75 +106,147 @@ class _ChartWidgetState extends State<ChartWidget> {
   }
 
   Widget _buildTopBar(BuildContext context, DateTimeRange snapshot) {
+    final List<DateTime> dateList = [];
+    // add date to the dateList in reverse order
+    switch (dateRange) {
+      case "month":
+        DateTime cur = snapshot.end.getDateTillMonth();
+        DateTime start = DateTime(snapshot.start.year, snapshot.start.month - 1)
+            .getDateTillMonth();
+        while (cur.isAfter(start)) {
+          dateList.add(cur);
+          cur = DateTime(cur.year, cur.month - 1);
+        }
+        break;
+      case "year":
+        DateTime cur = snapshot.end.getDateTillYear();
+        DateTime start = DateTime(snapshot.start.year - 1).getDateTillYear();
+        while (cur.isAfter(start)) {
+          dateList.add(cur);
+          cur = DateTime(cur.year - 1);
+        }
+        break;
+    }
     return SizedBox(
-      height: 56,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  showMonthPicker(
-                          context: context,
-                          initialDate: selectedDate,
-                          firstDate: snapshot.start,
-                          lastDate: snapshot.end)
-                      .then((value) {
-                    if (value != null) {
-                      setState(() {
-                        selectedDate = value;
-                      });
-                    }
-                  });
-                },
-                child: Row(
+            Row(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      selectedDate.format('yyyy-MM'),
-                      style: const TextStyle(
-                        color: Colors.green,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
+                    ToggleButtons(
+                      constraints: const BoxConstraints(
+                        maxHeight: 30,
                       ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.only(left: 8.0),
-                      child: Icon(
-                        Icons.date_range,
-                        color: Colors.green,
-                        size: 18,
-                      ),
+                      textStyle: const TextStyle(fontSize: 14),
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 18.0, vertical: 6.0),
+                          child: Text(AppLocalizations.of(context)!
+                              .chart_Top_DataRange_Month),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 18.0, vertical: 6.0),
+                          child: Text(AppLocalizations.of(context)!
+                              .chart_Top_DataRange_Year),
+                        )
+                      ],
+                      onPressed: (index) {
+                        setState(() {
+                          dateRange = index == 0 ? "month" : "year";
+                          isSelectedDateRange[index] = true;
+                          isSelectedDateRange[1 - index] = false;
+                        });
+                      },
+                      isSelected: isSelectedDateRange,
                     ),
                   ],
-                )),
-            const Spacer(),
-            ToggleButtons(
-              constraints: const BoxConstraints(
-                maxHeight: 30,
-              ),
-              textStyle: const TextStyle(fontSize: 14),
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 18.0, vertical: 6.0),
-                  child: Text(AppLocalizations.of(context)!.tab_Expense),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 18.0, vertical: 6.0),
-                  child: Text(AppLocalizations.of(context)!.tab_Income),
-                )
+                const Spacer(),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ToggleButtons(
+                      constraints: const BoxConstraints(
+                        maxHeight: 30,
+                      ),
+                      textStyle: const TextStyle(fontSize: 14),
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 18.0, vertical: 6.0),
+                          child:
+                              Text(AppLocalizations.of(context)!.tab_Expense),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 18.0, vertical: 6.0),
+                          child: Text(AppLocalizations.of(context)!.tab_Income),
+                        )
+                      ],
+                      onPressed: (index) {
+                        setState(() {
+                          categoryType = index == 0 ? "expense" : "income";
+                          isSelectedCategoryType[index] = true;
+                          isSelectedCategoryType[1 - index] = false;
+                        });
+                      },
+                      isSelected: isSelectedCategoryType,
+                    ),
+                  ],
+                ),
               ],
-              onPressed: (index) {
-                setState(() {
-                  categoryType = index == 0 ? "expense" : "income";
-                  isSelected[index] = true;
-                  isSelected[1 - index] = false;
-                });
-              },
-              isSelected: isSelected,
+            ),
+            SizedBox(
+              height: 40,
+              child: ScrollablePositionedList.builder(
+                  itemScrollController: _scrollController,
+                  scrollDirection: Axis.horizontal,
+                  itemCount: dateList.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return SizedBox(
+                      height: double.infinity,
+                      width: 110,
+                      child: ListTile(
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 8.0),
+                          onTap: () => {
+                                setState(() {
+                                  selectedDate = dateList[index];
+                                  _scrollController.scrollTo(
+                                      index: max(index - 1, 0),
+                                      duration:
+                                          const Duration(milliseconds: 500),
+                                      curve: Curves.easeInOut);
+                                })
+                              },
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                dateList[index].format(
+                                    dateRange == "month" ? "yyyy-MM" : "yyyy"),
+                                style: (selectedDate == dateList[index]) ||
+                                        (dateRange == "year" &&
+                                            selectedDate.year ==
+                                                dateList[index].year)
+                                    ? const TextStyle(
+                                        color: Colors.green,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                      )
+                                    : null,
+                              ),
+                            ],
+                          )),
+                    );
+                  }),
             ),
           ],
         ),
@@ -249,6 +330,7 @@ class _ChartWidgetState extends State<ChartWidget> {
                     MaterialPageRoute(
                         builder: (context) => ConditionedTransationPage(
                             dateTime: selectedDate,
+                            dateRange: dateRange,
                             categoryItem: categoryItems[entry.key]!)),
                   );
                 },

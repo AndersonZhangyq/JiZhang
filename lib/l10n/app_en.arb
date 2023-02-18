@@ -38,6 +38,8 @@
   "budget_AppBarTitle": "All Budgets",
   "budgets_SnackBar_failed_to_delete_budget": "Failed to delete budget",
   "budgets_SnackBar_Remove_Budget": "Budget removed",
+  "chart_Top_DataRange_Month": "Month",
+  "chart_Top_DataRange_Year": "Year",
   "chart_Title_TotalExpense": "Total Expense",
   "chart_Title_TotalIncome": "Total Income",
   "selectExpense_Title": "Select Expenses",

@@ -388,4 +388,38 @@ class MyDatabase extends _$MyDatabase {
               [(t) => OrderingTerm(expression: t.id, mode: OrderingMode.desc)]))
         .watch();
   }
+
+  Stream<List<Transaction>>? getTransactionsByYear(year) {
+    DateTime startDate = DateTime(year);
+    DateTime endDate = DateTime(year + 1).subtract(const Duration(days: 1));
+    return (select(transactions)
+          ..where((t) => t.date.isBetween(
+              CustomExpression(
+                  (startDate.millisecondsSinceEpoch / 1000).toString(),
+                  precedence: Precedence.primary),
+              CustomExpression(
+                  (endDate.millisecondsSinceEpoch / 1000).toString(),
+                  precedence: Precedence.primary)))
+          ..orderBy(
+              [(t) => OrderingTerm(expression: t.id, mode: OrderingMode.desc)]))
+        .watch();
+  }
+
+  Stream<List<Transaction>>? getTransactionsByYearAndCategoryId(
+      int year, int id) {
+    DateTime startDate = DateTime(year);
+    DateTime endDate = DateTime(year + 1).subtract(const Duration(days: 1));
+    return (select(transactions)
+          ..where((t) => t.date.isBetween(
+              CustomExpression(
+                  (startDate.millisecondsSinceEpoch / 1000).toString(),
+                  precedence: Precedence.primary),
+              CustomExpression(
+                  (endDate.millisecondsSinceEpoch / 1000).toString(),
+                  precedence: Precedence.primary)))
+          ..where((t) => t.categoryId.equals(id))
+          ..orderBy(
+              [(t) => OrderingTerm(expression: t.id, mode: OrderingMode.desc)]))
+        .watch();
+  }
 }

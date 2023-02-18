@@ -8,9 +8,13 @@ import 'package:provider/provider.dart';
 
 class ConditionedTransationPage extends StatefulWidget {
   const ConditionedTransationPage(
-      {Key? key, required this.dateTime, required this.categoryItem})
+      {Key? key,
+      required this.dateTime,
+      required this.dateRange,
+      required this.categoryItem})
       : super(key: key);
   final DateTime dateTime;
+  final String dateRange;
   final CategoryItem categoryItem;
 
   @override
@@ -36,7 +40,10 @@ class _ConditionedTransationPageState extends State<ConditionedTransationPage> {
         elevation: 0,
         backgroundColor: Colors.transparent,
         title: Text(
-          "${widget.dateTime.format('yyyy-MM')} ${widget.categoryItem.getDisplayName(context)}${widget.categoryItem.type == 'expense' ? AppLocalizations.of(context)!.tab_Expense : AppLocalizations.of(context)!.tab_Income}",
+          widget.dateRange == "month"
+              ? widget.dateTime.format('yyyy-MM')
+              : widget.dateTime.format('yyyy') +
+                  "${widget.categoryItem.getDisplayName(context)}${widget.categoryItem.type == 'expense' ? AppLocalizations.of(context)!.tab_Expense : AppLocalizations.of(context)!.tab_Income}",
           style: const TextStyle(fontSize: 20, color: Colors.black),
         ),
       ),
@@ -56,10 +63,13 @@ class _ConditionedTransationPageState extends State<ConditionedTransationPage> {
                 builder: (context, snapshot) {
                   final categories = snapshot.data ?? {};
                   return StreamBuilder<List<Transaction>>(
-                      stream: db.getTransactionsByMonthAndCategoryId(
-                          widget.dateTime.year,
-                          widget.dateTime.month,
-                          widget.categoryItem.id),
+                      stream: widget.dateRange == "month"
+                          ? db.getTransactionsByMonthAndCategoryId(
+                              widget.dateTime.year,
+                              widget.dateTime.month,
+                              widget.categoryItem.id)
+                          : db.getTransactionsByYearAndCategoryId(
+                              widget.dateTime.year, widget.categoryItem.id),
                       builder: (context, snapshot) {
                         final transactions = snapshot.data ?? [];
                         return TransactionListWidget(
