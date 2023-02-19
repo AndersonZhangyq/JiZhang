@@ -31,7 +31,7 @@ jobs:
         uses: subosito/flutter-action@v1.5.3
         with:
           # The Flutter version to make available on the path
-          flutter-version: 2.8.1
+          flutter-version: 2.10.5
           
       - name: Build apk
         run: flutter build apk --no-tree-shake-icons
