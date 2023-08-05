@@ -20,7 +20,7 @@ class MoneyNumberTablet extends StatelessWidget {
       ret = ret + number.toString();
     }
     // remove leading zero
-    ret = ret.replaceFirst(RegExp('^0+'), '');
+    // ret = ret.replaceFirst(RegExp('^0+'), '');
     // make sure only two number after dot
     // use '[0-9]+' to ensure that if tmp is Empty then set to "0"
     ret = RegExp("[0-9]+[.]?[0-9]{0,2}").stringMatch(ret) ?? "0";
