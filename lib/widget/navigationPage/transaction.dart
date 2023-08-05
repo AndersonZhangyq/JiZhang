@@ -5,7 +5,7 @@ import 'package:ji_zhang/models/database.dart';
 import 'package:ji_zhang/widget/loading.dart';
 import 'package:ji_zhang/widget/transaction/modifyTransaction.dart';
 import 'package:ji_zhang/widget/transaction/transactionList.dart';
-import 'package:month_picker_dialog_2/month_picker_dialog_2.dart';
+import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:provider/provider.dart';
 
 class TransactionWidget extends StatefulWidget {

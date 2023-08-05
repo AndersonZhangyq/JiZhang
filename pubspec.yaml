@@ -38,19 +38,18 @@ dependencies:
   cupertino_icons: ^1.0.2
   sqflite:
   dotted_border: ^2.0.0+2
-  intl: ^0.17.0
+  intl: ^0.18.0
   path_provider: ^2.0.8
   provider: ^6.0.1
   flutter_slidable: ^1.1.0
-  month_picker_dialog_2: ^0.6.0
+  month_picker_dialog: ^2.0.2
   permission_handler: ^8.3.0
   drift: ^1.2.0
   sqlite3_flutter_libs: ^0.5.0
   flutter_hooks: ^0.18.2
   flutter_animation_progress_bar: ^2.0.1
   fl_chart: ^0.40.6
-  charts_flutter: ^0.12.0
-  syncfusion_flutter_charts: ^19.4.41
+  syncfusion_flutter_charts: ^21.2.6
   flutter_font_icons: ^2.2.4
   scrollable_positioned_list: ^0.3.5
 
