@@ -290,6 +290,16 @@ class MyDatabase extends _$MyDatabase {
     });
   }
 
+  Future<int?> getCategoryLastPosByType(String type) {
+    return (select(categories)
+          ..where((c) => c.type.equals(type))
+          ..orderBy(
+              [(u) => OrderingTerm(expression: u.pos, mode: OrderingMode.desc)])
+          ..limit(1))
+        .map((c) => c.pos)
+        .getSingleOrNull();
+  }
+
   Stream<List<BudgetItem>>? watchBudgetItems() {
     DateTime now = DateTime.now().getDateOnly();
     int currentYear = now.year;

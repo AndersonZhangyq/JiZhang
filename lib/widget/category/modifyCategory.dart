@@ -16,12 +16,28 @@ class ModifyCategoryWidget extends StatefulWidget {
   State<StatefulWidget> createState() => _ModifyCategoryState();
 }
 
+class ChangeCounter {
+  int changeCounter = 0;
+
+  int get() {
+    return changeCounter;
+  }
+
+  void increment() {
+    changeCounter++;
+  }
+
+  void decrement() {
+    changeCounter--;
+  }
+}
+
 class _ModifyCategoryState extends State<ModifyCategoryWidget> {
   late MyDatabase db;
   List<CategoryItem> expenseCategory = [];
   List<CategoryItem> incomeCategory = [];
-  int expenseChanged = 0;
-  int incomeChanged = 0;
+  ChangeCounter expenseChanged = ChangeCounter();
+  ChangeCounter incomeChanged = ChangeCounter();
 
   @override
   void didChangeDependencies() {
@@ -33,7 +49,7 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
     ScaffoldMessenger.of(context).removeCurrentSnackBar();
     db.transaction(() async {
       // save category change
-      if (expenseChanged > 0) {
+      if (expenseChanged.get() > 0) {
         for (int i = 0; i < expenseCategory.length; i++) {
           CategoryItem element = expenseCategory[i];
           await (db.update(db.categories)
@@ -43,7 +59,7 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
           ));
         }
       }
-      if (incomeChanged > 0) {
+      if (incomeChanged.get() > 0) {
         for (int i = 0; i < incomeCategory.length; i++) {
           CategoryItem element = incomeCategory[i];
           await (db.update(db.categories)
@@ -160,8 +176,8 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
     );
   }
 
-  _buildCategoryList(
-      List<CategoryItem> categories, int changeCounter, String categoryType) {
+  _buildCategoryList(List<CategoryItem> categories, ChangeCounter changeCounter,
+      String categoryType) {
     return ReorderableListView.builder(
       // physics: const BouncingScrollPhysics(),
       itemBuilder: (BuildContext context, int index) {
@@ -170,7 +186,7 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
           leading: SizedBox(
             height: 25,
             child: FloatingActionButton.small(
-                heroTag: "remove_${categoryType}_${index}",
+                heroTag: "remove_${categoryType}_$index",
                 elevation: 0,
                 child: const Icon(
                   Icons.horizontal_rule,
@@ -178,7 +194,7 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
                 ),
                 onPressed: () async {
                   final categoryToRemove = categories[index];
-                  changeCounter++;
+                  changeCounter.increment();
                   await (db.delete(db.categories)
                         ..where((t) => t.id.equals(categoryToRemove.id)))
                       .go();
@@ -189,7 +205,7 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
                       action: SnackBarAction(
                           label: 'Undo',
                           onPressed: () {
-                            changeCounter--;
+                            changeCounter.decrement();
                             db.into(db.categories).insert(
                                 CategoriesCompanion.insert(
                                     name: categoryToRemove.name,
@@ -208,7 +224,7 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
       },
       itemCount: categories.length,
       onReorder: (int oldIndex, int newIndex) {
-        changeCounter++;
+        changeCounter.increment();
         if (oldIndex < newIndex) {
           newIndex -= 1;
         }

@@ -22,7 +22,12 @@ class CategoryItem implements Comparable {
     var iconIn = jsonDecode(category.icon);
     icon = IconData(iconIn['codePoint'],
         fontFamily: iconIn['fontFamily'], fontPackage: iconIn['fontPackage']);
-    color = Color(int.parse(category.color));
+    int? value = int.tryParse(category.color);
+    if (value == null) {
+      color = Colors.lightBlueAccent;
+    } else {
+      color = Color(int.parse(category.color));
+    }
     pos = category.pos;
   }
 
