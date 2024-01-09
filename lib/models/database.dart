@@ -432,4 +432,40 @@ class MyDatabase extends _$MyDatabase {
               [(t) => OrderingTerm(expression: t.id, mode: OrderingMode.desc)]))
         .watch();
   }
+
+  Stream<Map<DateTime, double>>? getMonthlySum(String categoryType) {
+    final query = select(transactions).join([
+      innerJoin(categories, categories.id.equalsExp(transactions.categoryId))
+    ]);
+    query.where(categories.type.equals(categoryType));
+    return query.watch().map((value) {
+      Map<DateTime, double> ret = {};
+      for (var item in value) {
+        DateTime date = item.read(transactions.date)!.getDateTillMonth();
+        if (ret[date] == null) {
+          ret[date] = 0;
+        }
+        ret[date] = ret[date]! + item.read(transactions.amount)!;
+      }
+      return ret;
+    });
+  }
+
+  Stream<Map<DateTime, double>>? getYearlySum(String categoryType) {
+    final query = select(transactions).join([
+      innerJoin(categories, categories.id.equalsExp(transactions.categoryId))
+    ]);
+    query.where(categories.type.equals(categoryType));
+    return query.watch().map((value) {
+      Map<DateTime, double> ret = {};
+      for (var item in value) {
+        DateTime date = item.read(transactions.date)!.getDateTillYear();
+        if (ret[date] == null) {
+          ret[date] = 0;
+        }
+        ret[date] = ret[date]! + item.read(transactions.amount)!;
+      }
+      return ret;
+    });
+  }
 }
