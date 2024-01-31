@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -23,16 +22,19 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
   DateTime selectedDate = DateTime.now().getDateTillMonth();
   String categoryType = "expense";
   String dateRange = "month";
+  late Map<DateTime, double> seriesData;
   List<bool> isSelectedCategoryType = [true, false];
   List<bool> isSelectedDateRange = [true, false];
   final ItemScrollController _scrollController = ItemScrollController();
+  final _tooltipBehavior = charts.TooltipBehavior(enable: true, header: '');
   final _zoomPanBehavior = charts.ZoomPanBehavior(
-    enableSelectionZooming: true,
-    enablePinching: true,
+    enableSelectionZooming: false,
+    enablePinching: false,
     zoomMode: charts.ZoomMode.x,
     enablePanning: true,
   );
-  final _selectionBehavior = charts.SelectionBehavior(enable: true);
+  final _selectionBehavior = charts.SelectionBehavior(
+      enable: true, unselectedOpacity: 0.4, selectedOpacity: 1.0);
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
@@ -90,10 +92,11 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
                                         children: _buildTotal(transactions),
                                       ),
                                       Expanded(
-                                          child: Column(
-                                        children: _buildPieAndList(
-                                            transactions, categoryItems),
-                                      ))
+                                        child: Column(
+                                          children: _buildPieAndList(
+                                              transactions, categoryItems),
+                                        ),
+                                      )
                                     ]),
                               );
                             });
@@ -201,52 +204,52 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
                 ),
               ],
             ),
-            SizedBox(
-              height: 40,
-              child: ScrollablePositionedList.builder(
-                  itemScrollController: _scrollController,
-                  scrollDirection: Axis.horizontal,
-                  itemCount: dateList.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return SizedBox(
-                      height: double.infinity,
-                      width: 110,
-                      child: ListTile(
-                          contentPadding:
-                              const EdgeInsets.symmetric(horizontal: 8.0),
-                          onTap: () => {
-                                setState(() {
-                                  selectedDate = dateList[index];
-                                  _scrollController.scrollTo(
-                                      index: max(index - 1, 0),
-                                      duration:
-                                          const Duration(milliseconds: 500),
-                                      curve: Curves.easeInOut);
-                                  _selectionBehavior.selectDataPoints(index);
-                                })
-                              },
-                          title: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                dateList[index].format(
-                                    dateRange == "month" ? "yyyy-MM" : "yyyy"),
-                                style: (selectedDate == dateList[index]) ||
-                                        (dateRange == "year" &&
-                                            selectedDate.year ==
-                                                dateList[index].year)
-                                    ? const TextStyle(
-                                        color: Colors.green,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18,
-                                      )
-                                    : null,
-                              ),
-                            ],
-                          )),
-                    );
-                  }),
-            ),
+            // SizedBox(
+            //   height: 40,
+            //   child: ScrollablePositionedList.builder(
+            //       itemScrollController: _scrollController,
+            //       scrollDirection: Axis.horizontal,
+            //       itemCount: dateList.length,
+            //       itemBuilder: (BuildContext context, int index) {
+            //         return SizedBox(
+            //           height: double.infinity,
+            //           width: 110,
+            //           child: ListTile(
+            //               contentPadding:
+            //                   const EdgeInsets.symmetric(horizontal: 8.0),
+            //               onTap: () => {
+            //                     setState(() {
+            //                       selectedDate = dateList[index];
+            //                       _scrollController.scrollTo(
+            //                           index: max(index - 1, 0),
+            //                           duration:
+            //                               const Duration(milliseconds: 500),
+            //                           curve: Curves.easeInOut);
+            //                       _selectionBehavior.selectDataPoints(index);
+            //                     })
+            //                   },
+            //               title: Row(
+            //                 mainAxisAlignment: MainAxisAlignment.center,
+            //                 children: [
+            //                   Text(
+            //                     dateList[index].format(
+            //                         dateRange == "month" ? "yyyy-MM" : "yyyy"),
+            //                     style: (selectedDate == dateList[index]) ||
+            //                             (dateRange == "year" &&
+            //                                 selectedDate.year ==
+            //                                     dateList[index].year)
+            //                         ? const TextStyle(
+            //                             color: Colors.green,
+            //                             fontWeight: FontWeight.bold,
+            //                             fontSize: 18,
+            //                           )
+            //                         : null,
+            //                   ),
+            //                 ],
+            //               )),
+            //         );
+            //       }),
+            // ),
             SizedBox(
               height: 200,
               child: StreamBuilder<Map<DateTime, double>>(
@@ -257,27 +260,61 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
                   if (!snapshot.hasData) {
                     return const LoadingWidget();
                   }
-                  final data = snapshot.data!;
+                  seriesData = snapshot.data!;
+                  int initialSelectedIndex = seriesData.keys.toList().indexOf(
+                      dateRange == 'year'
+                          ? DateTime.now().getDateTillYear()
+                          : DateTime.now().getDateTillMonth());
                   return SizedBox(
                     width: double.infinity,
                     child: charts.SfCartesianChart(
-                        primaryXAxis: charts.DateTimeCategoryAxis(
+                        onSelectionChanged: (selectionArgs) {
+                          final selectedTime = seriesData.keys
+                              .toList()
+                              .elementAt(selectionArgs.pointIndex);
+                          print(selectedTime);
+                          setState(() {
+                            selectedDate = selectedTime;
+                          });
+                        },
+                        primaryYAxis: charts.NumericAxis(isVisible: false),
+                        primaryXAxis: charts.DateTimeAxis(
+                          // isInversed: true,
+                          visibleMinimum: dateRange == 'year'
+                              ? selectedDate.copyWith(
+                                  year: selectedDate.year - 2)
+                              : selectedDate.copyWith(
+                                  month: selectedDate.month - 6),
+                          visibleMaximum: dateRange == 'year'
+                              ? selectedDate.copyWith(
+                                  year: selectedDate.year + 2)
+                              : selectedDate.copyWith(
+                                  month: selectedDate.month + 5),
                           // X axis labels will be rendered based on the below format
                           dateFormat: dateRange == 'year'
                               ? DateFormat('yyyy')
-                              : DateFormat('yyyy-MM'),
+                              : DateFormat('yy-MM'),
                         ),
+                        tooltipBehavior: _tooltipBehavior,
                         zoomPanBehavior: _zoomPanBehavior,
-                        series: <charts.ChartSeries>[
-                          charts.LineSeries<MapEntry<DateTime, double>,
+                        series: <charts.ColumnSeries>[
+                          charts.ColumnSeries<MapEntry<DateTime, double>,
                                   DateTime>(
-                              dataSource: data.entries.toList(),
+                              dataSource: seriesData.entries.toList(),
                               xValueMapper: (row, _) => row.key,
                               yValueMapper: (row, _) => row.value,
                               color: Colors.green,
-                              markerSettings:
-                                  const charts.MarkerSettings(isVisible: true),
+                              // Width of the columns
+                              // width: 0.5,
+                              // Spacing between the columns
+                              // spacing: 0.2,
+                              initialSelectedDataIndexes: [
+                                initialSelectedIndex
+                              ],
+                              selectionBehavior: _selectionBehavior,
                               dataLabelSettings: const charts.DataLabelSettings(
+                                  labelAlignment:
+                                      charts.ChartDataLabelAlignment.outer,
                                   isVisible: true))
                         ]),
                   );
@@ -298,15 +335,25 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
       total += element.amount;
     }
     return [
-      categoryType == 'expense'
-          ? Text(AppLocalizations.of(context)!.chart_Title_TotalExpense)
-          : Text(AppLocalizations.of(context)!.chart_Title_TotalIncome),
-      Padding(
-        padding: const EdgeInsets.only(top: 16.0),
-        child: Text(
-          total.toStringAsFixed(2),
-          style: const TextStyle(fontSize: 28),
-        ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          categoryType == 'expense'
+              ? Text((dateRange == 'year'
+                      ? selectedDate.format("yyyy")
+                      : selectedDate.format("yyyy-MM")) +
+                  " " +
+                  AppLocalizations.of(context)!.chart_Title_TotalExpense)
+              : Text((dateRange == 'year'
+                      ? selectedDate.format("yyyy")
+                      : selectedDate.format("yyyy-MM")) +
+                  " " +
+                  AppLocalizations.of(context)!.chart_Title_TotalIncome),
+          Text(
+            total.toStringAsFixed(2),
+            style: const TextStyle(fontSize: 24),
+          ),
+        ],
       )
     ];
   }

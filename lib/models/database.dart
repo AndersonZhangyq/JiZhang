@@ -143,16 +143,16 @@ class IntegerListConverter extends TypeConverter<List<int>, String> {
   const IntegerListConverter();
 
   @override
-  List<int>? mapToDart(String? fromDb) {
+  List<int> fromSql(String? fromDb) {
     if (fromDb == null) {
-      return null;
+      return [];
     }
     final ret = jsonDecode(fromDb);
     return ret.cast<int>();
   }
 
   @override
-  String? mapToSql(List<int>? value) {
+  String toSql(List<int>? value) {
     return jsonEncode(value);
   }
 }
@@ -242,14 +242,12 @@ class MyDatabase extends _$MyDatabase {
               CustomExpression(
                   (endDate.millisecondsSinceEpoch / 1000).toString(),
                   precedence: Precedence.primary)))
-          ..orderBy(
-              [(t) => OrderingTerm(expression: t.id, mode: OrderingMode.desc)]))
+          ..orderBy([(t) => OrderingTerm.desc(t.id)]))
         .watch();
   }
 
   Stream<List<CategoryItem>>? watchAllCategories() {
-    return (select(categories)
-          ..orderBy([(u) => OrderingTerm(expression: u.pos)]))
+    return (select(categories)..orderBy([(u) => OrderingTerm.asc(u.pos)]))
         .watch()
         .map((value) {
       List<CategoryItem> ret = [];
@@ -263,7 +261,7 @@ class MyDatabase extends _$MyDatabase {
   Stream<List<CategoryItem>>? watchCategoriesByType(String type) {
     return (select(categories)
           ..where((c) => c.type.equals(type))
-          ..orderBy([(u) => OrderingTerm(expression: u.pos)]))
+          ..orderBy([(u) => OrderingTerm.asc(u.pos)]))
         .watch()
         .map((value) {
       List<CategoryItem> ret = [];
@@ -275,8 +273,7 @@ class MyDatabase extends _$MyDatabase {
   }
 
   Stream<Map<String, List<CategoryItem>>>? watchCategoriesGroupByType() {
-    return (select(categories)
-          ..orderBy([(u) => OrderingTerm(expression: u.pos)]))
+    return (select(categories)..orderBy([(u) => OrderingTerm.asc(u.pos)]))
         .watch()
         .map((value) {
       Map<String, List<CategoryItem>> ret = {};
@@ -293,8 +290,7 @@ class MyDatabase extends _$MyDatabase {
   Future<int?> getCategoryLastPosByType(String type) {
     return (select(categories)
           ..where((c) => c.type.equals(type))
-          ..orderBy(
-              [(u) => OrderingTerm(expression: u.pos, mode: OrderingMode.desc)])
+          ..orderBy([(u) => OrderingTerm.desc(u.pos)])
           ..limit(1))
         .map((c) => c.pos)
         .getSingleOrNull();
@@ -344,9 +340,7 @@ class MyDatabase extends _$MyDatabase {
                 CustomExpression(
                     (endDate!.millisecondsSinceEpoch / 1000).toString(),
                     precedence: Precedence.primary)))
-            ..orderBy([
-              (t) => OrderingTerm(expression: t.id, mode: OrderingMode.desc)
-            ]))
+            ..orderBy([(t) => OrderingTerm.desc(t.id)]))
           .get();
       var totalExpenses = 0.0;
       var categoryExpenses = budget.categoryIds;
@@ -374,7 +368,7 @@ class MyDatabase extends _$MyDatabase {
         .map((row) {
       if (row != null) {
         return ui.DateTimeRange(
-            start: row.read(minDate), end: row.read(maxDate));
+            start: row.read(minDate)!, end: row.read(maxDate)!);
       }
       return ui.DateTimeRange(start: DateTime.now(), end: DateTime.now());
     });
@@ -394,8 +388,7 @@ class MyDatabase extends _$MyDatabase {
                   (endDate.millisecondsSinceEpoch / 1000).toString(),
                   precedence: Precedence.primary)))
           ..where((t) => t.categoryId.equals(categoryId))
-          ..orderBy(
-              [(t) => OrderingTerm(expression: t.id, mode: OrderingMode.desc)]))
+          ..orderBy([(t) => OrderingTerm.desc(t.id)]))
         .watch();
   }
 
@@ -410,8 +403,7 @@ class MyDatabase extends _$MyDatabase {
               CustomExpression(
                   (endDate.millisecondsSinceEpoch / 1000).toString(),
                   precedence: Precedence.primary)))
-          ..orderBy(
-              [(t) => OrderingTerm(expression: t.id, mode: OrderingMode.desc)]))
+          ..orderBy([(t) => OrderingTerm.desc(t.id)]))
         .watch();
   }
 
@@ -428,8 +420,7 @@ class MyDatabase extends _$MyDatabase {
                   (endDate.millisecondsSinceEpoch / 1000).toString(),
                   precedence: Precedence.primary)))
           ..where((t) => t.categoryId.equals(id))
-          ..orderBy(
-              [(t) => OrderingTerm(expression: t.id, mode: OrderingMode.desc)]))
+          ..orderBy([(t) => OrderingTerm.desc(t.id)]))
         .watch();
   }
 
@@ -438,15 +429,25 @@ class MyDatabase extends _$MyDatabase {
       innerJoin(categories, categories.id.equalsExp(transactions.categoryId))
     ]);
     query.where(categories.type.equals(categoryType));
+    query.orderBy([OrderingTerm.desc(transactions.date)]);
     return query.watch().map((value) {
       Map<DateTime, double> ret = {};
+      Map<DateTime, int> counter = {};
       for (var item in value) {
         DateTime date = item.read(transactions.date)!.getDateTillMonth();
+        // if (date.year == 2023 && date.month == 6) {
+        //   print(date);
+        //   print(item.read(transactions.date));
+        //   print(item.read(transactions.comment));
+        // }
         if (ret[date] == null) {
           ret[date] = 0;
+          counter[date] = 0;
         }
         ret[date] = ret[date]! + item.read(transactions.amount)!;
+        counter[date] = counter[date]! + 1;
       }
+      print(counter);
       return ret;
     });
   }
