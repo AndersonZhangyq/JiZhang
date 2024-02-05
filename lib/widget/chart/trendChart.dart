@@ -49,11 +49,11 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
           if (!snapshot.hasData) {
             return const LoadingWidget();
           }
-          final dateRange = snapshot.data!;
+          final transactionRange = snapshot.data!;
           return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildTopBar(context, dateRange),
+                _buildTopBar(context, transactionRange),
                 Expanded(
                   child: StreamBuilder<List<CategoryItem>>(
                       stream: db.watchCategoriesByType(categoryType),
@@ -78,32 +78,90 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
                               transactions.removeWhere((element) =>
                                   !categoryItems
                                       .containsKey(element.categoryId));
+                              var columnChildren = <Widget>[];
+                              columnChildren.add(_buildBarChart());
+                              columnChildren.add(_buildTotal(transactions));
+                              columnChildren.addAll(_buildPieAndList(
+                                  transactions, categoryItems));
                               return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16.0),
-                                child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: _buildTotal(transactions),
-                                      ),
-                                      Expanded(
-                                        child: Column(
-                                          children: _buildPieAndList(
-                                              transactions, categoryItems),
-                                        ),
-                                      )
-                                    ]),
-                              );
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16.0),
+                                  child: ScrollConfiguration(
+                                    behavior: const ScrollBehavior()
+                                        .copyWith(overscroll: false),
+                                    child: SingleChildScrollView(
+                                      child: Column(children: columnChildren),
+                                    ),
+                                  ));
                             });
                       }),
                 )
               ]);
         });
+  }
+
+  Widget _buildBarChart() {
+    return SizedBox(
+      height: 200,
+      width: double.infinity,
+      child: StreamBuilder<Map<DateTime, double>>(
+        stream: this.dateRange == "month"
+            ? db.getMonthlySum(categoryType)
+            : db.getYearlySum(categoryType),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const LoadingWidget();
+          }
+          seriesData = snapshot.data!;
+          int initialSelectedIndex = seriesData.keys.toList().indexOf(
+              this.dateRange == 'year'
+                  ? DateTime.now().getDateTillYear()
+                  : DateTime.now().getDateTillMonth());
+          return charts.SfCartesianChart(
+              onSelectionChanged: (selectionArgs) {
+                final selectedTime = seriesData.keys
+                    .toList()
+                    .elementAt(selectionArgs.pointIndex);
+                print(selectedTime);
+                setState(() {
+                  selectedDate = selectedTime;
+                });
+              },
+              primaryYAxis: charts.NumericAxis(isVisible: false),
+              primaryXAxis: charts.DateTimeAxis(
+                // isInversed: true,
+                visibleMinimum: this.dateRange == 'year'
+                    ? selectedDate.copyWith(year: selectedDate.year - 2)
+                    : selectedDate.copyWith(month: selectedDate.month - 6),
+                visibleMaximum: this.dateRange == 'year'
+                    ? selectedDate.copyWith(year: selectedDate.year + 2)
+                    : selectedDate.copyWith(month: selectedDate.month + 5),
+                // X axis labels will be rendered based on the below format
+                dateFormat: this.dateRange == 'year'
+                    ? DateFormat('yyyy')
+                    : DateFormat('yy-MM'),
+              ),
+              tooltipBehavior: _tooltipBehavior,
+              zoomPanBehavior: _zoomPanBehavior,
+              series: <charts.ColumnSeries>[
+                charts.ColumnSeries<MapEntry<DateTime, double>, DateTime>(
+                    dataSource: seriesData.entries.toList(),
+                    xValueMapper: (row, _) => row.key,
+                    yValueMapper: (row, _) => row.value,
+                    color: Colors.green,
+                    // Width of the columns
+                    // width: 0.5,
+                    // Spacing between the columns
+                    // spacing: 0.2,
+                    initialSelectedDataIndexes: [initialSelectedIndex],
+                    selectionBehavior: _selectionBehavior,
+                    dataLabelSettings: const charts.DataLabelSettings(
+                        labelAlignment: charts.ChartDataLabelAlignment.outer,
+                        isVisible: true))
+              ]);
+        },
+      ),
+    );
   }
 
   Widget _buildTopBar(BuildContext context, DateTimeRange snapshot) {
@@ -250,112 +308,39 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
             //         );
             //       }),
             // ),
-            SizedBox(
-              height: 200,
-              child: StreamBuilder<Map<DateTime, double>>(
-                stream: dateRange == "month"
-                    ? db.getMonthlySum(categoryType)
-                    : db.getYearlySum(categoryType),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return const LoadingWidget();
-                  }
-                  seriesData = snapshot.data!;
-                  int initialSelectedIndex = seriesData.keys.toList().indexOf(
-                      dateRange == 'year'
-                          ? DateTime.now().getDateTillYear()
-                          : DateTime.now().getDateTillMonth());
-                  return SizedBox(
-                    width: double.infinity,
-                    child: charts.SfCartesianChart(
-                        onSelectionChanged: (selectionArgs) {
-                          final selectedTime = seriesData.keys
-                              .toList()
-                              .elementAt(selectionArgs.pointIndex);
-                          print(selectedTime);
-                          setState(() {
-                            selectedDate = selectedTime;
-                          });
-                        },
-                        primaryYAxis: charts.NumericAxis(isVisible: false),
-                        primaryXAxis: charts.DateTimeAxis(
-                          // isInversed: true,
-                          visibleMinimum: dateRange == 'year'
-                              ? selectedDate.copyWith(
-                                  year: selectedDate.year - 2)
-                              : selectedDate.copyWith(
-                                  month: selectedDate.month - 6),
-                          visibleMaximum: dateRange == 'year'
-                              ? selectedDate.copyWith(
-                                  year: selectedDate.year + 2)
-                              : selectedDate.copyWith(
-                                  month: selectedDate.month + 5),
-                          // X axis labels will be rendered based on the below format
-                          dateFormat: dateRange == 'year'
-                              ? DateFormat('yyyy')
-                              : DateFormat('yy-MM'),
-                        ),
-                        tooltipBehavior: _tooltipBehavior,
-                        zoomPanBehavior: _zoomPanBehavior,
-                        series: <charts.ColumnSeries>[
-                          charts.ColumnSeries<MapEntry<DateTime, double>,
-                                  DateTime>(
-                              dataSource: seriesData.entries.toList(),
-                              xValueMapper: (row, _) => row.key,
-                              yValueMapper: (row, _) => row.value,
-                              color: Colors.green,
-                              // Width of the columns
-                              // width: 0.5,
-                              // Spacing between the columns
-                              // spacing: 0.2,
-                              initialSelectedDataIndexes: [
-                                initialSelectedIndex
-                              ],
-                              selectionBehavior: _selectionBehavior,
-                              dataLabelSettings: const charts.DataLabelSettings(
-                                  labelAlignment:
-                                      charts.ChartDataLabelAlignment.outer,
-                                  isVisible: true))
-                        ]),
-                  );
-                },
-              ),
-            )
           ],
         ),
       ),
     );
   }
 
-  List<Widget> _buildTotal(
+  Widget _buildTotal(
     List<Transaction> transactions,
   ) {
     double total = 0.0;
     for (var element in transactions) {
       total += element.amount;
     }
-    return [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          categoryType == 'expense'
-              ? Text((dateRange == 'year'
-                      ? selectedDate.format("yyyy")
-                      : selectedDate.format("yyyy-MM")) +
-                  " " +
-                  AppLocalizations.of(context)!.chart_Title_TotalExpense)
-              : Text((dateRange == 'year'
-                      ? selectedDate.format("yyyy")
-                      : selectedDate.format("yyyy-MM")) +
-                  " " +
-                  AppLocalizations.of(context)!.chart_Title_TotalIncome),
-          Text(
-            total.toStringAsFixed(2),
-            style: const TextStyle(fontSize: 24),
-          ),
-        ],
-      )
-    ];
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        categoryType == 'expense'
+            ? Text((dateRange == 'year'
+                    ? selectedDate.format("yyyy")
+                    : selectedDate.format("yyyy-MM")) +
+                " " +
+                AppLocalizations.of(context)!.chart_Title_TotalExpense)
+            : Text((dateRange == 'year'
+                    ? selectedDate.format("yyyy")
+                    : selectedDate.format("yyyy-MM")) +
+                " " +
+                AppLocalizations.of(context)!.chart_Title_TotalIncome),
+        Text(
+          total.toStringAsFixed(2),
+          style: const TextStyle(fontSize: 24),
+        ),
+      ],
+    );
   }
 
   List<Widget> _buildPieAndList(
@@ -382,77 +367,83 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
     var sortedAmountPerCategory = amountPerCategory.entries.toList()
       ..sort((a, b) => -a.value.compareTo(b.value));
     var maxAmount = sortedAmountPerCategory[0].value;
-    return [
-      SizedBox(
-        width: double.infinity,
-        child: AspectRatio(
-            aspectRatio: 16 / 9,
-            child: charts.SfCircularChart(series: <charts.CircularSeries>[
-              charts.PieSeries<MapEntry<int, double>, String>(
-                  animationDuration: 500,
-                  dataSource: sortedAmountPerCategory,
-                  xValueMapper: (row, _) => row.key.toString(),
-                  yValueMapper: (row, _) => row.value,
-                  dataLabelMapper: (row, _) =>
-                      '${categoryItems[row.key]?.getDisplayName(context)}',
-                  dataLabelSettings: const charts.DataLabelSettings(
-                    isVisible: true,
-                    labelPosition: charts.ChartDataLabelPosition.outside,
-                  ))
-            ])),
-      ),
-      Expanded(
-        child: ListView.builder(
-            itemCount: sortedAmountPerCategory.length,
-            itemBuilder: (context, index) {
-              var entry = sortedAmountPerCategory[index];
-              return ListTile(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => ConditionedTransationPage(
-                            dateTime: selectedDate,
-                            dateRange: dateRange,
-                            categoryItem: categoryItems[entry.key]!)),
-                  );
-                },
-                contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
-                style: ListTileStyle.drawer,
-                title: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(categoryItems[entry.key] == null
-                        ? ""
-                        : categoryItems[entry.key]!.getDisplayName(context)),
-                    Text(
-                      entry.value.toStringAsFixed(2),
-                      textAlign: TextAlign.end,
-                    ),
-                  ],
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    LinearProgressIndicator(
-                      value: entry.value / maxAmount,
-                      backgroundColor: Colors.grey[200],
-                    ),
-                    Text(
-                      (entry.value / total * 100).toStringAsFixed(1) + "%",
-                      style: const TextStyle(fontSize: 12),
-                    )
-                  ],
-                ),
-                leading: Icon(
-                  categoryItems[entry.key]!.icon,
-                  color: categoryItems[entry.key]!.color,
-                ),
-                trailing: const Icon(Icons.chevron_right),
-              );
-            }),
-      )
-    ];
+    var widgetList = <Widget>[];
+    widgetList.add(SizedBox(
+      width: double.infinity,
+      child: AspectRatio(
+          aspectRatio: 16 / 9,
+          child: charts.SfCircularChart(series: <charts.CircularSeries>[
+            charts.PieSeries<MapEntry<int, double>, String>(
+                animationDuration: 500,
+                dataSource: sortedAmountPerCategory,
+                xValueMapper: (row, _) => row.key.toString(),
+                yValueMapper: (row, _) => row.value,
+                dataLabelMapper: (row, _) =>
+                    '${categoryItems[row.key]?.getDisplayName(context)}',
+                dataLabelSettings: const charts.DataLabelSettings(
+                  isVisible: true,
+                  labelPosition: charts.ChartDataLabelPosition.outside,
+                ))
+          ])),
+    ));
+    widgetList.addAll(_buildCumulatedTransactionList(
+        sortedAmountPerCategory, categoryItems, maxAmount, total));
+    return widgetList;
+  }
+
+  List<Widget> _buildCumulatedTransactionList(
+      List<MapEntry<int, double>> sortedAmountPerCategory,
+      Map<int, CategoryItem> categoryItems,
+      double maxAmount,
+      double total) {
+    var accumulatedTransactionList = <Widget>[];
+    for (var entry in sortedAmountPerCategory) {
+      accumulatedTransactionList.add(ListTile(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ConditionedTransationPage(
+                    dateTime: selectedDate,
+                    dateRange: dateRange,
+                    categoryItem: categoryItems[entry.key]!)),
+          );
+        },
+        contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
+        style: ListTileStyle.drawer,
+        title: Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(categoryItems[entry.key] == null
+                ? ""
+                : categoryItems[entry.key]!.getDisplayName(context)),
+            Text(
+              entry.value.toStringAsFixed(2),
+              textAlign: TextAlign.end,
+            ),
+          ],
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            LinearProgressIndicator(
+              value: entry.value / maxAmount,
+              backgroundColor: Colors.grey[200],
+            ),
+            Text(
+              (entry.value / total * 100).toStringAsFixed(1) + "%",
+              style: const TextStyle(fontSize: 12),
+            )
+          ],
+        ),
+        leading: Icon(
+          categoryItems[entry.key]!.icon,
+          color: categoryItems[entry.key]!.color,
+        ),
+        trailing: const Icon(Icons.chevron_right),
+      ));
+    }
+    return accumulatedTransactionList;
   }
 }
