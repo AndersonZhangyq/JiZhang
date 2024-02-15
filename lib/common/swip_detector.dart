@@ -98,8 +98,9 @@ class SwipeDetector extends StatelessWidget {
 
         if (dx > swipeConfiguration.verticalSwipeMaxWidthThreshold) return;
         if (dy < swipeConfiguration.verticalSwipeMinDisplacement) return;
-        if (positiveVelocity < swipeConfiguration.verticalSwipeMinVelocity)
+        if (positiveVelocity < swipeConfiguration.verticalSwipeMinVelocity) {
           return;
+        }
 
         if (velocity < 0) {
           //Swipe Up
@@ -132,8 +133,9 @@ class SwipeDetector extends StatelessWidget {
 
         if (dx < swipeConfiguration.horizontalSwipeMinDisplacement) return;
         if (dy > swipeConfiguration.horizontalSwipeMaxHeightThreshold) return;
-        if (positiveVelocity < swipeConfiguration.horizontalSwipeMinVelocity)
+        if (positiveVelocity < swipeConfiguration.horizontalSwipeMinVelocity) {
           return;
+        }
 
         if (velocity < 0) {
           //Swipe Up
