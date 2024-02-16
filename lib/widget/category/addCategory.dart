@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:dotted_border/dotted_border.dart';
-import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:ji_zhang/models/database.dart';
 import 'package:ji_zhang/widget/transaction/modifyTransaction.dart';
@@ -15,7 +14,7 @@ class AddCategoryWidget extends StatefulWidget {
 }
 
 class _AddCategoryState extends State<AddCategoryWidget> {
-  TextEditingController _categoryNameController = TextEditingController();
+  final TextEditingController _categoryNameController = TextEditingController();
   String categoryType = 'expense';
   Icon? categoryIcon;
   Color? categoryColor;
@@ -175,7 +174,7 @@ class _AddCategoryState extends State<AddCategoryWidget> {
                                         : Colors
                                             .transparent, //color of dotted/dash line
                                     strokeWidth: 1, //thickness of das
-                                    dashPattern: [3, 6],
+                                    dashPattern: const [3, 6],
                                     borderType: BorderType.Circle,
                                     child: IconButton(
                                       padding: const EdgeInsets.all(0),

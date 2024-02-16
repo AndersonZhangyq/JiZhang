@@ -13,7 +13,7 @@ class _ModifyTagState extends State<ModifyTagWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).backgroundColor,
+        backgroundColor: Theme.of(context).colorScheme.background,
         elevation: 0,
         centerTitle: true,
         title: Text(AppLocalizations.of(context)!.modifyTransaction_Title_add),

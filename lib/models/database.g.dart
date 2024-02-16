@@ -2,11 +2,153 @@
 
 part of 'database.dart';
 
-// **************************************************************************
-// MoorGenerator
-// **************************************************************************
-
 // ignore_for_file: type=lint
+class $CategoriesTable extends Categories
+    with TableInfo<$CategoriesTable, Category> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CategoriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+      'type', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _iconMeta = const VerificationMeta('icon');
+  @override
+  late final GeneratedColumn<String> icon = GeneratedColumn<String>(
+      'icon', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _colorMeta = const VerificationMeta('color');
+  @override
+  late final GeneratedColumn<String> color = GeneratedColumn<String>(
+      'color', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _posMeta = const VerificationMeta('pos');
+  @override
+  late final GeneratedColumn<int> pos = GeneratedColumn<int>(
+      'pos', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _predefinedMeta =
+      const VerificationMeta('predefined');
+  @override
+  late final GeneratedColumn<int> predefined = GeneratedColumn<int>(
+      'predefined', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, name, type, icon, color, pos, predefined, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'categories';
+  @override
+  VerificationContext validateIntegrity(Insertable<Category> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+          _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('icon')) {
+      context.handle(
+          _iconMeta, icon.isAcceptableOrUnknown(data['icon']!, _iconMeta));
+    } else if (isInserting) {
+      context.missing(_iconMeta);
+    }
+    if (data.containsKey('color')) {
+      context.handle(
+          _colorMeta, color.isAcceptableOrUnknown(data['color']!, _colorMeta));
+    } else if (isInserting) {
+      context.missing(_colorMeta);
+    }
+    if (data.containsKey('pos')) {
+      context.handle(
+          _posMeta, pos.isAcceptableOrUnknown(data['pos']!, _posMeta));
+    } else if (isInserting) {
+      context.missing(_posMeta);
+    }
+    if (data.containsKey('predefined')) {
+      context.handle(
+          _predefinedMeta,
+          predefined.isAcceptableOrUnknown(
+              data['predefined']!, _predefinedMeta));
+    } else if (isInserting) {
+      context.missing(_predefinedMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Category map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Category(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      type: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
+      icon: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}icon'])!,
+      color: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}color'])!,
+      pos: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}pos'])!,
+      predefined: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}predefined'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
+  }
+
+  @override
+  $CategoriesTable createAlias(String alias) {
+    return $CategoriesTable(attachedDatabase, alias);
+  }
+}
+
 class Category extends DataClass implements Insertable<Category> {
   final int id;
   final String name;
@@ -16,7 +158,7 @@ class Category extends DataClass implements Insertable<Category> {
   final int pos;
   final int predefined;
   final DateTime createdAt;
-  Category(
+  const Category(
       {required this.id,
       required this.name,
       required this.type,
@@ -25,27 +167,6 @@ class Category extends DataClass implements Insertable<Category> {
       required this.pos,
       required this.predefined,
       required this.createdAt});
-  factory Category.fromData(Map<String, dynamic> data, {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return Category(
-      id: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      name: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}name'])!,
-      type: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
-      icon: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}icon'])!,
-      color: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}color'])!,
-      pos: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}pos'])!,
-      predefined: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}predefined'])!,
-      createdAt: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])!,
-    );
-  }
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -276,65 +397,42 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
   }
 }
 
-class $CategoriesTable extends Categories
-    with TableInfo<$CategoriesTable, Category> {
+class $EventsTable extends Events with TableInfo<$EventsTable, Event> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $CategoriesTable(this.attachedDatabase, [this._alias]);
-  final VerificationMeta _idMeta = const VerificationMeta('id');
+  $EventsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
       'id', aliasedName, false,
-      type: const IntType(),
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
       requiredDuringInsert: false,
-      defaultConstraints: 'PRIMARY KEY AUTOINCREMENT');
-  final VerificationMeta _nameMeta = const VerificationMeta('name');
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
-  late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
       'name', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
-  final VerificationMeta _typeMeta = const VerificationMeta('type');
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
   @override
-  late final GeneratedColumn<String?> type = GeneratedColumn<String?>(
-      'type', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
-  final VerificationMeta _iconMeta = const VerificationMeta('icon');
-  @override
-  late final GeneratedColumn<String?> icon = GeneratedColumn<String?>(
-      'icon', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
-  final VerificationMeta _colorMeta = const VerificationMeta('color');
-  @override
-  late final GeneratedColumn<String?> color = GeneratedColumn<String?>(
-      'color', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
-  final VerificationMeta _posMeta = const VerificationMeta('pos');
-  @override
-  late final GeneratedColumn<int?> pos = GeneratedColumn<int?>(
-      'pos', aliasedName, false,
-      type: const IntType(), requiredDuringInsert: true);
-  final VerificationMeta _predefinedMeta = const VerificationMeta('predefined');
-  @override
-  late final GeneratedColumn<int?> predefined = GeneratedColumn<int?>(
-      'predefined', aliasedName, false,
-      type: const IntType(), requiredDuringInsert: true);
-  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  @override
-  late final GeneratedColumn<DateTime?> createdAt = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
       'created_at', aliasedName, false,
-      type: const IntType(),
+      type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, name, type, icon, color, pos, predefined, createdAt];
+  List<GeneratedColumn> get $columns => [id, name, createdAt];
   @override
-  String get aliasedName => _alias ?? 'categories';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'categories';
+  String get actualTableName => $name;
+  static const String $name = 'events';
   @override
-  VerificationContext validateIntegrity(Insertable<Category> instance,
+  VerificationContext validateIntegrity(Insertable<Event> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -347,38 +445,6 @@ class $CategoriesTable extends Categories
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    if (data.containsKey('type')) {
-      context.handle(
-          _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
-    } else if (isInserting) {
-      context.missing(_typeMeta);
-    }
-    if (data.containsKey('icon')) {
-      context.handle(
-          _iconMeta, icon.isAcceptableOrUnknown(data['icon']!, _iconMeta));
-    } else if (isInserting) {
-      context.missing(_iconMeta);
-    }
-    if (data.containsKey('color')) {
-      context.handle(
-          _colorMeta, color.isAcceptableOrUnknown(data['color']!, _colorMeta));
-    } else if (isInserting) {
-      context.missing(_colorMeta);
-    }
-    if (data.containsKey('pos')) {
-      context.handle(
-          _posMeta, pos.isAcceptableOrUnknown(data['pos']!, _posMeta));
-    } else if (isInserting) {
-      context.missing(_posMeta);
-    }
-    if (data.containsKey('predefined')) {
-      context.handle(
-          _predefinedMeta,
-          predefined.isAcceptableOrUnknown(
-              data['predefined']!, _predefinedMeta));
-    } else if (isInserting) {
-      context.missing(_predefinedMeta);
-    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -389,14 +455,21 @@ class $CategoriesTable extends Categories
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Category map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return Category.fromData(data,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+  Event map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Event(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
   }
 
   @override
-  $CategoriesTable createAlias(String alias) {
-    return $CategoriesTable(attachedDatabase, alias);
+  $EventsTable createAlias(String alias) {
+    return $EventsTable(attachedDatabase, alias);
   }
 }
 
@@ -404,18 +477,7 @@ class Event extends DataClass implements Insertable<Event> {
   final int id;
   final String name;
   final DateTime createdAt;
-  Event({required this.id, required this.name, required this.createdAt});
-  factory Event.fromData(Map<String, dynamic> data, {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return Event(
-      id: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      name: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}name'])!,
-      createdAt: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])!,
-    );
-  }
+  const Event({required this.id, required this.name, required this.createdAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -539,49 +601,109 @@ class EventsCompanion extends UpdateCompanion<Event> {
   }
 }
 
-class $EventsTable extends Events with TableInfo<$EventsTable, Event> {
+class $TransactionsTable extends Transactions
+    with TableInfo<$TransactionsTable, Transaction> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $EventsTable(this.attachedDatabase, [this._alias]);
-  final VerificationMeta _idMeta = const VerificationMeta('id');
+  $TransactionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
       'id', aliasedName, false,
-      type: const IntType(),
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
       requiredDuringInsert: false,
-      defaultConstraints: 'PRIMARY KEY AUTOINCREMENT');
-  final VerificationMeta _nameMeta = const VerificationMeta('name');
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
   @override
-  late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
-      'name', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
-  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
+      'amount', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
   @override
-  late final GeneratedColumn<DateTime?> createdAt = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
+      'date', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _categoryIdMeta =
+      const VerificationMeta('categoryId');
+  @override
+  late final GeneratedColumn<int> categoryId = GeneratedColumn<int>(
+      'category_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _recurrenceMeta =
+      const VerificationMeta('recurrence');
+  @override
+  late final GeneratedColumn<String> recurrence = GeneratedColumn<String>(
+      'recurrence', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _tagIdsMeta = const VerificationMeta('tagIds');
+  @override
+  late final GeneratedColumnWithTypeConverter<List<int>?, String> tagIds =
+      GeneratedColumn<String>('tag_ids', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<List<int>?>($TransactionsTable.$convertertagIdsn);
+  static const VerificationMeta _commentMeta =
+      const VerificationMeta('comment');
+  @override
+  late final GeneratedColumn<String> comment = GeneratedColumn<String>(
+      'comment', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
       'created_at', aliasedName, false,
-      type: const IntType(),
+      type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
   @override
-  List<GeneratedColumn> get $columns => [id, name, createdAt];
+  List<GeneratedColumn> get $columns =>
+      [id, amount, date, categoryId, recurrence, tagIds, comment, createdAt];
   @override
-  String get aliasedName => _alias ?? 'events';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'events';
+  String get actualTableName => $name;
+  static const String $name = 'transactions';
   @override
-  VerificationContext validateIntegrity(Insertable<Event> instance,
+  VerificationContext validateIntegrity(Insertable<Transaction> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
-    if (data.containsKey('name')) {
-      context.handle(
-          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    if (data.containsKey('amount')) {
+      context.handle(_amountMeta,
+          amount.isAcceptableOrUnknown(data['amount']!, _amountMeta));
     } else if (isInserting) {
-      context.missing(_nameMeta);
+      context.missing(_amountMeta);
+    }
+    if (data.containsKey('date')) {
+      context.handle(
+          _dateMeta, date.isAcceptableOrUnknown(data['date']!, _dateMeta));
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    if (data.containsKey('category_id')) {
+      context.handle(
+          _categoryIdMeta,
+          categoryId.isAcceptableOrUnknown(
+              data['category_id']!, _categoryIdMeta));
+    } else if (isInserting) {
+      context.missing(_categoryIdMeta);
+    }
+    if (data.containsKey('recurrence')) {
+      context.handle(
+          _recurrenceMeta,
+          recurrence.isAcceptableOrUnknown(
+              data['recurrence']!, _recurrenceMeta));
+    }
+    context.handle(_tagIdsMeta, const VerificationResult.success());
+    if (data.containsKey('comment')) {
+      context.handle(_commentMeta,
+          comment.isAcceptableOrUnknown(data['comment']!, _commentMeta));
     }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
@@ -593,15 +715,38 @@ class $EventsTable extends Events with TableInfo<$EventsTable, Event> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Event map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return Event.fromData(data,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+  Transaction map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Transaction(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      amount: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}amount'])!,
+      date: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}date'])!,
+      categoryId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}category_id'])!,
+      recurrence: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}recurrence']),
+      tagIds: $TransactionsTable.$convertertagIdsn.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}tag_ids'])),
+      comment: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}comment']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
   }
 
   @override
-  $EventsTable createAlias(String alias) {
-    return $EventsTable(attachedDatabase, alias);
+  $TransactionsTable createAlias(String alias) {
+    return $TransactionsTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<List<int>, String> $convertertagIds =
+      const IntegerListConverter();
+  static TypeConverter<List<int>?, String?> $convertertagIdsn =
+      NullAwareTypeConverter.wrap($convertertagIds);
 }
 
 class Transaction extends DataClass implements Insertable<Transaction> {
@@ -613,7 +758,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   final List<int>? tagIds;
   final String? comment;
   final DateTime createdAt;
-  Transaction(
+  const Transaction(
       {required this.id,
       required this.amount,
       required this.date,
@@ -622,27 +767,6 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       this.tagIds,
       this.comment,
       required this.createdAt});
-  factory Transaction.fromData(Map<String, dynamic> data, {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return Transaction(
-      id: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      amount: const RealType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}amount'])!,
-      date: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}date'])!,
-      categoryId: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}category_id'])!,
-      recurrence: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}recurrence']),
-      tagIds: $TransactionsTable.$converter0.mapToDart(const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}tag_ids'])),
-      comment: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}comment']),
-      createdAt: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])!,
-    );
-  }
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -651,14 +775,14 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     map['date'] = Variable<DateTime>(date);
     map['category_id'] = Variable<int>(categoryId);
     if (!nullToAbsent || recurrence != null) {
-      map['recurrence'] = Variable<String?>(recurrence);
+      map['recurrence'] = Variable<String>(recurrence);
     }
     if (!nullToAbsent || tagIds != null) {
-      final converter = $TransactionsTable.$converter0;
-      map['tag_ids'] = Variable<String?>(converter.mapToSql(tagIds));
+      map['tag_ids'] =
+          Variable<String>($TransactionsTable.$convertertagIdsn.toSql(tagIds));
     }
     if (!nullToAbsent || comment != null) {
-      map['comment'] = Variable<String?>(comment);
+      map['comment'] = Variable<String>(comment);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
@@ -716,18 +840,18 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           double? amount,
           DateTime? date,
           int? categoryId,
-          String? recurrence,
-          List<int>? tagIds,
-          String? comment,
+          Value<String?> recurrence = const Value.absent(),
+          Value<List<int>?> tagIds = const Value.absent(),
+          Value<String?> comment = const Value.absent(),
           DateTime? createdAt}) =>
       Transaction(
         id: id ?? this.id,
         amount: amount ?? this.amount,
         date: date ?? this.date,
         categoryId: categoryId ?? this.categoryId,
-        recurrence: recurrence ?? this.recurrence,
-        tagIds: tagIds ?? this.tagIds,
-        comment: comment ?? this.comment,
+        recurrence: recurrence.present ? recurrence.value : this.recurrence,
+        tagIds: tagIds.present ? tagIds.value : this.tagIds,
+        comment: comment.present ? comment.value : this.comment,
         createdAt: createdAt ?? this.createdAt,
       );
   @override
@@ -798,9 +922,9 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     Expression<double>? amount,
     Expression<DateTime>? date,
     Expression<int>? categoryId,
-    Expression<String?>? recurrence,
-    Expression<List<int>?>? tagIds,
-    Expression<String?>? comment,
+    Expression<String>? recurrence,
+    Expression<String>? tagIds,
+    Expression<String>? comment,
     Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
@@ -852,14 +976,14 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       map['category_id'] = Variable<int>(categoryId.value);
     }
     if (recurrence.present) {
-      map['recurrence'] = Variable<String?>(recurrence.value);
+      map['recurrence'] = Variable<String>(recurrence.value);
     }
     if (tagIds.present) {
-      final converter = $TransactionsTable.$converter0;
-      map['tag_ids'] = Variable<String?>(converter.mapToSql(tagIds.value));
+      map['tag_ids'] = Variable<String>(
+          $TransactionsTable.$convertertagIdsn.toSql(tagIds.value));
     }
     if (comment.present) {
-      map['comment'] = Variable<String?>(comment.value);
+      map['comment'] = Variable<String>(comment.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -883,102 +1007,53 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
   }
 }
 
-class $TransactionsTable extends Transactions
-    with TableInfo<$TransactionsTable, Transaction> {
+class $TagsTable extends Tags with TableInfo<$TagsTable, Tag> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $TransactionsTable(this.attachedDatabase, [this._alias]);
-  final VerificationMeta _idMeta = const VerificationMeta('id');
+  $TagsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
       'id', aliasedName, false,
-      type: const IntType(),
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
       requiredDuringInsert: false,
-      defaultConstraints: 'PRIMARY KEY AUTOINCREMENT');
-  final VerificationMeta _amountMeta = const VerificationMeta('amount');
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
-  late final GeneratedColumn<double?> amount = GeneratedColumn<double?>(
-      'amount', aliasedName, false,
-      type: const RealType(), requiredDuringInsert: true);
-  final VerificationMeta _dateMeta = const VerificationMeta('date');
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
   @override
-  late final GeneratedColumn<DateTime?> date = GeneratedColumn<DateTime?>(
-      'date', aliasedName, false,
-      type: const IntType(), requiredDuringInsert: true);
-  final VerificationMeta _categoryIdMeta = const VerificationMeta('categoryId');
-  @override
-  late final GeneratedColumn<int?> categoryId = GeneratedColumn<int?>(
-      'category_id', aliasedName, false,
-      type: const IntType(), requiredDuringInsert: true);
-  final VerificationMeta _recurrenceMeta = const VerificationMeta('recurrence');
-  @override
-  late final GeneratedColumn<String?> recurrence = GeneratedColumn<String?>(
-      'recurrence', aliasedName, true,
-      type: const StringType(), requiredDuringInsert: false);
-  final VerificationMeta _tagIdsMeta = const VerificationMeta('tagIds');
-  @override
-  late final GeneratedColumnWithTypeConverter<List<int>, String?> tagIds =
-      GeneratedColumn<String?>('tag_ids', aliasedName, true,
-              type: const StringType(), requiredDuringInsert: false)
-          .withConverter<List<int>>($TransactionsTable.$converter0);
-  final VerificationMeta _commentMeta = const VerificationMeta('comment');
-  @override
-  late final GeneratedColumn<String?> comment = GeneratedColumn<String?>(
-      'comment', aliasedName, true,
-      type: const StringType(), requiredDuringInsert: false);
-  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  @override
-  late final GeneratedColumn<DateTime?> createdAt = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
       'created_at', aliasedName, false,
-      type: const IntType(),
+      type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, amount, date, categoryId, recurrence, tagIds, comment, createdAt];
+  List<GeneratedColumn> get $columns => [id, name, createdAt];
   @override
-  String get aliasedName => _alias ?? 'transactions';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'transactions';
+  String get actualTableName => $name;
+  static const String $name = 'tags';
   @override
-  VerificationContext validateIntegrity(Insertable<Transaction> instance,
+  VerificationContext validateIntegrity(Insertable<Tag> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
-    if (data.containsKey('amount')) {
-      context.handle(_amountMeta,
-          amount.isAcceptableOrUnknown(data['amount']!, _amountMeta));
-    } else if (isInserting) {
-      context.missing(_amountMeta);
-    }
-    if (data.containsKey('date')) {
+    if (data.containsKey('name')) {
       context.handle(
-          _dateMeta, date.isAcceptableOrUnknown(data['date']!, _dateMeta));
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
     } else if (isInserting) {
-      context.missing(_dateMeta);
-    }
-    if (data.containsKey('category_id')) {
-      context.handle(
-          _categoryIdMeta,
-          categoryId.isAcceptableOrUnknown(
-              data['category_id']!, _categoryIdMeta));
-    } else if (isInserting) {
-      context.missing(_categoryIdMeta);
-    }
-    if (data.containsKey('recurrence')) {
-      context.handle(
-          _recurrenceMeta,
-          recurrence.isAcceptableOrUnknown(
-              data['recurrence']!, _recurrenceMeta));
-    }
-    context.handle(_tagIdsMeta, const VerificationResult.success());
-    if (data.containsKey('comment')) {
-      context.handle(_commentMeta,
-          comment.isAcceptableOrUnknown(data['comment']!, _commentMeta));
+      context.missing(_nameMeta);
     }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
@@ -990,36 +1065,29 @@ class $TransactionsTable extends Transactions
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Transaction map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return Transaction.fromData(data,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+  Tag map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Tag(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
   }
 
   @override
-  $TransactionsTable createAlias(String alias) {
-    return $TransactionsTable(attachedDatabase, alias);
+  $TagsTable createAlias(String alias) {
+    return $TagsTable(attachedDatabase, alias);
   }
-
-  static TypeConverter<List<int>, String> $converter0 =
-      const IntegerListConverter();
 }
 
 class Tag extends DataClass implements Insertable<Tag> {
   final int id;
   final String name;
   final DateTime createdAt;
-  Tag({required this.id, required this.name, required this.createdAt});
-  factory Tag.fromData(Map<String, dynamic> data, {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return Tag(
-      id: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      name: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}name'])!,
-      createdAt: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])!,
-    );
-  }
+  const Tag({required this.id, required this.name, required this.createdAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1143,38 +1211,62 @@ class TagsCompanion extends UpdateCompanion<Tag> {
   }
 }
 
-class $TagsTable extends Tags with TableInfo<$TagsTable, Tag> {
+class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, Budget> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $TagsTable(this.attachedDatabase, [this._alias]);
-  final VerificationMeta _idMeta = const VerificationMeta('id');
+  $BudgetsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
       'id', aliasedName, false,
-      type: const IntType(),
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
       requiredDuringInsert: false,
-      defaultConstraints: 'PRIMARY KEY AUTOINCREMENT');
-  final VerificationMeta _nameMeta = const VerificationMeta('name');
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
-  late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
       'name', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
-  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
   @override
-  late final GeneratedColumn<DateTime?> createdAt = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
+      'amount', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _categoryIdsMeta =
+      const VerificationMeta('categoryIds');
+  @override
+  late final GeneratedColumnWithTypeConverter<List<int>, String> categoryIds =
+      GeneratedColumn<String>('category_ids', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<List<int>>($BudgetsTable.$convertercategoryIds);
+  static const VerificationMeta _recurrenceMeta =
+      const VerificationMeta('recurrence');
+  @override
+  late final GeneratedColumnWithTypeConverter<RECURRENCE_TYPE, int> recurrence =
+      GeneratedColumn<int>('recurrence', aliasedName, false,
+              type: DriftSqlType.int, requiredDuringInsert: true)
+          .withConverter<RECURRENCE_TYPE>($BudgetsTable.$converterrecurrence);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
       'created_at', aliasedName, false,
-      type: const IntType(),
+      type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
   @override
-  List<GeneratedColumn> get $columns => [id, name, createdAt];
+  List<GeneratedColumn> get $columns =>
+      [id, name, amount, categoryIds, recurrence, createdAt];
   @override
-  String get aliasedName => _alias ?? 'tags';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'tags';
+  String get actualTableName => $name;
+  static const String $name = 'budgets';
   @override
-  VerificationContext validateIntegrity(Insertable<Tag> instance,
+  VerificationContext validateIntegrity(Insertable<Budget> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -1187,6 +1279,14 @@ class $TagsTable extends Tags with TableInfo<$TagsTable, Tag> {
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
+    if (data.containsKey('amount')) {
+      context.handle(_amountMeta,
+          amount.isAcceptableOrUnknown(data['amount']!, _amountMeta));
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    context.handle(_categoryIdsMeta, const VerificationResult.success());
+    context.handle(_recurrenceMeta, const VerificationResult.success());
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -1197,15 +1297,35 @@ class $TagsTable extends Tags with TableInfo<$TagsTable, Tag> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Tag map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return Tag.fromData(data,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+  Budget map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Budget(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      amount: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}amount'])!,
+      categoryIds: $BudgetsTable.$convertercategoryIds.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}category_ids'])!),
+      recurrence: $BudgetsTable.$converterrecurrence.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}recurrence'])!),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
   }
 
   @override
-  $TagsTable createAlias(String alias) {
-    return $TagsTable(attachedDatabase, alias);
+  $BudgetsTable createAlias(String alias) {
+    return $BudgetsTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<List<int>, String> $convertercategoryIds =
+      const IntegerListConverter();
+  static JsonTypeConverter2<RECURRENCE_TYPE, int, int> $converterrecurrence =
+      const EnumIndexConverter<RECURRENCE_TYPE>(RECURRENCE_TYPE.values);
 }
 
 class Budget extends DataClass implements Insertable<Budget> {
@@ -1215,30 +1335,13 @@ class Budget extends DataClass implements Insertable<Budget> {
   final List<int> categoryIds;
   final RECURRENCE_TYPE recurrence;
   final DateTime createdAt;
-  Budget(
+  const Budget(
       {required this.id,
       required this.name,
       required this.amount,
       required this.categoryIds,
       required this.recurrence,
       required this.createdAt});
-  factory Budget.fromData(Map<String, dynamic> data, {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return Budget(
-      id: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      name: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}name'])!,
-      amount: const RealType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}amount'])!,
-      categoryIds: $BudgetsTable.$converter0.mapToDart(const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}category_ids']))!,
-      recurrence: $BudgetsTable.$converter1.mapToDart(const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}recurrence']))!,
-      createdAt: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])!,
-    );
-  }
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1246,12 +1349,12 @@ class Budget extends DataClass implements Insertable<Budget> {
     map['name'] = Variable<String>(name);
     map['amount'] = Variable<double>(amount);
     {
-      final converter = $BudgetsTable.$converter0;
-      map['category_ids'] = Variable<String>(converter.mapToSql(categoryIds)!);
+      map['category_ids'] = Variable<String>(
+          $BudgetsTable.$convertercategoryIds.toSql(categoryIds));
     }
     {
-      final converter = $BudgetsTable.$converter1;
-      map['recurrence'] = Variable<int>(converter.mapToSql(recurrence)!);
+      map['recurrence'] =
+          Variable<int>($BudgetsTable.$converterrecurrence.toSql(recurrence));
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
@@ -1276,7 +1379,8 @@ class Budget extends DataClass implements Insertable<Budget> {
       name: serializer.fromJson<String>(json['name']),
       amount: serializer.fromJson<double>(json['amount']),
       categoryIds: serializer.fromJson<List<int>>(json['categoryIds']),
-      recurrence: serializer.fromJson<RECURRENCE_TYPE>(json['recurrence']),
+      recurrence: $BudgetsTable.$converterrecurrence
+          .fromJson(serializer.fromJson<int>(json['recurrence'])),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -1288,7 +1392,8 @@ class Budget extends DataClass implements Insertable<Budget> {
       'name': serializer.toJson<String>(name),
       'amount': serializer.toJson<double>(amount),
       'categoryIds': serializer.toJson<List<int>>(categoryIds),
-      'recurrence': serializer.toJson<RECURRENCE_TYPE>(recurrence),
+      'recurrence': serializer
+          .toJson<int>($BudgetsTable.$converterrecurrence.toJson(recurrence)),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -1366,8 +1471,8 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
     Expression<int>? id,
     Expression<String>? name,
     Expression<double>? amount,
-    Expression<List<int>>? categoryIds,
-    Expression<RECURRENCE_TYPE>? recurrence,
+    Expression<String>? categoryIds,
+    Expression<int>? recurrence,
     Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
@@ -1410,13 +1515,12 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
       map['amount'] = Variable<double>(amount.value);
     }
     if (categoryIds.present) {
-      final converter = $BudgetsTable.$converter0;
-      map['category_ids'] =
-          Variable<String>(converter.mapToSql(categoryIds.value)!);
+      map['category_ids'] = Variable<String>(
+          $BudgetsTable.$convertercategoryIds.toSql(categoryIds.value));
     }
     if (recurrence.present) {
-      final converter = $BudgetsTable.$converter1;
-      map['recurrence'] = Variable<int>(converter.mapToSql(recurrence.value)!);
+      map['recurrence'] = Variable<int>(
+          $BudgetsTable.$converterrecurrence.toSql(recurrence.value));
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -1438,112 +1542,16 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
   }
 }
 
-class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, Budget> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $BudgetsTable(this.attachedDatabase, [this._alias]);
-  final VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
-      'id', aliasedName, false,
-      type: const IntType(),
-      requiredDuringInsert: false,
-      defaultConstraints: 'PRIMARY KEY AUTOINCREMENT');
-  final VerificationMeta _nameMeta = const VerificationMeta('name');
-  @override
-  late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
-      'name', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
-  final VerificationMeta _amountMeta = const VerificationMeta('amount');
-  @override
-  late final GeneratedColumn<double?> amount = GeneratedColumn<double?>(
-      'amount', aliasedName, false,
-      type: const RealType(), requiredDuringInsert: true);
-  final VerificationMeta _categoryIdsMeta =
-      const VerificationMeta('categoryIds');
-  @override
-  late final GeneratedColumnWithTypeConverter<List<int>, String?> categoryIds =
-      GeneratedColumn<String?>('category_ids', aliasedName, false,
-              type: const StringType(), requiredDuringInsert: true)
-          .withConverter<List<int>>($BudgetsTable.$converter0);
-  final VerificationMeta _recurrenceMeta = const VerificationMeta('recurrence');
-  @override
-  late final GeneratedColumnWithTypeConverter<RECURRENCE_TYPE, int?>
-      recurrence = GeneratedColumn<int?>('recurrence', aliasedName, false,
-              type: const IntType(), requiredDuringInsert: true)
-          .withConverter<RECURRENCE_TYPE>($BudgetsTable.$converter1);
-  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  @override
-  late final GeneratedColumn<DateTime?> createdAt = GeneratedColumn<DateTime?>(
-      'created_at', aliasedName, false,
-      type: const IntType(),
-      requiredDuringInsert: false,
-      defaultValue: currentDateAndTime);
-  @override
-  List<GeneratedColumn> get $columns =>
-      [id, name, amount, categoryIds, recurrence, createdAt];
-  @override
-  String get aliasedName => _alias ?? 'budgets';
-  @override
-  String get actualTableName => 'budgets';
-  @override
-  VerificationContext validateIntegrity(Insertable<Budget> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('name')) {
-      context.handle(
-          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
-    } else if (isInserting) {
-      context.missing(_nameMeta);
-    }
-    if (data.containsKey('amount')) {
-      context.handle(_amountMeta,
-          amount.isAcceptableOrUnknown(data['amount']!, _amountMeta));
-    } else if (isInserting) {
-      context.missing(_amountMeta);
-    }
-    context.handle(_categoryIdsMeta, const VerificationResult.success());
-    context.handle(_recurrenceMeta, const VerificationResult.success());
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  Budget map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return Budget.fromData(data,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
-  }
-
-  @override
-  $BudgetsTable createAlias(String alias) {
-    return $BudgetsTable(attachedDatabase, alias);
-  }
-
-  static TypeConverter<List<int>, String> $converter0 =
-      const IntegerListConverter();
-  static TypeConverter<RECURRENCE_TYPE, int> $converter1 =
-      const EnumIndexConverter<RECURRENCE_TYPE>(RECURRENCE_TYPE.values);
-}
-
 abstract class _$MyDatabase extends GeneratedDatabase {
-  _$MyDatabase(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
+  _$MyDatabase(QueryExecutor e) : super(e);
   late final $CategoriesTable categories = $CategoriesTable(this);
   late final $EventsTable events = $EventsTable(this);
   late final $TransactionsTable transactions = $TransactionsTable(this);
   late final $TagsTable tags = $TagsTable(this);
   late final $BudgetsTable budgets = $BudgetsTable(this);
   @override
-  Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
+  Iterable<TableInfo<Table, Object?>> get allTables =>
+      allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
       [categories, events, transactions, tags, budgets];

@@ -43,8 +43,7 @@ class MoneyNumberTablet extends StatelessWidget {
       children: <Widget>[
         OutlinedButton(
           style: OutlinedButton.styleFrom(
-            textStyle: const TextStyle(fontSize: 18),
-            primary: Colors.black,
+            foregroundColor: Colors.black, textStyle: const TextStyle(fontSize: 18),
             backgroundColor: Colors.white,
           ),
           child: const Text('1'),
@@ -54,8 +53,7 @@ class MoneyNumberTablet extends StatelessWidget {
         ),
         OutlinedButton(
           style: OutlinedButton.styleFrom(
-            textStyle: const TextStyle(fontSize: 18),
-            primary: Colors.black,
+            foregroundColor: Colors.black, textStyle: const TextStyle(fontSize: 18),
             backgroundColor: Colors.white,
           ),
           child: const Text('2'),
@@ -65,8 +63,7 @@ class MoneyNumberTablet extends StatelessWidget {
         ),
         OutlinedButton(
           style: OutlinedButton.styleFrom(
-            textStyle: const TextStyle(fontSize: 18),
-            primary: Colors.black,
+            foregroundColor: Colors.black, textStyle: const TextStyle(fontSize: 18),
             backgroundColor: Colors.white,
           ),
           child: const Text('3'),
@@ -76,8 +73,7 @@ class MoneyNumberTablet extends StatelessWidget {
         ),
         OutlinedButton(
             style: OutlinedButton.styleFrom(
-              textStyle: const TextStyle(fontSize: 18),
-              primary: Colors.black,
+              foregroundColor: Colors.black, textStyle: const TextStyle(fontSize: 18),
               backgroundColor: Colors.white,
             ),
             child: const Text('4'),
@@ -86,8 +82,7 @@ class MoneyNumberTablet extends StatelessWidget {
             }),
         OutlinedButton(
             style: OutlinedButton.styleFrom(
-              textStyle: const TextStyle(fontSize: 18),
-              primary: Colors.black,
+              foregroundColor: Colors.black, textStyle: const TextStyle(fontSize: 18),
               backgroundColor: Colors.white,
             ),
             child: const Text('5'),
@@ -96,8 +91,7 @@ class MoneyNumberTablet extends StatelessWidget {
             }),
         OutlinedButton(
             style: OutlinedButton.styleFrom(
-              textStyle: const TextStyle(fontSize: 18),
-              primary: Colors.black,
+              foregroundColor: Colors.black, textStyle: const TextStyle(fontSize: 18),
               backgroundColor: Colors.white,
             ),
             child: const Text('6'),
@@ -106,8 +100,7 @@ class MoneyNumberTablet extends StatelessWidget {
             }),
         OutlinedButton(
             style: OutlinedButton.styleFrom(
-              textStyle: const TextStyle(fontSize: 18),
-              primary: Colors.black,
+              foregroundColor: Colors.black, textStyle: const TextStyle(fontSize: 18),
               backgroundColor: Colors.white,
             ),
             child: const Text('7'),
@@ -116,8 +109,7 @@ class MoneyNumberTablet extends StatelessWidget {
             }),
         OutlinedButton(
             style: OutlinedButton.styleFrom(
-              textStyle: const TextStyle(fontSize: 18),
-              primary: Colors.black,
+              foregroundColor: Colors.black, textStyle: const TextStyle(fontSize: 18),
               backgroundColor: Colors.white,
             ),
             child: const Text('8'),
@@ -126,8 +118,7 @@ class MoneyNumberTablet extends StatelessWidget {
             }),
         OutlinedButton(
             style: OutlinedButton.styleFrom(
-              textStyle: const TextStyle(fontSize: 18),
-              primary: Colors.black,
+              foregroundColor: Colors.black, textStyle: const TextStyle(fontSize: 18),
               backgroundColor: Colors.white,
             ),
             child: const Text('9'),
@@ -136,8 +127,7 @@ class MoneyNumberTablet extends StatelessWidget {
             }),
         OutlinedButton(
             style: OutlinedButton.styleFrom(
-              textStyle: const TextStyle(fontSize: 18),
-              primary: Colors.black,
+              foregroundColor: Colors.black, textStyle: const TextStyle(fontSize: 18),
               backgroundColor: Colors.white,
             ),
             child: const Text('.'),
@@ -146,8 +136,7 @@ class MoneyNumberTablet extends StatelessWidget {
             }),
         OutlinedButton(
             style: OutlinedButton.styleFrom(
-              textStyle: const TextStyle(fontSize: 18),
-              primary: Colors.black,
+              foregroundColor: Colors.black, textStyle: const TextStyle(fontSize: 18),
               backgroundColor: Colors.white,
             ),
             child: const Text('0'),
@@ -156,8 +145,7 @@ class MoneyNumberTablet extends StatelessWidget {
             }),
         OutlinedButton(
             style: OutlinedButton.styleFrom(
-              textStyle: const TextStyle(fontSize: 18),
-              primary: Colors.black,
+              foregroundColor: Colors.black, textStyle: const TextStyle(fontSize: 18),
               backgroundColor: Colors.white,
             ),
             child: const Icon(
