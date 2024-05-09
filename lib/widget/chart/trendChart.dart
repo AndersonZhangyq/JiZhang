@@ -44,7 +44,7 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
   @override
   Widget build(BuildContext context) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _buildTopBar(context),
+      _buildTopBar(),
       Expanded(
         child: ValueListenableBuilder(
             valueListenable: categoryTypeNotifier,
@@ -94,8 +94,7 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
                                     behavior: const ScrollBehavior()
                                         .copyWith(overscroll: false),
                                     child: SingleChildScrollView(
-                                      child: Column(
-                                          children: columnChildren),
+                                      child: Column(children: columnChildren),
                                     ),
                                   ));
                             });
@@ -107,7 +106,7 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
     ]);
   }
 
-  Widget _buildTopBar(BuildContext context) {
+  Widget _buildTopBar() {
     return StreamBuilder<DateTimeRange>(
         stream: db.getTransactionRange(),
         builder: (context, snapshot) {
@@ -334,105 +333,117 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
   }
 
   Widget _buildBarChart() {
-    return SizedBox(
-      height: 180,
-      width: double.infinity,
-      child: StreamBuilder<Map<DateTime, double>>(
-        stream: dateRangeNotifier.value == "month"
-            ? db.getMonthlySum(categoryTypeNotifier.value)
-            : db.getYearlySum(categoryTypeNotifier.value),
+    return StreamBuilder<DateTimeRange>(
+        stream: db.getTransactionRange(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting ||
               !snapshot.hasData) {
-            return Container();
+            return const LoadingWidget();
           }
-          final range = snapshot.data!.keys.toList();
-          range.sort();
-          seriesData.clear();
-          if (dateRangeNotifier.value == 'year') {
-            var iterDatetime = range.last;
-            if (selectedDateNotifier.value
-                .copyWith(year: selectedDateNotifier.value.year + 2)
-                .compareTo(range.last) <=
-                0) {
-              iterDatetime = selectedDateNotifier.value
-                  .copyWith(year: selectedDateNotifier.value.year + 2);
-            }
-            while (iterDatetime.compareTo(range.first) >= 0) {
-              seriesData[iterDatetime] = snapshot.data![iterDatetime] ?? 0.0;
-              iterDatetime = iterDatetime.copyWith(year: iterDatetime.year - 1);
-              if (seriesData.length >= 5) {
-                break;
-              }
-            }
-          } else {
-            var iterDatetime = range.last;
-            if (selectedDateNotifier.value
-                .copyWith(month: selectedDateNotifier.value.month + 6)
-                .compareTo(range.last) <=
-                0) {
-              iterDatetime = selectedDateNotifier.value
-                  .copyWith(month: selectedDateNotifier.value.month + 6);
-            }
-            while (iterDatetime.compareTo(range.first) >= 0) {
-              seriesData[iterDatetime] = snapshot.data![iterDatetime] ?? 0.0;
-              iterDatetime =
-                  iterDatetime.copyWith(month: iterDatetime.month - 1);
-              if (seriesData.length >= 12) {
-                break;
-              }
-            }
-          }
-          int initialSelectedIndex = seriesData.keys.toList().indexOf(
-              dateRangeNotifier.value == 'year'
-                  ? DateTime.now().getDateTillYear()
-                  : DateTime.now().getDateTillMonth());
-          return charts.SfCartesianChart(
-              margin: const EdgeInsets.all(10),
-              onSelectionChanged: (selectionArgs) {
-                final selectedTime = seriesData.keys
-                    .toList()
-                    .elementAt(selectionArgs.pointIndex);
-                print(selectedTime);
-                selectedDateNotifier.value = selectedTime;
+          final transactionRange = snapshot.data!;
+          return SizedBox(
+            height: 180,
+            width: double.infinity,
+            child: StreamBuilder<Map<DateTime, double>>(
+              stream: dateRangeNotifier.value == "month"
+                  ? db.getMonthlySum(categoryTypeNotifier.value)
+                  : db.getYearlySum(categoryTypeNotifier.value),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting ||
+                    !snapshot.hasData) {
+                  return Container();
+                }
+                final range = snapshot.data!.keys.toList();
+                range.sort();
+                seriesData.clear();
+                if (dateRangeNotifier.value == 'year') {
+                  var iterDatetime = range.last;
+                  if (selectedDateNotifier.value
+                          .copyWith(year: selectedDateNotifier.value.year + 2)
+                          .compareTo(range.last) <=
+                      0) {
+                    iterDatetime = selectedDateNotifier.value
+                        .copyWith(year: selectedDateNotifier.value.year + 2);
+                  }
+                  while (iterDatetime.compareTo(range.first) >= 0) {
+                    seriesData[iterDatetime] =
+                        snapshot.data![iterDatetime] ?? 0.0;
+                    iterDatetime =
+                        iterDatetime.copyWith(year: iterDatetime.year - 1);
+                    if (seriesData.length >= 5) {
+                      break;
+                    }
+                  }
+                } else {
+                  var iterDatetime = range.last;
+                  if (selectedDateNotifier.value
+                          .copyWith(month: selectedDateNotifier.value.month + 6)
+                          .compareTo(range.last) <=
+                      0) {
+                    iterDatetime = selectedDateNotifier.value
+                        .copyWith(month: selectedDateNotifier.value.month + 6);
+                  }
+                  while (iterDatetime.compareTo(range.first) >= 0) {
+                    seriesData[iterDatetime] =
+                        snapshot.data![iterDatetime] ?? 0.0;
+                    iterDatetime =
+                        iterDatetime.copyWith(month: iterDatetime.month - 1);
+                    if (seriesData.length >= 12) {
+                      break;
+                    }
+                  }
+                }
+                int initialSelectedIndex = seriesData.keys.toList().indexOf(
+                    dateRangeNotifier.value == 'year'
+                        ? DateTime.now().getDateTillYear()
+                        : DateTime.now().getDateTillMonth());
+                return charts.SfCartesianChart(
+                    margin: const EdgeInsets.all(10),
+                    onSelectionChanged: (selectionArgs) {
+                      final selectedTime = seriesData.keys
+                          .toList()
+                          .elementAt(selectionArgs.pointIndex);
+                      print(selectedTime);
+                      selectedDateNotifier.value = selectedTime;
+                    },
+                    primaryYAxis: charts.NumericAxis(
+                        isVisible: false,
+                        majorGridLines: const charts.MajorGridLines(width: 0)),
+                    primaryXAxis: charts.DateTimeAxis(
+                      labelAlignment: charts.LabelAlignment.end,
+                      majorGridLines: const charts.MajorGridLines(width: 0),
+                      dateFormat: dateRangeNotifier.value == 'year'
+                          ? DateFormat('yyyy')
+                          : DateFormat('yy-MM'),
+                    ),
+                    trackballBehavior: _trackballBehavior,
+                    series: <charts.ColumnSeries>[
+                      charts.ColumnSeries<MapEntry<DateTime, double>, DateTime>(
+                        dataSource: seriesData.entries.toList(),
+                        xValueMapper: (row, _) => row.key,
+                        yValueMapper: (row, _) => row.value,
+                        pointColorMapper: (row, _) {
+                          if (dateRangeNotifier.value == 'year' &&
+                              row.key.year == selectedDateNotifier.value.year) {
+                            return Colors.redAccent;
+                          }
+                          if (row.key ==
+                              selectedDateNotifier.value.getDateTillMonth()) {
+                            return Colors.redAccent;
+                          }
+                          return Colors.green.withOpacity(0.3);
+                        },
+                        // color: Colors.greenAccent,
+                        // Width of the columns
+                        // width: 0.5,
+                        // Spacing between the columns
+                        // spacing: 0.2,
+                      )
+                    ]);
               },
-              primaryYAxis: charts.NumericAxis(
-                  isVisible: false,
-                  majorGridLines: const charts.MajorGridLines(width: 0)),
-              primaryXAxis: charts.DateTimeAxis(
-                labelAlignment: charts.LabelAlignment.end,
-                majorGridLines: const charts.MajorGridLines(width: 0),
-                dateFormat: dateRangeNotifier.value == 'year'
-                    ? DateFormat('yyyy')
-                    : DateFormat('yy-MM'),
-              ),
-              trackballBehavior: _trackballBehavior,
-              series: <charts.ColumnSeries>[
-                charts.ColumnSeries<MapEntry<DateTime, double>, DateTime>(
-                  dataSource: seriesData.entries.toList(),
-                  xValueMapper: (row, _) => row.key,
-                  yValueMapper: (row, _) => row.value,
-                  pointColorMapper: (row, _) {
-                    if (dateRangeNotifier.value == 'year' &&
-                        row.key.year == selectedDateNotifier.value.year) {
-                      return Colors.redAccent;
-                    }
-                    if (row.key ==
-                        selectedDateNotifier.value.getDateTillMonth()) {
-                      return Colors.redAccent;
-                    }
-                    return Colors.green.withOpacity(0.3);
-                  },
-                  // color: Colors.greenAccent,
-                  // Width of the columns
-                  // width: 0.5,
-                  // Spacing between the columns
-                  // spacing: 0.2,
-                )
-              ]);
-        },
-      ),
-    );
+            ),
+          );
+        });
   }
 
   Widget _buildTotal(
