@@ -94,8 +94,7 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
                                     behavior: const ScrollBehavior()
                                         .copyWith(overscroll: false),
                                     child: SingleChildScrollView(
-                                      child: Column(
-                                          children: columnChildren),
+                                      child: Column(children: columnChildren),
                                     ),
                                   ));
                             });
@@ -352,8 +351,8 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
           if (dateRangeNotifier.value == 'year') {
             var iterDatetime = range.last;
             if (selectedDateNotifier.value
-                .copyWith(year: selectedDateNotifier.value.year + 2)
-                .compareTo(range.last) <=
+                    .copyWith(year: selectedDateNotifier.value.year + 2)
+                    .compareTo(range.last) <=
                 0) {
               iterDatetime = selectedDateNotifier.value
                   .copyWith(year: selectedDateNotifier.value.year + 2);
@@ -368,8 +367,8 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
           } else {
             var iterDatetime = range.last;
             if (selectedDateNotifier.value
-                .copyWith(month: selectedDateNotifier.value.month + 6)
-                .compareTo(range.last) <=
+                    .copyWith(month: selectedDateNotifier.value.month + 6)
+                    .compareTo(range.last) <=
                 0) {
               iterDatetime = selectedDateNotifier.value
                   .copyWith(month: selectedDateNotifier.value.month + 6);
