@@ -49,6 +49,18 @@ class $CategoriesTable extends Categories
   late final GeneratedColumn<int> predefined = GeneratedColumn<int>(
       'predefined', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _parentIdMeta =
+      const VerificationMeta('parentId');
+  @override
+  late final GeneratedColumn<int> parentId = GeneratedColumn<int>(
+      'parent_id', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _parentNameMeta =
+      const VerificationMeta('parentName');
+  @override
+  late final GeneratedColumn<String> parentName = GeneratedColumn<String>(
+      'parent_name', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -58,8 +70,18 @@ class $CategoriesTable extends Categories
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, name, type, icon, color, pos, predefined, createdAt];
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        type,
+        icon,
+        color,
+        pos,
+        predefined,
+        parentId,
+        parentName,
+        createdAt
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -111,6 +133,16 @@ class $CategoriesTable extends Categories
     } else if (isInserting) {
       context.missing(_predefinedMeta);
     }
+    if (data.containsKey('parent_id')) {
+      context.handle(_parentIdMeta,
+          parentId.isAcceptableOrUnknown(data['parent_id']!, _parentIdMeta));
+    }
+    if (data.containsKey('parent_name')) {
+      context.handle(
+          _parentNameMeta,
+          parentName.isAcceptableOrUnknown(
+              data['parent_name']!, _parentNameMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -138,6 +170,10 @@ class $CategoriesTable extends Categories
           .read(DriftSqlType.int, data['${effectivePrefix}pos'])!,
       predefined: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}predefined'])!,
+      parentId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}parent_id']),
+      parentName: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}parent_name']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
     );
@@ -157,6 +193,8 @@ class Category extends DataClass implements Insertable<Category> {
   final String color;
   final int pos;
   final int predefined;
+  final int? parentId;
+  final String? parentName;
   final DateTime createdAt;
   const Category(
       {required this.id,
@@ -166,6 +204,8 @@ class Category extends DataClass implements Insertable<Category> {
       required this.color,
       required this.pos,
       required this.predefined,
+      this.parentId,
+      this.parentName,
       required this.createdAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -177,6 +217,12 @@ class Category extends DataClass implements Insertable<Category> {
     map['color'] = Variable<String>(color);
     map['pos'] = Variable<int>(pos);
     map['predefined'] = Variable<int>(predefined);
+    if (!nullToAbsent || parentId != null) {
+      map['parent_id'] = Variable<int>(parentId);
+    }
+    if (!nullToAbsent || parentName != null) {
+      map['parent_name'] = Variable<String>(parentName);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -190,6 +236,12 @@ class Category extends DataClass implements Insertable<Category> {
       color: Value(color),
       pos: Value(pos),
       predefined: Value(predefined),
+      parentId: parentId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(parentId),
+      parentName: parentName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(parentName),
       createdAt: Value(createdAt),
     );
   }
@@ -205,6 +257,8 @@ class Category extends DataClass implements Insertable<Category> {
       color: serializer.fromJson<String>(json['color']),
       pos: serializer.fromJson<int>(json['pos']),
       predefined: serializer.fromJson<int>(json['predefined']),
+      parentId: serializer.fromJson<int?>(json['parentId']),
+      parentName: serializer.fromJson<String?>(json['parentName']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -219,6 +273,8 @@ class Category extends DataClass implements Insertable<Category> {
       'color': serializer.toJson<String>(color),
       'pos': serializer.toJson<int>(pos),
       'predefined': serializer.toJson<int>(predefined),
+      'parentId': serializer.toJson<int?>(parentId),
+      'parentName': serializer.toJson<String?>(parentName),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -231,6 +287,8 @@ class Category extends DataClass implements Insertable<Category> {
           String? color,
           int? pos,
           int? predefined,
+          Value<int?> parentId = const Value.absent(),
+          Value<String?> parentName = const Value.absent(),
           DateTime? createdAt}) =>
       Category(
         id: id ?? this.id,
@@ -240,6 +298,8 @@ class Category extends DataClass implements Insertable<Category> {
         color: color ?? this.color,
         pos: pos ?? this.pos,
         predefined: predefined ?? this.predefined,
+        parentId: parentId.present ? parentId.value : this.parentId,
+        parentName: parentName.present ? parentName.value : this.parentName,
         createdAt: createdAt ?? this.createdAt,
       );
   @override
@@ -252,14 +312,16 @@ class Category extends DataClass implements Insertable<Category> {
           ..write('color: $color, ')
           ..write('pos: $pos, ')
           ..write('predefined: $predefined, ')
+          ..write('parentId: $parentId, ')
+          ..write('parentName: $parentName, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, type, icon, color, pos, predefined, createdAt);
+  int get hashCode => Object.hash(id, name, type, icon, color, pos, predefined,
+      parentId, parentName, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -271,6 +333,8 @@ class Category extends DataClass implements Insertable<Category> {
           other.color == this.color &&
           other.pos == this.pos &&
           other.predefined == this.predefined &&
+          other.parentId == this.parentId &&
+          other.parentName == this.parentName &&
           other.createdAt == this.createdAt);
 }
 
@@ -282,6 +346,8 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
   final Value<String> color;
   final Value<int> pos;
   final Value<int> predefined;
+  final Value<int?> parentId;
+  final Value<String?> parentName;
   final Value<DateTime> createdAt;
   const CategoriesCompanion({
     this.id = const Value.absent(),
@@ -291,6 +357,8 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     this.color = const Value.absent(),
     this.pos = const Value.absent(),
     this.predefined = const Value.absent(),
+    this.parentId = const Value.absent(),
+    this.parentName = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   CategoriesCompanion.insert({
@@ -301,6 +369,8 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     required String color,
     required int pos,
     required int predefined,
+    this.parentId = const Value.absent(),
+    this.parentName = const Value.absent(),
     this.createdAt = const Value.absent(),
   })  : name = Value(name),
         type = Value(type),
@@ -316,6 +386,8 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     Expression<String>? color,
     Expression<int>? pos,
     Expression<int>? predefined,
+    Expression<int>? parentId,
+    Expression<String>? parentName,
     Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
@@ -326,6 +398,8 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       if (color != null) 'color': color,
       if (pos != null) 'pos': pos,
       if (predefined != null) 'predefined': predefined,
+      if (parentId != null) 'parent_id': parentId,
+      if (parentName != null) 'parent_name': parentName,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -338,6 +412,8 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       Value<String>? color,
       Value<int>? pos,
       Value<int>? predefined,
+      Value<int?>? parentId,
+      Value<String?>? parentName,
       Value<DateTime>? createdAt}) {
     return CategoriesCompanion(
       id: id ?? this.id,
@@ -347,6 +423,8 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       color: color ?? this.color,
       pos: pos ?? this.pos,
       predefined: predefined ?? this.predefined,
+      parentId: parentId ?? this.parentId,
+      parentName: parentName ?? this.parentName,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -375,6 +453,12 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     if (predefined.present) {
       map['predefined'] = Variable<int>(predefined.value);
     }
+    if (parentId.present) {
+      map['parent_id'] = Variable<int>(parentId.value);
+    }
+    if (parentName.present) {
+      map['parent_name'] = Variable<String>(parentName.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -391,6 +475,8 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
           ..write('color: $color, ')
           ..write('pos: $pos, ')
           ..write('predefined: $predefined, ')
+          ..write('parentId: $parentId, ')
+          ..write('parentName: $parentName, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();

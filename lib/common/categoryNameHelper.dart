@@ -5,7 +5,7 @@ class CategoryNameLocalizationHelper {
   static String getDisplayName(
       String categoryName, String categoryType, BuildContext context) {
     var table = AppLocalizations.of(context)!;
-    String displayName;
+    String displayName = categoryName;
     if (categoryType == "income") {
       switch (categoryName) {
         case "Salary":
@@ -32,18 +32,19 @@ class CategoryNameLocalizationHelper {
         case "Other":
           displayName = table.category_Income_Other;
           break;
-        default:
-          throw UnimplementedError();
       }
     } else {
       switch (categoryName) {
         case "Food":
           displayName = table.category_Expense_Food;
           break;
+        case "Weekday":
+          displayName = table.category_Expense_Food_Weekday;
+          break;
         case "Shopping":
           displayName = table.category_Expense_Shopping;
           break;
-        case "Shopping_Family":
+        case "Family":
           displayName = table.category_Expense_Shopping_Family;
           break;
         case "Transport":
@@ -64,8 +65,8 @@ class CategoryNameLocalizationHelper {
         case "Travel":
           displayName = table.category_Expense_Travel;
           break;
-        case "Family":
-          displayName = table.category_Expense_Family;
+        case "Friends":
+          displayName = table.category_Expense_Friends;
           break;
         case "Healthcare":
           displayName = table.category_Expense_Healthcare;
@@ -91,8 +92,6 @@ class CategoryNameLocalizationHelper {
         case "Other":
           displayName = table.category_Expense_Other;
           break;
-        default:
-          throw UnimplementedError();
       }
     }
     return displayName;

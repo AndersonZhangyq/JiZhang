@@ -29,6 +29,8 @@ class CategoryItem implements Comparable {
       color = Color(int.parse(category.color));
     }
     pos = category.pos;
+    parentId = category.parentId;
+    parentName = category.parentName;
   }
 
   late int id;
@@ -40,6 +42,8 @@ class CategoryItem implements Comparable {
   late Color color;
   late String originIcon;
   late String originColor;
+  late int? parentId;
+  late String? parentName;
 
   @override
   int compareTo(other) {
@@ -50,10 +54,14 @@ class CategoryItem implements Comparable {
   }
 
   String getDisplayName(BuildContext context) {
-    if (predefined == 1) {
+    if (parentId != null) {
+      return CategoryNameLocalizationHelper.getDisplayName(
+              parentName!, type, context) +
+          " - " +
+          CategoryNameLocalizationHelper.getDisplayName(name, type, context);
+    } else {
       return CategoryNameLocalizationHelper.getDisplayName(name, type, context);
     }
-    return name;
   }
 }
 
