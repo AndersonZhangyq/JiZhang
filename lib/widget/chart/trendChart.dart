@@ -162,6 +162,7 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
                                         true;
                                     isSelectedDateRangeNotifier
                                         .value[1 - index] = false;
+                                    isSelectedDateRangeNotifier.notifyListeners();
                                   },
                                   isSelected: isSelectedDateRange,
                                 );
@@ -201,6 +202,7 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
                                         .value[index] = true;
                                     isSelectedCategoryTypeNotifier
                                         .value[1 - index] = false;
+                                    isSelectedCategoryTypeNotifier.notifyListeners();
                                   },
                                   isSelected: isSelectedCategoryType,
                                 );
