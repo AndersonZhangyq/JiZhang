@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ji_zhang/models/database.dart';
@@ -68,8 +69,14 @@ class _AccountPageState extends State<AccountPageWidget> {
   }
 
   Future<bool> _checkStoragePermission() async {
-    var status = await Permission.storage.request();
-    if (!status.isGranted) {
+    final plugin = DeviceInfoPlugin();
+    final android = await plugin.androidInfo;
+
+    final storageStatus = android.version.sdkInt < 33
+        ? await Permission.storage.request()
+        : PermissionStatus.granted;
+
+    if (!storageStatus.isGranted) {
       ScaffoldMessenger.of(context).removeCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(
