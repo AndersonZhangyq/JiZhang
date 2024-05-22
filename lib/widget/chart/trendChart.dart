@@ -112,7 +112,7 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting ||
               !snapshot.hasData) {
-            return const LoadingWidget();
+            return Container();
           }
           final transactionRange = snapshot.data!;
           return SizedBox(
@@ -162,8 +162,6 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
                                         true;
                                     isSelectedDateRangeNotifier
                                         .value[1 - index] = false;
-                                    isSelectedDateRangeNotifier
-                                        .notifyListeners();
                                   },
                                   isSelected: isSelectedDateRange,
                                 );
@@ -203,8 +201,6 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
                                         .value[index] = true;
                                     isSelectedCategoryTypeNotifier
                                         .value[1 - index] = false;
-                                    isSelectedCategoryTypeNotifier
-                                        .notifyListeners();
                                   },
                                   isSelected: isSelectedCategoryType,
                                 );
@@ -346,6 +342,9 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
             return Container();
           }
           final range = snapshot.data!.keys.toList();
+          if (range.isEmpty) {
+            return Container();
+          }
           range.sort();
           seriesData.clear();
           if (dateRangeNotifier.value == 'year') {

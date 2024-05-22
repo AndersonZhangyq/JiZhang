@@ -3,6 +3,7 @@ import 'package:flutter_font_icons/flutter_font_icons.dart';
 
 final Map<String, Icon> expenseCategoryIconInfo = {
   "Food": const Icon(MaterialCommunityIcons.silverware_fork_knife),
+  "Food_Weekday": const Icon(MaterialCommunityIcons.silverware_fork_knife),
   "Shopping": const Icon(Icons.shopping_cart),
   "Shopping_Family": const Icon(Icons.shopping_cart),
   "Transport": const Icon(Icons.airport_shuttle),
@@ -11,7 +12,7 @@ final Map<String, Icon> expenseCategoryIconInfo = {
   "Entertainment": const Icon(Entypo.game_controller),
   "Car": const Icon(Icons.directions_car),
   "Travel": const Icon(FontAwesome.plane),
-  "Family": const Icon(Icons.people),
+  "Friends": const Icon(Icons.people),
   "Healthcare": const Icon(Icons.local_hospital),
   "Education": const Icon(Icons.school),
   "Gifts": const Icon(Icons.card_giftcard),
@@ -23,6 +24,7 @@ final Map<String, Icon> expenseCategoryIconInfo = {
 
 final Map<String, Color> expenseCategoryColorInfo = {
   "Food": Colors.orange,
+  "Food_Weekday": Colors.orange,
   "Shopping": Colors.pink,
   "Shopping_Family": Colors.pink,
   "Transport": Colors.lime,
@@ -31,7 +33,7 @@ final Map<String, Color> expenseCategoryColorInfo = {
   "Entertainment": Colors.deepOrange,
   "Car": Colors.blue,
   "Travel": Colors.redAccent,
-  "Family": Colors.blueGrey,
+  "Friends": Colors.blueGrey,
   "Healthcare": Colors.purple,
   "Education": Colors.amber,
   "Gifts": Colors.greenAccent,

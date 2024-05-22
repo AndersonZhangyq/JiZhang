@@ -38,6 +38,10 @@ class Categories extends Table {
 
   IntColumn get predefined => integer()();
 
+  IntColumn get parentId => integer().nullable()();
+
+  TextColumn get parentName => text().nullable()();
+
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
@@ -180,17 +184,43 @@ class MyDatabase extends _$MyDatabase {
       ui.IconData icon =
           (expenseCategoryIconInfo[curCategory] as ui.Icon).icon as ui.IconData;
       ui.Color color = expenseCategoryColorInfo[curCategory] as ui.Color;
-      into(categories).insertOnConflictUpdate(CategoriesCompanion.insert(
-          name: curCategory,
-          type: 'expense',
-          icon: jsonEncode({
-            "codePoint": icon.codePoint,
-            "fontFamily": icon.fontFamily,
-            "fontPackage": icon.fontPackage
-          }),
-          color: color.value.toString(),
-          predefined: 1,
-          pos: i));
+      if (curCategory.contains("_")) {
+        var splited = curCategory.split("_");
+        var parentName = splited[0];
+        var categoryName = splited[1];
+        var parentCategory = await (select(categories)
+              ..where((tbl) => tbl.name.equals(parentName)))
+            .getSingleOrNull();
+        if (parentCategory == null) {
+          print("parent of $curCategory $parentName is not found!");
+        } else {
+          into(categories).insertOnConflictUpdate(CategoriesCompanion.insert(
+              name: categoryName,
+              type: 'expense',
+              icon: jsonEncode({
+                "codePoint": icon.codePoint,
+                "fontFamily": icon.fontFamily,
+                "fontPackage": icon.fontPackage
+              }),
+              color: color.value.toString(),
+              predefined: 1,
+              parentName: Value.ofNullable(parentName),
+              parentId: Value.ofNullable(parentCategory.id),
+              pos: i));
+        }
+      } else {
+        into(categories).insertOnConflictUpdate(CategoriesCompanion.insert(
+            name: curCategory,
+            type: 'expense',
+            icon: jsonEncode({
+              "codePoint": icon.codePoint,
+              "fontFamily": icon.fontFamily,
+              "fontPackage": icon.fontPackage
+            }),
+            color: color.value.toString(),
+            predefined: 1,
+            pos: i));
+      }
     }
     var incomeCategoryColorKeys = incomeCategoryIconInfo.keys.toList();
     for (int i = 0; i < incomeCategoryColorKeys.length; ++i) {
@@ -228,7 +258,7 @@ class MyDatabase extends _$MyDatabase {
   // you should bump this number whenever you change or add a table definition. Migrations
   // are covered later in this readme.
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   Stream<List<Transaction>>? getTransactionsByMonth(int year, int month) {
     DateTime startDate = DateTime(year, month);

@@ -70,14 +70,14 @@
   "category_Income_Other": "Other",
   "category_Expense_Food": "Food",
   "category_Expense_Shopping": "Shopping",
-  "category_Expense_Shopping_Family": "Shopping_Family",
+  "category_Expense_Shopping_Family": "Family",
   "category_Expense_Transport": "Transport",
   "category_Expense_Home": "Home",
   "category_Expense_Bills": "Bills",
   "category_Expense_Entertainment": "Entertainment",
   "category_Expense_Car": "Car",
   "category_Expense_Travel": "Travel",
-  "category_Expense_Family": "Family",
+  "category_Expense_Friends": "Friends",
   "category_Expense_Healthcare": "Healthcare",
   "category_Expense_Education": "Education",
   "category_Expense_Groceries": "Groceries",
@@ -85,5 +85,6 @@
   "category_Expense_Sports": "Sports",
   "category_Expense_Beauty": "Beauty",
   "category_Expense_Work": "Work",
+  "category_Expense_Food_Weekday": "Weekday",
   "category_Expense_Other": "Other"
 }

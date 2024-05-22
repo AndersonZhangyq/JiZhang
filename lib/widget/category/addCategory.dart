@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:ji_zhang/models/database.dart';
 import 'package:ji_zhang/widget/transaction/modifyTransaction.dart';
 import 'package:provider/provider.dart';
+import 'package:drift/drift.dart' as drift;
 
 class AddCategoryWidget extends StatefulWidget {
   const AddCategoryWidget({Key? key}) : super(key: key);
@@ -15,10 +16,14 @@ class AddCategoryWidget extends StatefulWidget {
 
 class _AddCategoryState extends State<AddCategoryWidget> {
   final TextEditingController _categoryNameController = TextEditingController();
-  String categoryType = 'expense';
+  ValueNotifier<String> categoryTypeNotifier = ValueNotifier<String>("expense");
+  ValueNotifier<int> selectedIconIndexNotifier = ValueNotifier(-1);
+  int? categoryParentId;
+  // String categoryType = 'expense';
   Icon? categoryIcon;
   Color? categoryColor;
-  int selectedIconIndex = -1;
+  // int selectedIconIndex = -1;
+  Map<int, String> categoryIdName = {};
   late MyDatabase db;
 
   @override
@@ -34,8 +39,8 @@ class _AddCategoryState extends State<AddCategoryWidget> {
 
   bool canSave() {
     return _categoryNameController.text.isNotEmpty &&
-        categoryType.isNotEmpty &&
-        selectedIconIndex != -1 &&
+        categoryTypeNotifier.value.isNotEmpty &&
+        selectedIconIndexNotifier.value != -1 &&
         categoryIcon != null;
   }
 
@@ -54,20 +59,26 @@ class _AddCategoryState extends State<AddCategoryWidget> {
               icon: const Icon(Icons.save),
               onPressed: () async {
                 if (canSave()) {
-                  int? lastPos =
-                      await db.getCategoryLastPosByType(categoryType);
+                  int? lastPos = await db
+                      .getCategoryLastPosByType(categoryTypeNotifier.value);
                   if (lastPos != null) {
                     int categoryPos = lastPos + 1;
-                    int id = await db
-                        .into(db.categories)
-                        .insert(CategoriesCompanion.insert(
+                    String? categoryParentName;
+                    if (categoryParentId != null) {
+                      categoryParentName = categoryIdName[categoryParentId];
+                    }
+                    int id = await db.into(db.categories).insert(
+                        CategoriesCompanion.insert(
                             name: _categoryNameController.text,
-                            type: categoryType,
+                            type: categoryTypeNotifier.value,
                             icon: jsonEncode({
                               "codePoint": categoryIcon!.icon!.codePoint,
                               "fontFamily": categoryIcon!.icon!.fontFamily,
                               "fontPackage": categoryIcon!.icon!.fontPackage
                             }),
+                            parentId: drift.Value.ofNullable(categoryParentId),
+                            parentName:
+                                drift.Value.ofNullable(categoryParentName),
                             color: categoryColor!.value.toString(),
                             pos: categoryPos,
                             predefined: 0));
@@ -90,112 +101,182 @@ class _AddCategoryState extends State<AddCategoryWidget> {
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _categoryNameController,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Category Name',
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: DropdownButtonFormField<String>(
-                    isExpanded: true,
-                    decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Category Type'),
-                    // 设置默认值
-                    value: 'expense',
-                    // 选择回调
-                    onChanged: (String? value) {
-                      setState(() {
-                        categoryType = value!;
-                      });
-                    },
-                    // 传入可选的数组
-                    items: ["Expense", "Income"].map((String type) {
-                      return DropdownMenuItem(
-                          value: type.toLowerCase(), child: Text(type));
-                    }).toList(),
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.only(top: 24),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Center(
-                          child: Text(
-                            'Category Icon',
-                            style: TextStyle(fontSize: 18),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: StreamBuilder<List<CategoryItem>>(
-                      stream: db.watchAllCategories(),
-                      builder: (context, snapshot) {
-                        final categories = snapshot.data ?? <CategoryItem>[];
-                        List<CategoryItem> categoryItems = [];
-                        Set<int> iconCodePoint = {};
-                        for (var item in categories) {
-                          if (!iconCodePoint.contains(item.icon.codePoint)) {
-                            iconCodePoint.add(item.icon.codePoint);
-                            categoryItems.add(item);
-                          }
-                        }
-                        return GridView.builder(
-                            itemCount: categoryItems.length,
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisSpacing: 2,
-                                    mainAxisSpacing: 2,
-                                    crossAxisCount: 5),
-                            itemBuilder: (BuildContext context, int index) {
-                              var value = categoryItems[index];
-                              return Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  DottedBorder(
-                                    color: selectedIconIndex == index
-                                        ? Colors.red
-                                        : Colors
-                                            .transparent, //color of dotted/dash line
-                                    strokeWidth: 1, //thickness of das
-                                    dashPattern: const [3, 6],
-                                    borderType: BorderType.Circle,
-                                    child: IconButton(
-                                      padding: const EdgeInsets.all(0),
-                                      icon: Icon(value.icon),
-                                      onPressed: () {
-                                        setState(() {
-                                          categoryIcon = Icon(value.icon);
-                                          categoryColor = value.color;
-                                          selectedIconIndex = index;
-                                        });
+            child: StreamBuilder<List<CategoryItem>>(
+                stream: db.watchAllCategories(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting ||
+                      !snapshot.hasData) {
+                    return Container();
+                  }
+                  final categories = snapshot.data ?? <CategoryItem>[];
+                  List<CategoryItem> categoryItems = [];
+                  Set<int> iconCodePoint = {};
+                  for (var item in categories) {
+                    categoryIdName[item.id] = item.name;
+                    if (!iconCodePoint.contains(item.icon.codePoint)) {
+                      iconCodePoint.add(item.icon.codePoint);
+                      categoryItems.add(item);
+                    }
+                  }
+                  return ValueListenableBuilder(
+                    valueListenable: categoryTypeNotifier,
+                    builder: (context, categoryType, _) {
+                      categoryParentId = null;
+                      return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    controller: _categoryNameController,
+                                    decoration: const InputDecoration(
+                                      border: OutlineInputBorder(),
+                                      labelText: 'Category Name',
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 12),
+                              child: DropdownButtonFormField<String>(
+                                isExpanded: true,
+                                decoration: const InputDecoration(
+                                    border: OutlineInputBorder(),
+                                    labelText: 'Category Type'),
+                                // 设置默认值
+                                value: 'expense',
+                                // 选择回调
+                                onChanged: (String? value) {
+                                  categoryTypeNotifier.value = value!;
+                                },
+                                // 传入可选的数组
+                                items: ["Expense", "Income"].map((String type) {
+                                  return DropdownMenuItem(
+                                      value: type.toLowerCase(),
+                                      child: Text(type));
+                                }).toList(),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 12),
+                              child: categoryType == 'expense'
+                                  ? DropdownButtonFormField<String>(
+                                      key: UniqueKey(),
+                                      isExpanded: true,
+                                      decoration: const InputDecoration(
+                                          border: OutlineInputBorder(),
+                                          labelText: 'Category Parent Name'),
+                                      // 选择回调
+                                      onChanged: (String? value) {
+                                        if (value != null) {
+                                          categoryParentId = int.parse(value);
+                                        }
                                       },
-                                      color: value.color,
+                                      // 传入可选的数组
+                                      items: categories
+                                          .where((element) =>
+                                              element.type == 'expense' &&
+                                              element.parentId == null)
+                                          .map((element) {
+                                        return DropdownMenuItem(
+                                            value: element.id.toString(),
+                                            child: Text(element
+                                                .getDisplayName(context)));
+                                      }).toList(),
+                                    )
+                                  : DropdownButtonFormField<String>(
+                                      key: UniqueKey(),
+                                      isExpanded: true,
+                                      decoration: const InputDecoration(
+                                          border: OutlineInputBorder(),
+                                          labelText: 'Category Parent Name'),
+                                      // 选择回调
+                                      onChanged: (String? value) {
+                                        if (value != null) {
+                                          categoryParentId = int.parse(value);
+                                        }
+                                      },
+                                      // 传入可选的数组
+                                      items: categories
+                                          .where((element) =>
+                                              element.type == 'income' &&
+                                              element.parentId == null)
+                                          .map((element) {
+                                        return DropdownMenuItem(
+                                            value: element.id.toString(),
+                                            child: Text(element
+                                                .getDisplayName(context)));
+                                      }).toList(),
+                                    ),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(top: 24),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Center(
+                                      child: Text(
+                                        'Category Icon',
+                                        style: TextStyle(fontSize: 18),
+                                      ),
                                     ),
                                   ),
                                 ],
-                              );
-                            });
-                      }),
-                )
-              ],
-            ),
+                              ),
+                            ),
+                            Expanded(
+                                child: ValueListenableBuilder(
+                                    valueListenable: selectedIconIndexNotifier,
+                                    builder: (context, selectedIconIndex, _) {
+                                      return GridView.builder(
+                                          itemCount: categoryItems.length,
+                                          gridDelegate:
+                                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                                  crossAxisSpacing: 2,
+                                                  mainAxisSpacing: 2,
+                                                  crossAxisCount: 5),
+                                          itemBuilder: (BuildContext context,
+                                              int index) {
+                                            var value = categoryItems[index];
+                                            return Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: <Widget>[
+                                                DottedBorder(
+                                                  color: selectedIconIndex ==
+                                                          index
+                                                      ? Colors.red
+                                                      : Colors
+                                                          .transparent, //color of dotted/dash line
+                                                  strokeWidth:
+                                                      1, //thickness of das
+                                                  dashPattern: const [3, 6],
+                                                  borderType: BorderType.Circle,
+                                                  child: IconButton(
+                                                    padding:
+                                                        const EdgeInsets.all(0),
+                                                    icon: Icon(value.icon),
+                                                    onPressed: () {
+                                                      categoryIcon =
+                                                          Icon(value.icon);
+                                                      categoryColor =
+                                                          value.color;
+                                                      selectedIconIndexNotifier
+                                                          .value = index;
+                                                    },
+                                                    color: value.color,
+                                                  ),
+                                                ),
+                                              ],
+                                            );
+                                          });
+                                    }))
+                          ]);
+                    },
+                  );
+                }),
           ),
         ));
   }
