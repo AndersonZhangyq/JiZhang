@@ -86,5 +86,12 @@
   "category_Expense_Beauty": "美容美发",
   "category_Expense_Work": "工作",
   "category_Expense_Food_Weekday": "工作日",
-  "category_Expense_Other": "其他"
+  "category_Expense_Other": "其他",
+  "addCategory_title": "添加类别",
+  "addCategory_SnackBar_failed_to_add_category": "添加类别失败",
+  "addCategory_SnackBar_failed_to_get_last_pos": "获取最后位置失败",
+  "addCategory_Form_CategoryName": "类别名称",
+  "addCategory_Form_CategoryType": "类别类型",
+  "addCategory_Form_CategoryParentName": "父类别名称",
+  "addCategory_Form_CategoryIcon": "类别图标"
 }
