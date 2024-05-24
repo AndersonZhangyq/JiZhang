@@ -144,9 +144,12 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
         initialData: null,
         child: Consumer<Category?>(builder: (_, value, __) {
           if (value != null) {
-            CategoryItem categoryItem = CategoryItem(value);
-            categoryColor = categoryItem.color;
-            selectedCategoryIcon = Icon(categoryItem.icon, color: Colors.white);
+            if (selectedCategoryIcon.icon == Icons.add) {
+              CategoryItem categoryItem = CategoryItem(value);
+              categoryColor = categoryItem.color;
+              selectedCategoryIcon =
+                  Icon(categoryItem.icon, color: Colors.white);
+            }
           }
           return Scaffold(
               resizeToAvoidBottomInset: false,
