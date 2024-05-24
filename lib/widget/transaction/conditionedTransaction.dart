@@ -7,7 +7,7 @@ import 'package:ji_zhang/widget/transaction/transactionList.dart';
 import 'package:provider/provider.dart';
 
 class ConditionedTransationPage extends StatefulWidget {
-  const ConditionedTransationPage(
+  ConditionedTransationPage(
       {Key? key,
       required this.dateTime,
       required this.dateRange,
@@ -24,6 +24,8 @@ class ConditionedTransationPage extends StatefulWidget {
 
 class _ConditionedTransationPageState extends State<ConditionedTransationPage> {
   late MyDatabase db;
+  ValueNotifier<List<bool>> isSelectedOrderTypeNotifier =
+      ValueNotifier([true, false]);
 
   @override
   void didChangeDependencies() {
@@ -40,16 +42,44 @@ class _ConditionedTransationPageState extends State<ConditionedTransationPage> {
         elevation: 0,
         backgroundColor: Colors.transparent,
         title: Text(
-          widget.dateRange == "month"
-              ? widget.dateTime.format('yyyy-MM')
-              : widget.dateTime.format('yyyy') +
-                  "${widget.categoryItem.getDisplayName(context)}${widget.categoryItem.type == 'expense' ? AppLocalizations.of(context)!.tab_Expense : AppLocalizations.of(context)!.tab_Income}",
+          (widget.dateRange == "month"
+                  ? widget.dateTime.format('yyyy-MM')
+                  : widget.dateTime.format('yyyy')) +
+              "   ${widget.categoryItem.getDisplayName(context)}${widget.categoryItem.type == 'expense' ? AppLocalizations.of(context)!.tab_Expense : AppLocalizations.of(context)!.tab_Income}",
           style: const TextStyle(fontSize: 20, color: Colors.black),
         ),
       ),
       body: Center(
         child: Column(
           children: [
+            ValueListenableBuilder<List<bool>>(
+                valueListenable: isSelectedOrderTypeNotifier,
+                builder: (context, isSelectedOrderType, _) {
+                  return ToggleButtons(
+                    constraints: const BoxConstraints(
+                      maxHeight: 30,
+                    ),
+                    textStyle: const TextStyle(fontSize: 14),
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 18.0, vertical: 6.0),
+                        child: Text(AppLocalizations.of(context)!.tab_ByDate),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 18.0, vertical: 6.0),
+                        child: Text(AppLocalizations.of(context)!.tab_ByAmount),
+                      )
+                    ],
+                    onPressed: (index) {
+                      isSelectedOrderTypeNotifier.value[index] = true;
+                      isSelectedOrderTypeNotifier.value[1 - index] = false;
+                      isSelectedOrderTypeNotifier.notifyListeners();
+                    },
+                    isSelected: isSelectedOrderType,
+                  );
+                }),
             StreamBuilder<Map<int, CategoryItem>>(
                 stream: db
                     .watchAllCategories()!
@@ -72,11 +102,16 @@ class _ConditionedTransationPageState extends State<ConditionedTransationPage> {
                               widget.dateTime.year, widget.categoryItem.id),
                       builder: (context, snapshot) {
                         final transactions = snapshot.data ?? [];
-                        return TransactionListWidget(
-                            context: context,
-                            db: db,
-                            transactions: transactions,
-                            categories: categories);
+                        return ValueListenableBuilder<List<bool>>(
+                            valueListenable: isSelectedOrderTypeNotifier,
+                            builder: (context, isSelectedOrderType, _) {
+                              return TransactionListWidget(
+                                  context: context,
+                                  db: db,
+                                  transactions: transactions,
+                                  categories: categories,
+                                  isByDate: isSelectedOrderType[0]);
+                            });
                       });
                 }),
           ],

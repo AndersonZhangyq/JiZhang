@@ -60,6 +60,8 @@
   "tags": "Tags",
   "tab_Expense": "Expense",
   "tab_Income": "Income",
+  "tab_ByDate": "By Date",
+  "tab_ByAmount": "By Amount",
   "category_Income_Salary": "Salary",
   "category_Income_Business": "Business",
   "category_Income_Gifts": "Gifts",

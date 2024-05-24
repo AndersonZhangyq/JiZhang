@@ -13,21 +13,22 @@ class ListItem {
 }
 
 class TransactionListWidget extends StatelessWidget {
-  const TransactionListWidget({
-    Key? key,
-    required this.context,
-    required this.db,
-    required this.transactions,
-    required this.categories,
-  }) : super(key: key);
+  const TransactionListWidget(
+      {Key? key,
+      required this.context,
+      required this.db,
+      required this.transactions,
+      required this.categories,
+      this.isByDate = true})
+      : super(key: key);
 
   final BuildContext context;
   final MyDatabase db;
   final List<Transaction> transactions;
   final Map<int, CategoryItem> categories;
+  final bool isByDate;
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildTransactionListByDate() {
     var groupedTransaction = groupBy(transactions, (Transaction t) => t.date);
     List<ListItem> listItems = [];
     groupedTransaction.keys.sorted((a, b) => -a.compareTo(b)).forEach((date) {
@@ -183,5 +184,107 @@ class TransactionListWidget extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Widget _buildTransactionListByAmount() {
+    transactions.sort((a, b) => b.amount.compareTo(a.amount));
+    return Expanded(
+      child: ListView.builder(
+        physics: const BouncingScrollPhysics(),
+        itemCount: transactions.length,
+        itemBuilder: (context, index) {
+          Transaction curTransaction = transactions[index];
+          CategoryItem? curCategoryItem = categories[curTransaction.categoryId];
+          return Dismissible(
+            key: Key(curTransaction.id.toString()),
+            background: Container(color: Colors.redAccent),
+            onDismissed: (direction) async {
+              // Remove the item from the data source.
+              final transactionToRemove = curTransaction;
+              int ret = await (db.delete(db.transactions)
+                    ..where((t) => t.id.equals(transactionToRemove.id)))
+                  .go();
+              if (ret == 0) {
+                ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(AppLocalizations.of(context)!
+                        .transactions_SnackBar_failed_to_delete_transaction)));
+              } else {
+                // Then show a snackbar.
+                ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(AppLocalizations.of(context)!
+                        .transactions_SnackBar_Remove_Transaction),
+                    action: SnackBarAction(
+                        label:
+                            AppLocalizations.of(context)!.snackBarAction_Undo,
+                        onPressed: () async {
+                          await db
+                              .into(db.transactions)
+                              .insertOnConflictUpdate(transactionToRemove);
+                        })));
+              }
+            },
+            child: ListTile(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          ModifyTransactionsPage(transaction: curTransaction)),
+                );
+              },
+              leading: FloatingActionButton.small(
+                heroTag: "transaction_category_$index",
+                child: Icon(
+                  curCategoryItem!.icon,
+                  color: Colors.white,
+                ),
+                backgroundColor: curCategoryItem.color,
+                elevation: 0,
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (BuildContext context) =>
+                        const CategorySelectorWidget(),
+                  ).then((value) async {
+                    if (null != value) {
+                      int ret = await (db.update(db.transactions)
+                            ..where((t) => t.id.equals(curTransaction.id)))
+                          .write(TransactionsCompanion(
+                              categoryId: drift.Value(value["id"] as int)));
+                      if (0 == ret) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(AppLocalizations.of(context)!
+                                .transactions_SnackBar_failed_to_update_transaction)));
+                      }
+                    }
+                  });
+                },
+              ),
+              title: Text(curTransaction.comment ??
+                  curCategoryItem.getDisplayName(context)),
+              subtitle: Text(curTransaction.date.format("yyyy-MM-dd"),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+              trailing: Text(
+                  (curCategoryItem.type == "expense" ? "-" : "") +
+                      curTransaction.amount.toStringAsFixed(2),
+                  style: curCategoryItem.type == "expense"
+                      ? const TextStyle(color: Colors.red)
+                      : const TextStyle(color: Colors.green)),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (isByDate) {
+      return _buildTransactionListByDate();
+    } else {
+      return _buildTransactionListByAmount();
+    }
   }
 }
