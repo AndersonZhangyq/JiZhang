@@ -95,5 +95,6 @@
   "addCategory_Form_CategoryName": "类别名称",
   "addCategory_Form_CategoryType": "类别类型",
   "addCategory_Form_CategoryParentName": "父类别名称",
-  "addCategory_Form_CategoryIcon": "类别图标"
+  "addCategory_Form_CategoryIcon": "类别图标",
+  "trendChart_listView_ShowMore": "显示更多"
 }

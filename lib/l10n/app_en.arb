@@ -95,5 +95,6 @@
   "addCategory_Form_CategoryName": "Category Name",
   "addCategory_Form_CategoryType": "Category Type",
   "addCategory_Form_CategoryParentName": "Category Parent Name",
-  "addCategory_Form_CategoryIcon": "Category Icon"
+  "addCategory_Form_CategoryIcon": "Category Icon",
+  "trendChart_listView_ShowMore": "Show More"
 }

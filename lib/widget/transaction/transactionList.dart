@@ -187,13 +187,14 @@ class TransactionListWidget extends StatelessWidget {
   }
 
   Widget _buildTransactionListByAmount() {
-    transactions.sort((a, b) => b.amount.compareTo(a.amount));
+    var sortedTransction = transactions.toList()
+      ..sort((a, b) => -a.amount.compareTo(b.amount));
     return Expanded(
       child: ListView.builder(
         physics: const BouncingScrollPhysics(),
-        itemCount: transactions.length,
+        itemCount: sortedTransction.length,
         itemBuilder: (context, index) {
-          Transaction curTransaction = transactions[index];
+          Transaction curTransaction = sortedTransction[index];
           CategoryItem? curCategoryItem = categories[curTransaction.categoryId];
           return Dismissible(
             key: Key(curTransaction.id.toString()),

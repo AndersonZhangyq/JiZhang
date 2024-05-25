@@ -35,6 +35,7 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
       // Enables the trackball
       enable: true,
       activationMode: charts.ActivationMode.singleTap);
+  ValueNotifier<bool> isShowMoreClickedNotifier = ValueNotifier<bool>(false);
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
@@ -43,67 +44,73 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _buildTopBar(context),
-      Expanded(
-        child: ValueListenableBuilder(
-            valueListenable: categoryTypeNotifier,
-            builder: (context, value, _) {
-              return ValueListenableBuilder(
-                valueListenable: selectedDateNotifier,
-                builder: (context, value, _) {
-                  return StreamBuilder<List<CategoryItem>>(
-                      stream:
-                          db.watchCategoriesByType(categoryTypeNotifier.value),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                                ConnectionState.waiting ||
-                            !snapshot.hasData) {
-                          return const LoadingWidget();
-                        }
-                        final categoryItems = <int, CategoryItem>{};
-                        for (var element in snapshot.data!) {
-                          categoryItems.putIfAbsent(element.id, () => element);
-                        }
-                        return StreamBuilder<List<Transaction>>(
-                            stream: dateRangeNotifier.value == "month"
-                                ? db.getTransactionsByMonth(
-                                    selectedDateNotifier.value.year,
-                                    selectedDateNotifier.value.month)
-                                : db.getTransactionsByYear(
-                                    selectedDateNotifier.value.year),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                      ConnectionState.waiting ||
-                                  !snapshot.hasData) {
-                                return const LoadingWidget();
-                              }
-                              final transactions = snapshot.data!;
-                              transactions.removeWhere((element) =>
-                                  !categoryItems
-                                      .containsKey(element.categoryId));
-                              var columnChildren = <Widget>[];
-                              columnChildren.add(_buildBarChart());
-                              columnChildren.add(_buildTotal(transactions));
-                              columnChildren.addAll(_buildPieAndList(
-                                  transactions, categoryItems));
-                              return Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16.0),
-                                  child: ScrollConfiguration(
-                                    behavior: const ScrollBehavior()
-                                        .copyWith(overscroll: false),
-                                    child: SingleChildScrollView(
-                                      child: Column(children: columnChildren),
-                                    ),
-                                  ));
-                            });
-                      });
-                },
-              );
-            }),
-      )
-    ]);
+    return Container(
+      color: Colors.grey[100],
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        _buildTopBar(context),
+        Expanded(
+          child: ValueListenableBuilder(
+              valueListenable: categoryTypeNotifier,
+              builder: (context, value, _) {
+                return ValueListenableBuilder(
+                  valueListenable: selectedDateNotifier,
+                  builder: (context, value, _) {
+                    return StreamBuilder<List<CategoryItem>>(
+                        stream: db
+                            .watchCategoriesByType(categoryTypeNotifier.value),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                                  ConnectionState.waiting ||
+                              !snapshot.hasData) {
+                            return const LoadingWidget();
+                          }
+                          final categoryItems = <int, CategoryItem>{};
+                          for (var element in snapshot.data!) {
+                            categoryItems.putIfAbsent(
+                                element.id, () => element);
+                          }
+                          return StreamBuilder<List<Transaction>>(
+                              stream: dateRangeNotifier.value == "month"
+                                  ? db.getTransactionsByMonth(
+                                      selectedDateNotifier.value.year,
+                                      selectedDateNotifier.value.month)
+                                  : db.getTransactionsByYear(
+                                      selectedDateNotifier.value.year),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                        ConnectionState.waiting ||
+                                    !snapshot.hasData) {
+                                  return const LoadingWidget();
+                                }
+                                isShowMoreClickedNotifier.value = false;
+                                final transactions = snapshot.data!;
+                                transactions.removeWhere((element) =>
+                                    !categoryItems
+                                        .containsKey(element.categoryId));
+                                var columnChildren = <Widget>[];
+                                columnChildren.add(Padding(
+                                    padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
+                                    child: _buildBarChart()));
+                                columnChildren.add(Padding(
+                                    padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
+                                    child: _buildTotal(transactions)));
+                                columnChildren.addAll(_buildPieAndList(
+                                    transactions, categoryItems));
+                                return ScrollConfiguration(
+                                  behavior: const ScrollBehavior()
+                                      .copyWith(overscroll: false),
+                                  child: SingleChildScrollView(
+                                    child: Column(children: columnChildren),
+                                  ),
+                                );
+                              });
+                        });
+                  },
+                );
+              }),
+        )
+      ]),
+    );
   }
 
   Widget _buildTopBar(BuildContext context) {
@@ -121,6 +128,7 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // date range and category type selector
                   Row(
                     children: [
                       Row(
@@ -162,7 +170,8 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
                                         true;
                                     isSelectedDateRangeNotifier
                                         .value[1 - index] = false;
-                                    isSelectedDateRangeNotifier.notifyListeners();
+                                    isSelectedDateRangeNotifier
+                                        .notifyListeners();
                                   },
                                   isSelected: isSelectedDateRange,
                                 );
@@ -202,7 +211,8 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
                                         .value[index] = true;
                                     isSelectedCategoryTypeNotifier
                                         .value[1 - index] = false;
-                                    isSelectedCategoryTypeNotifier.notifyListeners();
+                                    isSelectedCategoryTypeNotifier
+                                        .notifyListeners();
                                   },
                                   isSelected: isSelectedCategoryType,
                                 );
@@ -211,6 +221,7 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
                       ),
                     ],
                   ),
+                  // scrollable date selector
                   SizedBox(
                     height: 40,
                     child: ValueListenableBuilder(
@@ -490,26 +501,41 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
       ..sort((a, b) => -a.value.compareTo(b.value));
     var maxAmount = sortedAmountPerCategory[0].value;
     var widgetList = <Widget>[];
-    widgetList.add(SizedBox(
-      width: double.infinity,
-      child: AspectRatio(
-          aspectRatio: 16 / 9,
-          child: charts.SfCircularChart(series: <charts.CircularSeries>[
-            charts.PieSeries<MapEntry<int, double>, String>(
-                animationDuration: 500,
-                dataSource: sortedAmountPerCategory,
-                xValueMapper: (row, _) => row.key.toString(),
-                yValueMapper: (row, _) => row.value,
-                dataLabelMapper: (row, _) =>
-                    '${categoryItems[row.key]?.getDisplayName(context)}',
-                dataLabelSettings: const charts.DataLabelSettings(
-                  isVisible: true,
-                  labelPosition: charts.ChartDataLabelPosition.outside,
-                ))
-          ])),
+    widgetList.add(Padding(
+      padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
+      child: SizedBox(
+        width: double.infinity,
+        child: AspectRatio(
+            aspectRatio: 16 / 9,
+            child: charts.SfCircularChart(series: <charts.CircularSeries>[
+              charts.PieSeries<MapEntry<int, double>, String>(
+                  animationDuration: 500,
+                  dataSource: sortedAmountPerCategory,
+                  xValueMapper: (row, _) => row.key.toString(),
+                  yValueMapper: (row, _) => row.value,
+                  dataLabelMapper: (row, _) =>
+                      '${categoryItems[row.key]?.getDisplayName(context)}',
+                  dataLabelSettings: const charts.DataLabelSettings(
+                    isVisible: true,
+                    labelPosition: charts.ChartDataLabelPosition.outside,
+                  ))
+            ])),
+      ),
     ));
-    widgetList.addAll(_buildCumulatedTransactionList(
-        sortedAmountPerCategory, categoryItems, maxAmount, total));
+    widgetList.add(Padding(
+      padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
+      child: Card(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(0.0, 16.0, 0.0, 16.0),
+            child: Column(
+                children: _buildCumulatedTransactionList(
+                    sortedAmountPerCategory, categoryItems, maxAmount, total)),
+          )),
+    ));
+    widgetList
+        .add(_buildTransactionListSortByAmount(transactions, categoryItems));
     return widgetList;
   }
 
@@ -559,13 +585,93 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
             )
           ],
         ),
-        leading: Icon(
-          categoryItems[entry.key]!.icon,
-          color: categoryItems[entry.key]!.color,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Icon(
+            categoryItems[entry.key]!.icon,
+            color: categoryItems[entry.key]!.color,
+          ),
         ),
         trailing: const Icon(Icons.chevron_right),
       ));
     }
     return accumulatedTransactionList;
+  }
+
+  Widget _buildTransactionListSortByAmount(
+    List<Transaction> transactions,
+    Map<int, CategoryItem> categoryItems,
+  ) {
+    var sortedTransction = transactions.toList()
+      ..sort((a, b) => -a.amount.compareTo(b.amount));
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
+      child: Card(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(0.0, 16.0, 0.0, 16.0),
+          child: ValueListenableBuilder(
+              valueListenable: isShowMoreClickedNotifier,
+              builder: (context, isShowMoreClicked, _) {
+                return ListView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: sortedTransction.length > 10
+                      ? (isShowMoreClicked ? sortedTransction.length : 11)
+                      : sortedTransction.length,
+                  itemBuilder: (context, index) {
+                    Transaction curTransaction = sortedTransction[index];
+                    CategoryItem? curCategoryItem =
+                        categoryItems[curTransaction.categoryId];
+                    if (sortedTransction.length > 10 &&
+                        index == 10 &&
+                        !isShowMoreClicked) {
+                      return TextButton.icon(
+                          onPressed: () {
+                            isShowMoreClickedNotifier.value = true;
+                          },
+                          icon: const Icon(Icons.keyboard_arrow_down),
+                          label: Text(AppLocalizations.of(context)!
+                              .trendChart_listView_ShowMore));
+                    }
+                    return ListTile(
+                      dense: true,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ModifyTransactionsPage(
+                                  transaction: curTransaction)),
+                        );
+                      },
+                      leading: FloatingActionButton.small(
+                        heroTag: "transaction_category_$index",
+                        child: Icon(
+                          curCategoryItem!.icon,
+                          color: Colors.white,
+                        ),
+                        backgroundColor: curCategoryItem.color,
+                        elevation: 0,
+                        onPressed: () {},
+                      ),
+                      title: Text(curTransaction.comment ??
+                          curCategoryItem.getDisplayName(context)),
+                      subtitle: Text(curTransaction.date.format("yyyy-MM-dd"),
+                          style:
+                              TextStyle(color: Colors.grey[600], fontSize: 12)),
+                      trailing: Text(
+                          (curCategoryItem.type == "expense" ? "-" : "") +
+                              curTransaction.amount.toStringAsFixed(2),
+                          style: curCategoryItem.type == "expense"
+                              ? const TextStyle(color: Colors.red)
+                              : const TextStyle(color: Colors.green)),
+                    );
+                  },
+                );
+              }),
+        ),
+      ),
+    );
   }
 }
