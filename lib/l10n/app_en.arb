@@ -60,6 +60,8 @@
   "tags": "Tags",
   "tab_Expense": "Expense",
   "tab_Income": "Income",
+  "tab_ByDate": "By Date",
+  "tab_ByAmount": "By Amount",
   "category_Income_Salary": "Salary",
   "category_Income_Business": "Business",
   "category_Income_Gifts": "Gifts",
@@ -86,5 +88,13 @@
   "category_Expense_Beauty": "Beauty",
   "category_Expense_Work": "Work",
   "category_Expense_Food_Weekday": "Weekday",
-  "category_Expense_Other": "Other"
+  "category_Expense_Other": "Other",
+  "addCategory_title": "Add Category",
+  "addCategory_SnackBar_failed_to_add_category": "Failed to save new category.",
+  "addCategory_SnackBar_failed_to_get_last_pos": "Failed to get the last position of the category.",
+  "addCategory_Form_CategoryName": "Category Name",
+  "addCategory_Form_CategoryType": "Category Type",
+  "addCategory_Form_CategoryParentName": "Category Parent Name",
+  "addCategory_Form_CategoryIcon": "Category Icon",
+  "trendChart_listView_ShowMore": "Show More"
 }

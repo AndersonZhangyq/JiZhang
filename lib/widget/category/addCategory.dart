@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ji_zhang/models/database.dart';
 import 'package:ji_zhang/widget/transaction/modifyTransaction.dart';
 import 'package:provider/provider.dart';
@@ -48,7 +49,7 @@ class _AddCategoryState extends State<AddCategoryWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text("Add Category"),
+          title: Text(AppLocalizations.of(context)!.addCategory_title),
           leading: IconButton(
               icon: const Icon(Icons.arrow_back),
               onPressed: () {
@@ -85,13 +86,14 @@ class _AddCategoryState extends State<AddCategoryWidget> {
                     if (id > 0) {
                       Navigator.of(context, rootNavigator: true).pop(context);
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Failed to save.')));
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text(AppLocalizations.of(context)!
+                              .addCategory_SnackBar_failed_to_add_category)));
                     }
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text(
-                            'Failed to get the last position of the category.')));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(AppLocalizations.of(context)!
+                            .addCategory_SnackBar_failed_to_get_last_pos)));
                   }
                 }
               },
@@ -130,9 +132,10 @@ class _AddCategoryState extends State<AddCategoryWidget> {
                                 Expanded(
                                   child: TextField(
                                     controller: _categoryNameController,
-                                    decoration: const InputDecoration(
+                                    decoration: InputDecoration(
                                       border: OutlineInputBorder(),
-                                      labelText: 'Category Name',
+                                      labelText: AppLocalizations.of(context)!
+                                          .addCategory_Form_CategoryName,
                                     ),
                                   ),
                                 ),
@@ -142,9 +145,10 @@ class _AddCategoryState extends State<AddCategoryWidget> {
                               padding: const EdgeInsets.only(top: 12),
                               child: DropdownButtonFormField<String>(
                                 isExpanded: true,
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                     border: OutlineInputBorder(),
-                                    labelText: 'Category Type'),
+                                    labelText: AppLocalizations.of(context)!
+                                        .addCategory_Form_CategoryName),
                                 // 设置默认值
                                 value: 'expense',
                                 // 选择回调
@@ -155,7 +159,11 @@ class _AddCategoryState extends State<AddCategoryWidget> {
                                 items: ["Expense", "Income"].map((String type) {
                                   return DropdownMenuItem(
                                       value: type.toLowerCase(),
-                                      child: Text(type));
+                                      child: Text(type == "Expense"
+                                          ? AppLocalizations.of(context)!
+                                              .tab_Expense
+                                          : AppLocalizations.of(context)!
+                                              .tab_Income));
                                 }).toList(),
                               ),
                             ),
@@ -165,9 +173,11 @@ class _AddCategoryState extends State<AddCategoryWidget> {
                                   ? DropdownButtonFormField<String>(
                                       key: UniqueKey(),
                                       isExpanded: true,
-                                      decoration: const InputDecoration(
+                                      decoration: InputDecoration(
                                           border: OutlineInputBorder(),
-                                          labelText: 'Category Parent Name'),
+                                          labelText: AppLocalizations.of(
+                                                  context)!
+                                              .addCategory_Form_CategoryParentName),
                                       // 选择回调
                                       onChanged: (String? value) {
                                         if (value != null) {
@@ -189,9 +199,11 @@ class _AddCategoryState extends State<AddCategoryWidget> {
                                   : DropdownButtonFormField<String>(
                                       key: UniqueKey(),
                                       isExpanded: true,
-                                      decoration: const InputDecoration(
+                                      decoration: InputDecoration(
                                           border: OutlineInputBorder(),
-                                          labelText: 'Category Parent Name'),
+                                          labelText: AppLocalizations.of(
+                                                  context)!
+                                              .addCategory_Form_CategoryParentName),
                                       // 选择回调
                                       onChanged: (String? value) {
                                         if (value != null) {
@@ -211,14 +223,15 @@ class _AddCategoryState extends State<AddCategoryWidget> {
                                       }).toList(),
                                     ),
                             ),
-                            const Padding(
+                            Padding(
                               padding: EdgeInsets.only(top: 24),
                               child: Row(
                                 children: [
                                   Expanded(
                                     child: Center(
                                       child: Text(
-                                        'Category Icon',
+                                        AppLocalizations.of(context)!
+                                            .addCategory_Form_CategoryIcon,
                                         style: TextStyle(fontSize: 18),
                                       ),
                                     ),
