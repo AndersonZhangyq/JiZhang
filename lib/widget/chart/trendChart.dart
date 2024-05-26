@@ -34,6 +34,7 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
   final _trackballBehavior = charts.TrackballBehavior(
       // Enables the trackball
       enable: true,
+      tooltipSettings: charts.InteractiveTooltip(format: "point.x: point.y"),
       activationMode: charts.ActivationMode.singleTap);
   ValueNotifier<bool> isShowMoreClickedNotifier = ValueNotifier<bool>(false);
   @override
@@ -394,24 +395,20 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
               }
             }
           }
-          int initialSelectedIndex = seriesData.keys.toList().indexOf(
-              dateRangeNotifier.value == 'year'
-                  ? DateTime.now().getDateTillYear()
-                  : DateTime.now().getDateTillMonth());
           return charts.SfCartesianChart(
               margin: const EdgeInsets.all(10),
               onSelectionChanged: (selectionArgs) {
                 final selectedTime = seriesData.keys
                     .toList()
                     .elementAt(selectionArgs.pointIndex);
-                print(selectedTime);
                 selectedDateNotifier.value = selectedTime;
               },
               primaryYAxis: charts.NumericAxis(
                   isVisible: false,
                   majorGridLines: const charts.MajorGridLines(width: 0)),
-              primaryXAxis: charts.DateTimeAxis(
-                labelAlignment: charts.LabelAlignment.end,
+              primaryXAxis: charts.DateTimeCategoryAxis(
+                plotOffset: 5,
+                labelAlignment: charts.LabelAlignment.center,
                 majorGridLines: const charts.MajorGridLines(width: 0),
                 dateFormat: dateRangeNotifier.value == 'year'
                     ? DateFormat('yyyy')
@@ -420,26 +417,20 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
               trackballBehavior: _trackballBehavior,
               series: <charts.ColumnSeries>[
                 charts.ColumnSeries<MapEntry<DateTime, double>, DateTime>(
-                  dataSource: seriesData.entries.toList(),
-                  xValueMapper: (row, _) => row.key,
-                  yValueMapper: (row, _) => row.value,
-                  pointColorMapper: (row, _) {
-                    if (dateRangeNotifier.value == 'year' &&
-                        row.key.year == selectedDateNotifier.value.year) {
-                      return Colors.redAccent;
-                    }
-                    if (row.key ==
-                        selectedDateNotifier.value.getDateTillMonth()) {
-                      return Colors.redAccent;
-                    }
-                    return Colors.green.withOpacity(0.3);
-                  },
-                  // color: Colors.greenAccent,
-                  // Width of the columns
-                  // width: 0.5,
-                  // Spacing between the columns
-                  // spacing: 0.2,
-                )
+                    dataSource: seriesData.entries.toList(),
+                    xValueMapper: (row, _) => row.key,
+                    yValueMapper: (row, _) => row.value,
+                    pointColorMapper: (row, _) {
+                      if (dateRangeNotifier.value == 'year' &&
+                          row.key.year == selectedDateNotifier.value.year) {
+                        return Colors.redAccent;
+                      }
+                      if (row.key ==
+                          selectedDateNotifier.value.getDateTillMonth()) {
+                        return Colors.redAccent;
+                      }
+                      return Colors.green.withOpacity(0.3);
+                    }),
               ]);
         },
       ),
