@@ -227,6 +227,7 @@ class TransactionListWidget extends StatelessWidget {
               }
             },
             child: ListTile(
+              dense: true,
               onTap: () {
                 Navigator.push(
                   context,
