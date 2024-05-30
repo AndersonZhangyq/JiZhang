@@ -422,7 +422,7 @@ class MyDatabase extends _$MyDatabase {
         .watch();
   }
 
-  Stream<List<Transaction>>? getTransactionsByYear(year) {
+  Stream<List<Transaction>>? getTransactionsByYear(int year) {
     DateTime startDate = DateTime(year);
     DateTime endDate = DateTime(year + 1).subtract(const Duration(days: 1));
     return (select(transactions)
