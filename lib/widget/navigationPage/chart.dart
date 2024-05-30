@@ -1,6 +1,7 @@
 // import 'package:charts_flutter/flutter.dart' as charts;
 
 import 'package:flutter/material.dart';
+import 'package:ji_zhang/widget/chart/compareChart.dart';
 import 'package:ji_zhang/widget/chart/trendChart.dart';
 
 class ChartWidget extends StatefulWidget {
@@ -42,7 +43,7 @@ class _ChartWidgetState extends State<ChartWidget> {
             physics: NeverScrollableScrollPhysics(),
             children: [
               TrendChartWidget(),
-              Icon(Icons.directions_transit),
+              CompareChartWidget(),
             ],
           ),
         ),
