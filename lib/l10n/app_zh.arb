@@ -56,6 +56,7 @@
   "account_NeedStoragePermission": "需要读取存储和写入存储权限才能使用备份和恢复功能",
   "cancel": "取消",
   "ok": "确定",
+  "confirm": "确认",
   "snackBarAction_Undo": "撤销",
   "tags": "标签",
   "tab_Expense": "支出",
@@ -96,5 +97,10 @@
   "addCategory_Form_CategoryType": "类别类型",
   "addCategory_Form_CategoryParentName": "父类别名称",
   "addCategory_Form_CategoryIcon": "类别图标",
-  "trendChart_listView_ShowMore": "显示更多"
+  "trendChart_listView_ShowMore": "显示更多",
+  "trendChart_listView_ShowLess": "收起",
+  "monthYearPicker_byMonth": "按月选择",
+  "monthYearPicker_byYear": "按年选择",
+  "monthYearPicker_bottomSheet_title": "年份",
+  "compareChart_SelectDate": "选择日期"
 }

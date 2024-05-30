@@ -609,12 +609,22 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
                   physics: const NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
                   itemCount: sortedTransction.length > 10
-                      ? (isShowMoreClicked ? sortedTransction.length : 11)
+                      ? (isShowMoreClicked
+                          ? (sortedTransction.length + 1)
+                          : (10 + 1))
                       : sortedTransction.length,
                   itemBuilder: (context, index) {
-                    Transaction curTransaction = sortedTransction[index];
-                    CategoryItem? curCategoryItem =
-                        categoryItems[curTransaction.categoryId];
+                    if (sortedTransction.length > 10 &&
+                        index == sortedTransction.length &&
+                        isShowMoreClicked) {
+                      return TextButton.icon(
+                          onPressed: () {
+                            isShowMoreClickedNotifier.value = false;
+                          },
+                          icon: const Icon(Icons.keyboard_arrow_up),
+                          label: Text(AppLocalizations.of(context)!
+                              .trendChart_listView_ShowLess));
+                    }
                     if (sortedTransction.length > 10 &&
                         index == 10 &&
                         !isShowMoreClicked) {
@@ -626,6 +636,9 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
                           label: Text(AppLocalizations.of(context)!
                               .trendChart_listView_ShowMore));
                     }
+                    Transaction curTransaction = sortedTransction[index];
+                    CategoryItem? curCategoryItem =
+                        categoryItems[curTransaction.categoryId];
                     return ListTile(
                       dense: true,
                       onTap: () {

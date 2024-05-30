@@ -56,6 +56,7 @@
   "account_NeedStoragePermission": "We need to access the storage for storing and reading backup files.",
   "cancel": "Cancel",
   "ok": "OK",
+  "confirm": "confirm",
   "snackBarAction_Undo": "Undo",
   "tags": "Tags",
   "tab_Expense": "Expense",
@@ -96,5 +97,10 @@
   "addCategory_Form_CategoryType": "Category Type",
   "addCategory_Form_CategoryParentName": "Category Parent Name",
   "addCategory_Form_CategoryIcon": "Category Icon",
-  "trendChart_listView_ShowMore": "Show More"
+  "trendChart_listView_ShowMore": "Show More",
+  "trendChart_listView_ShowLess": "Show Less",
+  "monthYearPicker_byMonth": "By Month",
+  "monthYearPicker_byYear": "By Year",
+  "monthYearPicker_bottomSheet_title": "Year",
+  "compareChart_SelectDate": "Select Date"
 }
