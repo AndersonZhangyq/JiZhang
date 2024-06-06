@@ -102,5 +102,14 @@
   "monthYearPicker_byMonth": "By Month",
   "monthYearPicker_byYear": "By Year",
   "monthYearPicker_bottomSheet_title": "Year",
-  "compareChart_SelectDate": "Select Date"
+  "compareChart_SelectDate": "Select Date",
+  "batchAddTransaction_Title": "Add Recognized Transactions",
+  "batchAddTransaction_SnackBar_choose_at_least_one_transaction": "Please choose at least one transaction to add.",
+  "batchAddTransaction_SnackBar_transactions_without_category": "Make sure all transactions have a category.",
+  "batchAddTransaction_SnackBar_failed_to_add_part_of_transactions": "Failed to save some of the selected transactions.",
+  "textRecognition_Title": "Text Recognition",
+  "textRecognition_PickImage": "Pick Image from Gallery",
+  "textRecognition_GenerateTransactions": "Generate Transactions",
+  "textRecognition_ZhiFuBao": "ZhiFuBao",
+  "textRecognition_WeChat": "WeChat"
 }

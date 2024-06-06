@@ -102,5 +102,14 @@
   "monthYearPicker_byMonth": "按月选择",
   "monthYearPicker_byYear": "按年选择",
   "monthYearPicker_bottomSheet_title": "年份",
-  "compareChart_SelectDate": "选择日期"
+  "compareChart_SelectDate": "选择日期",
+  "batchAddTransaction_Title": "批量添加账单",
+  "batchAddTransaction_SnackBar_choose_at_least_one_transaction": "请至少选择一个账单",
+  "batchAddTransaction_SnackBar_transactions_without_category": "有交易未选择分类，请选择分类后保存",
+  "batchAddTransaction_SnackBar_failed_to_add_part_of_transactions": "部分交易保存失败，请重试",
+  "textRecognition_Title": "识别账单",
+  "textRecognition_PickImage": "从相册选择图片",
+  "textRecognition_GenerateTransactions": "生成账单",
+  "textRecognition_ZhiFuBao": "支付宝",
+  "textRecognition_WeChat": "微信"
 }
