@@ -6,6 +6,7 @@ import 'package:ji_zhang/widget/navigationPage/account.dart';
 import 'package:ji_zhang/widget/navigationPage/budget.dart';
 import 'package:ji_zhang/widget/navigationPage/chart.dart';
 import 'package:ji_zhang/widget/navigationPage/transaction.dart';
+import 'package:ji_zhang/widget/ocr/textRecognition.dart';
 import 'package:ji_zhang/widget/transaction/modifyTransaction.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
@@ -83,33 +84,61 @@ class _MyHomePageState extends State<MyHomePage> {
           _children[_currentIndex],
         ],
       ),
-      floatingActionButton: _currentIndex == 1 || _currentIndex == 3
-          ? null
-          : FloatingActionButton.small(
+      floatingActionButton: () {
+        switch (_currentIndex) {
+          case 1:
+          case 3:
+            return null;
+          case 0:
+            return IntrinsicHeight(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  FloatingActionButton.small(
+                    heroTag: 'add_transaction_manual',
+                    elevation: 4.0,
+                    child: const Icon(Icons.add),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const ModifyTransactionsPage(
+                                transaction: null)),
+                      );
+                    },
+                  ),
+                  FloatingActionButton.small(
+                    heroTag: 'add_transaction_ocr',
+                    elevation: 4.0,
+                    child: const Icon(Icons.camera_alt_outlined),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => TextRecognitionWidget()),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            );
+          case 2:
+            return FloatingActionButton.small(
               heroTag: 'add_transaction',
               elevation: 4.0,
               child: const Icon(Icons.add),
               onPressed: () {
-                switch (_currentIndex) {
-                  case 0:
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              const ModifyTransactionsPage(transaction: null)),
-                    );
-                    break;
-                  case 2:
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              const ModifyBudgetPage(budget: null)),
-                    );
-                    break;
-                }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          const ModifyBudgetPage(budget: null)),
+                );
               },
-            ),
+            );
+        }
+        return null;
+      }(),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         onTap: onTabTapped,

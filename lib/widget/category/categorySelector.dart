@@ -98,10 +98,11 @@ class CategorySelectorWidget extends StatelessWidget {
                 icon: Icon(value.icon),
                 onPressed: () {
                   Navigator.pop(context, {
-                    'category': key,
+                    'category': value.name,
                     'icon': value.icon,
                     'color': value.color,
-                    "id": value.id
+                    "id": value.id,
+                    "type": "income"
                   });
                 },
                 color: value.color,
@@ -160,7 +161,8 @@ class CategorySelectorWidget extends StatelessWidget {
                     "category": value.name,
                     'icon': value.icon,
                     "color": value.color,
-                    "id": value.id
+                    "id": value.id,
+                    "type": "expense"
                   });
                 },
                 color: value.color,
