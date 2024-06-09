@@ -77,12 +77,14 @@ class _AddCategoryState extends State<AddCategoryWidget> {
                               "fontFamily": categoryIcon!.icon!.fontFamily,
                               "fontPackage": categoryIcon!.icon!.fontPackage
                             }),
-                            parentId: drift.Value.ofNullable(categoryParentId),
+                            parentId:
+                                drift.Value.absentIfNull(categoryParentId),
                             parentName:
-                                drift.Value.ofNullable(categoryParentName),
+                                drift.Value.absentIfNull(categoryParentName),
                             color: categoryColor!.value.toString(),
                             pos: categoryPos,
-                            predefined: 0));
+                            predefined: 0,
+                            accountId: db.currentAccountId));
                     if (id > 0) {
                       Navigator.of(context, rootNavigator: true).pop(context);
                     } else {

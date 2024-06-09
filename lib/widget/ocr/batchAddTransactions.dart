@@ -108,7 +108,8 @@ class _BatchAddTransactionsState extends State<BatchAddTransactions> {
                                   categoryId: transaction.categoryId!,
                                   comment: drift.Value(transaction.title.isEmpty
                                       ? null
-                                      : transaction.title)));
+                                      : transaction.title),
+                                  accountId: db.currentAccountId));
                           if (0 == id) {
                             failedTransactions.add(transaction);
                             failedSelected.add(_selected[i]);
@@ -195,8 +196,8 @@ class _BatchAddTransactionsState extends State<BatchAddTransactions> {
         RecognizedTextElement? titleElement;
         for (int j = i - 1; j >= 0; j--) {
           final candidateTitleElement = widget.recognizedTextElements[j];
-          final heightDiff = (candidateTitleElement.boundingBox.top -
-                  currentElement.boundingBox.top)
+          final heightDiff = (candidateTitleElement.boundingBox.center.dy -
+                  currentElement.boundingBox.center.dy)
               .abs();
           if (heightDiff > 20) {
             break;
@@ -212,8 +213,8 @@ class _BatchAddTransactionsState extends State<BatchAddTransactions> {
         }
         for (int j = i + 1; j < widget.recognizedTextElements.length; j++) {
           final candidateTitleElement = widget.recognizedTextElements[j];
-          final heightDiff = (candidateTitleElement.boundingBox.top -
-                  currentElement.boundingBox.top)
+          final heightDiff = (candidateTitleElement.boundingBox.center.dy -
+                  currentElement.boundingBox.center.dy)
               .abs();
           if (heightDiff > 20) {
             break;
@@ -234,8 +235,8 @@ class _BatchAddTransactionsState extends State<BatchAddTransactions> {
         RecognizedTextElement? dateElement;
         for (int j = i + 1; j < widget.recognizedTextElements.length; j++) {
           final candidateDateElement = widget.recognizedTextElements[j];
-          final heightDiff = (candidateDateElement.boundingBox.top -
-                  titleElement.boundingBox.top)
+          final heightDiff = (candidateDateElement.boundingBox.center.dy -
+                  titleElement.boundingBox.center.dy)
               .abs();
           if (heightDiff > (widget.type == 'wechat' ? 100 : 200)) {
             break;
@@ -401,6 +402,7 @@ class _TransactionListElmentState extends State<TransactionListElment> {
                     },
                     onTapOutside: (event) {
                       setState(() {
+                        widget.transaction.title = _titleController.text;
                         _titleIsEditing = false;
                         _titleFocusNode.unfocus();
                       });
@@ -447,16 +449,10 @@ class _TransactionListElmentState extends State<TransactionListElment> {
                   onFocusChange: (value) {
                     if (value == false) {
                       setState(() {
-                        _amountIsEditing = false;
                         var changed = _amountController.text;
                         if (double.tryParse(changed) != null) {
                           if (widget.transaction.categoryType == null) {
-                            if (widget.transaction.amount < 0) {
-                              widget.transaction.amount =
-                                  -double.parse(changed);
-                            } else {
-                              widget.transaction.amount = double.parse(changed);
-                            }
+                            widget.transaction.amount = double.parse(changed);
                           } else if (widget.transaction.categoryType ==
                               'income') {
                             widget.transaction.amount = double.parse(changed);
@@ -465,6 +461,7 @@ class _TransactionListElmentState extends State<TransactionListElment> {
                           }
                         }
                         updateAmountController();
+                        _amountIsEditing = false;
                       });
                     }
                   },
@@ -483,8 +480,6 @@ class _TransactionListElmentState extends State<TransactionListElment> {
                     },
                     onTap: () {
                       setState(() {
-                        _amountController.text =
-                            widget.transaction.amount.abs().toString();
                         _amountIsEditing = true;
                       });
                     },

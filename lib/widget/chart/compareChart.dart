@@ -82,7 +82,6 @@ class _CompareChartWidgetState extends State<CompareChartWidget> {
                                                 day: 1);
                                       }
                                     },
-                                    db: db,
                                   ),
                                 );
                               },
@@ -146,7 +145,6 @@ class _CompareChartWidgetState extends State<CompareChartWidget> {
                                                 day: 1);
                                       }
                                     },
-                                    db: db,
                                   ),
                                 );
                               },

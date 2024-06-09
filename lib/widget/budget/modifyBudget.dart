@@ -97,7 +97,8 @@ class _ModifyBudgetPageState extends State<ModifyBudgetPage> {
                                         name: budgetNameController.text,
                                         amount: amount,
                                         categoryIds: budgetCategoryIds,
-                                        recurrence: budgetRecurrence));
+                                        recurrence: budgetRecurrence,
+                                        accountId: db.currentAccountId));
                                 if (0 == id) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
@@ -120,7 +121,9 @@ class _ModifyBudgetPageState extends State<ModifyBudgetPage> {
                                         categoryIds:
                                             drift.Value(budgetCategoryIds),
                                         recurrence:
-                                            drift.Value(budgetRecurrence)));
+                                            drift.Value(budgetRecurrence),
+                                        accountId: drift.Value(
+                                            widget.budget!.accountId)));
                                 if (false == ret) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(

@@ -98,11 +98,12 @@ class CategorySelectorWidget extends StatelessWidget {
                 icon: Icon(value.icon),
                 onPressed: () {
                   Navigator.pop(context, {
-                    'category': value.name,
+                    'name': value.name,
                     'icon': value.icon,
                     'color': value.color,
                     "id": value.id,
-                    "type": "income"
+                    "type": "income",
+                    "parentId": value.parentId,
                   });
                 },
                 color: value.color,
@@ -158,11 +159,12 @@ class CategorySelectorWidget extends StatelessWidget {
                 icon: Icon(value.icon),
                 onPressed: () {
                   Navigator.pop(context, {
-                    "category": value.name,
+                    "name": value.name,
                     'icon': value.icon,
                     "color": value.color,
                     "id": value.id,
-                    "type": "expense"
+                    "type": "expense",
+                    "parentId": value.parentId,
                   });
                 },
                 color: value.color,

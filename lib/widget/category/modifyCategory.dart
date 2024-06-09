@@ -194,27 +194,54 @@ class _ModifyCategoryState extends State<ModifyCategoryWidget> {
                 ),
                 onPressed: () async {
                   final categoryToRemove = categories[index];
-                  changeCounter.increment();
-                  await (db.delete(db.categories)
-                        ..where((t) => t.id.equals(categoryToRemove.id)))
-                      .go();
-                  ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(AppLocalizations.of(context)!
-                          .modifyCategory_SnackBar_category_removed),
-                      action: SnackBarAction(
-                          label: 'Undo',
-                          onPressed: () {
-                            changeCounter.decrement();
-                            db.into(db.categories).insert(
-                                CategoriesCompanion.insert(
-                                    name: categoryToRemove.name,
-                                    type: categoryToRemove.type,
-                                    icon: categoryToRemove.originIcon,
-                                    color: categoryToRemove.originColor,
-                                    pos: categoryToRemove.pos,
-                                    predefined: categoryToRemove.predefined));
-                          })));
+                  showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: Text(AppLocalizations.of(context)!
+                              .modifyCategory_Dialog_title_remove_category),
+                          content: Text(AppLocalizations.of(context)!
+                              .modifyCategory_Dialog_content_remove_category),
+                          actions: [
+                            TextButton(
+                                child:
+                                    Text(AppLocalizations.of(context)!.cancel),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                }),
+                            TextButton(
+                                child:
+                                    Text(AppLocalizations.of(context)!.confirm),
+                                onPressed: () async {
+                                  await _removeCategory(
+                                      categoryToRemove, changeCounter);
+                                  Navigator.of(context).pop();
+                                }),
+                          ],
+                        );
+                      });
+                  // changeCounter.increment();
+                  // await (db.delete(db.categories)
+                  //       ..where((t) => t.id.equals(categoryToRemove.id)))
+                  //     .go();
+                  // ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                  // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  //     content: Text(AppLocalizations.of(context)!
+                  //         .modifyCategory_SnackBar_category_removed),
+                  //     action: SnackBarAction(
+                  //         label: 'Undo',
+                  //         onPressed: () {
+                  //           changeCounter.decrement();
+                  //           db.into(db.categories).insert(
+                  //               CategoriesCompanion.insert(
+                  //                   name: categoryToRemove.name,
+                  //                   type: categoryToRemove.type,
+                  //                   icon: categoryToRemove.originIcon,
+                  //                   color: categoryToRemove.originColor,
+                  //                   pos: categoryToRemove.pos,
+                  //                   predefined: categoryToRemove.predefined,
+                  //                   accountId: db.currentAccountId));
+                  //         })));
                 },
                 backgroundColor: Colors.red),
           ),

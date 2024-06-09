@@ -33,6 +33,8 @@ class CategoryItem implements Comparable {
     parentName = category.parentName;
   }
 
+  CategoryItem.empty();
+
   late int id;
   late String name;
   late String type;
@@ -63,12 +65,18 @@ class CategoryItem implements Comparable {
       return CategoryNameLocalizationHelper.getDisplayName(name, type, context);
     }
   }
+
+  String getTrueName(BuildContext context) {
+    return CategoryNameLocalizationHelper.getDisplayName(name, type, context);
+  }
 }
 
 class ModifyTransactionsPage extends StatefulWidget {
-  const ModifyTransactionsPage({Key? key, required this.transaction})
+  const ModifyTransactionsPage(
+      {Key? key, required this.transaction, required this.category})
       : super(key: key);
   final Transaction? transaction;
+  final CategoryItem? category;
 
   @override
   State<ModifyTransactionsPage> createState() => _ModifyTransactionsPageState();
@@ -77,10 +85,13 @@ class ModifyTransactionsPage extends StatefulWidget {
 class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
   late MyDatabase db;
   late bool isAdd;
-  late int selectedCategoryId;
+  // late int selectedCategoryId;
   DateTime selectedDate = DateTime.now().getDateOnly();
-  Color categoryColor = const Color(0xFF68a1e8);
-  Icon selectedCategoryIcon = const Icon(Icons.add, color: Colors.white);
+  final defaultColor = const Color(0xFF68a1e8);
+  final defaultIcon = const Icon(Icons.add, color: Colors.white);
+  // Color categoryColor = const Color(0xFF68a1e8);
+  // Icon selectedCategoryIcon = const Icon(Icons.add, color: Colors.white);
+  CategoryItem? selectedCategory;
 
   final TextEditingController amountController = TextEditingController();
 
@@ -103,15 +114,15 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
       amountController.text = widget.transaction!.amount.toStringAsFixed(2);
       dateController.text = widget.transaction!.date.format("yyyy-MM-dd");
       commentController.text = widget.transaction!.comment ?? "";
-      selectedCategoryId = widget.transaction!.categoryId;
       selectedDate = widget.transaction!.date;
+      selectedCategory = widget.category!;
     }
   }
 
   bool canSave() {
     return amountController.text.isNotEmpty &&
         0 != double.tryParse(amountController.text) &&
-        Icons.add != selectedCategoryIcon.icon;
+        selectedCategory != null;
   }
 
   void showCategorySelector(BuildContext context) {
@@ -121,9 +132,16 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
     ).then((value) {
       if (null != value) {
         setState(() {
-          categoryColor = value["color"];
-          selectedCategoryIcon = Icon(value["icon"], color: Colors.white);
-          selectedCategoryId = value["id"] as int;
+          // categoryColor = value["color"];
+          // selectedCategoryIcon = Icon(value["icon"], color: Colors.white);
+          // selectedCategoryId = value["id"] as int;
+          selectedCategory = CategoryItem.empty();
+          selectedCategory!.parentId = value["parentId"] as int?;
+          selectedCategory!.name = value["name"] as String;
+          selectedCategory!.type = value["type"] as String;
+          selectedCategory!.color = value["color"] as Color;
+          selectedCategory!.icon = value["icon"] as IconData;
+          selectedCategory!.id = value["id"] as int;
         });
       }
     });
@@ -131,221 +149,237 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureProvider<Category?>(
-        create: (_) {
-          if (!isAdd) {
-            return (db.select(db.categories)
-                  ..where((t) => t.id.equals(selectedCategoryId)))
-                .getSingleOrNull();
-          } else {
-            return Future.value(null);
-          }
-        },
-        initialData: null,
-        child: Consumer<Category?>(builder: (_, value, __) {
-          if (value != null) {
-            if (selectedCategoryIcon.icon == Icons.add) {
-              CategoryItem categoryItem = CategoryItem(value);
-              categoryColor = categoryItem.color;
-              selectedCategoryIcon =
-                  Icon(categoryItem.icon, color: Colors.white);
-            }
-          }
-          return Scaffold(
-              resizeToAvoidBottomInset: false,
-              appBar: AppBar(
-                  backgroundColor: categoryColor,
-                  elevation: 0,
-                  centerTitle: true,
-                  title: Text((isAdd
-                          ? AppLocalizations.of(context)!
-                              .modifyTransaction_Title_add
-                          : AppLocalizations.of(context)!
-                              .modifyTransaction_Title_edit) +
-                      AppLocalizations.of(context)!
-                          .modifyTransaction_Title_transaction),
-                  leading: IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () {
-                      Navigator.of(context, rootNavigator: true).pop(context);
-                    },
-                  ),
-                  actions: <Widget>[
-                    IconButton(
-                      icon: const Icon(Icons.save),
-                      onPressed: canSave()
-                          ? () async {
-                              final amount =
-                                  double.parse(amountController.text);
-                              if (isAdd) {
-                                int id = await db
-                                    .into(db.transactions)
-                                    .insert(TransactionsCompanion.insert(
-                                      amount: amount,
-                                      date: selectedDate,
-                                      categoryId: selectedCategoryId,
-                                      comment: drift.Value(
-                                          commentController.text.isEmpty
-                                              ? null
-                                              : commentController.text),
-                                    ));
-                                if (0 == id) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(AppLocalizations.of(
-                                              context)!
-                                          .modifyTransaction_SnackBar_failed_to_add_transaction),
-                                    ),
-                                  );
-                                } else {
-                                  Navigator.of(context, rootNavigator: true)
-                                      .pop(context);
-                                }
-                              } else {
-                                bool ret = await db
-                                    .update(db.transactions)
-                                    .replace(
-                                      TransactionsCompanion(
-                                          id: drift.Value(
-                                              widget.transaction!.id),
-                                          amount: drift.Value(amount),
-                                          date: drift.Value(selectedDate),
-                                          categoryId:
-                                              drift.Value(selectedCategoryId),
-                                          comment: drift.Value(
-                                              commentController.text.isEmpty
-                                                  ? null
-                                                  : commentController.text)),
-                                    );
-                                if (false == ret) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(AppLocalizations.of(
-                                              context)!
-                                          .modifyTransaction_SnackBar_failed_to_update_transaction),
-                                    ),
-                                  );
-                                } else {
-                                  Navigator.of(context, rootNavigator: true)
-                                      .pop(context);
-                                }
-                              }
-                            }
-                          : null,
-                    ),
-                  ]),
-              body: Column(children: [
-                Container(
-                  color: categoryColor,
-                  child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Row(
-                        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          DottedBorder(
-                            borderType: BorderType.Circle,
-                            color: Colors.white,
-                            padding: const EdgeInsets.all(0),
-                            dashPattern: const [6],
-                            child: MaterialButton(
-                              onPressed: () {
-                                showCategorySelector(context);
-                              },
-                              child: selectedCategoryIcon,
-                              shape: const CircleBorder(),
+    return Scaffold(
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(
+            backgroundColor: selectedCategory == null
+                ? defaultColor
+                : selectedCategory!.color,
+            elevation: 0,
+            centerTitle: true,
+            title: Text((isAdd
+                    ? AppLocalizations.of(context)!.modifyTransaction_Title_add
+                    : AppLocalizations.of(context)!
+                        .modifyTransaction_Title_edit) +
+                AppLocalizations.of(context)!
+                    .modifyTransaction_Title_transaction),
+            leading: IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () {
+                Navigator.of(context, rootNavigator: true).pop(context);
+              },
+            ),
+            actions: <Widget>[
+              IconButton(
+                icon: const Icon(Icons.save),
+                onPressed: canSave()
+                    ? () async {
+                        final amount = double.parse(amountController.text);
+                        if (isAdd) {
+                          int id = await db
+                              .into(db.transactions)
+                              .insert(TransactionsCompanion.insert(
+                                amount: amount,
+                                date: selectedDate,
+                                categoryId: selectedCategory!.id,
+                                accountId: db.currentAccountId,
+                                comment: drift.Value(
+                                    commentController.text.isEmpty
+                                        ? null
+                                        : commentController.text),
+                              ));
+                          if (0 == id) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(AppLocalizations.of(context)!
+                                    .modifyTransaction_SnackBar_failed_to_add_transaction),
+                              ),
+                            );
+                          } else {
+                            Navigator.of(context, rootNavigator: true)
+                                .pop(context);
+                          }
+                        } else {
+                          bool ret = await db.update(db.transactions).replace(
+                              TransactionsCompanion(
+                                  id: drift.Value(widget.transaction!.id),
+                                  amount: drift.Value(amount),
+                                  date: drift.Value(selectedDate),
+                                  categoryId: drift.Value(selectedCategory!.id),
+                                  comment: drift.Value(
+                                      commentController.text.isEmpty
+                                          ? null
+                                          : commentController.text),
+                                  accountId: drift.Value(
+                                      widget.transaction!.accountId)));
+                          if (false == ret) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(AppLocalizations.of(context)!
+                                    .modifyTransaction_SnackBar_failed_to_update_transaction),
+                              ),
+                            );
+                          } else {
+                            Navigator.of(context, rootNavigator: true)
+                                .pop(context);
+                          }
+                        }
+                      }
+                    : null,
+              ),
+            ]),
+        body: Column(children: [
+          Container(
+            color: selectedCategory == null
+                ? defaultColor
+                : selectedCategory!.color,
+            child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Column(
+                      children: [
+                        DottedBorder(
+                          borderType: BorderType.Circle,
+                          color: Colors.white,
+                          padding: const EdgeInsets.all(0),
+                          dashPattern: const [6],
+                          child: MaterialButton(
+                            onPressed: () {
+                              showCategorySelector(context);
+                            },
+                            child: selectedCategory == null
+                                ? defaultIcon
+                                : Icon(selectedCategory!.icon,
+                                    color: Colors.white),
+                            shape: const CircleBorder(),
+                          ),
+                        ),
+                        Visibility(
+                          maintainSize: true,
+                          maintainAnimation: true,
+                          maintainState: true,
+                          visible: (selectedCategory != null) &&
+                              (selectedCategory!.parentId != null),
+                          child: SizedBox(
+                            height: 24,
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 2.0),
+                              child: Text(
+                                selectedCategory == null
+                                    ? ""
+                                    : selectedCategory!.getTrueName(context),
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold),
+                              ),
                             ),
                           ),
-                          // const Spacer(),
-                          Expanded(
-                            child: TextFormField(
-                              controller: amountController,
-                              style: const TextStyle(
-                                  color: Colors.white, fontSize: 24),
-                              textAlign: TextAlign.end,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                // border: OutlineInputBorder(),
-                                border: InputBorder.none,
-                              ),
-                              readOnly: true,
-                            ),
-                          )
-                        ],
-                      )),
-                ),
-                ListTile(
-                  leading: Icon(Icons.date_range, color: categoryColor),
-                  title: TextField(
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
+                        )
+                      ],
                     ),
-                    showCursor: false,
-                    readOnly: true,
-                    controller: dateController,
-                    onTap: () {
-                      showDatePicker(
-                              context: context,
-                              initialDate: selectedDate,
-                              firstDate: DateTime(1900),
-                              lastDate: DateTime(3000))
-                          .then((value) {
-                        setState(() {
-                          if (null != value) selectedDate = value;
-                          dateController.text =
-                              selectedDate.format("yyyy-MM-dd");
+                    // const Spacer(),
+                    Expanded(
+                      child: TextFormField(
+                        controller: amountController,
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 24),
+                        textAlign: TextAlign.end,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          // border: OutlineInputBorder(),
+                          border: InputBorder.none,
+                        ),
+                        readOnly: true,
+                      ),
+                    )
+                  ],
+                )),
+          ),
+          ListTile(
+            leading: Icon(Icons.date_range,
+                color: selectedCategory == null
+                    ? defaultColor
+                    : selectedCategory!.color),
+            title: TextField(
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+              ),
+              showCursor: false,
+              readOnly: true,
+              controller: dateController,
+              onTap: () {
+                showDatePicker(
+                        context: context,
+                        initialDate: selectedDate,
+                        firstDate: DateTime(1900),
+                        lastDate: DateTime(3000))
+                    .then((value) {
+                  setState(() {
+                    if (null != value) selectedDate = value;
+                    dateController.text = selectedDate.format("yyyy-MM-dd");
+                  });
+                });
+              },
+            ),
+          ),
+          ListTile(
+            leading: Icon(Icons.note,
+                color: selectedCategory == null
+                    ? defaultColor
+                    : selectedCategory!.color),
+            title: TextField(
+              controller: commentController,
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: AppLocalizations.of(context)!
+                    .modifyTransaction_Comment_hint,
+              ),
+            ),
+          ),
+          ListTile(
+            leading: Icon(Icons.label,
+                color: selectedCategory == null
+                    ? defaultColor
+                    : selectedCategory!.color),
+            title: Text(AppLocalizations.of(context)!.tags),
+            trailing: const Icon(Icons.chevron_right),
+          ),
+          SizedBox(
+              height: 50,
+              child: StreamBuilder<List<Tag>>(
+                  stream: null,
+                  builder: (context, snapshot) {
+                    final tags = snapshot.data ?? <Tag>[];
+                    return ListView.builder(
+                        itemCount: tags.length,
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (context, index) {
+                          Tag cur = tags[index];
+                          return Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: FilterChip(
+                                backgroundColor: (selectedCategory == null
+                                        ? defaultColor
+                                        : selectedCategory!.color)
+                                    .withOpacity(0.1),
+                                label: Text(cur.name),
+                                onSelected: (bool value) {},
+                              ));
                         });
-                      });
-                    },
-                  ),
-                ),
-                ListTile(
-                  leading: Icon(Icons.note, color: categoryColor),
-                  title: TextField(
-                    controller: commentController,
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: AppLocalizations.of(context)!
-                          .modifyTransaction_Comment_hint,
-                    ),
-                  ),
-                ),
-                ListTile(
-                  leading: Icon(Icons.label, color: categoryColor),
-                  title: Text(AppLocalizations.of(context)!.tags),
-                  trailing: const Icon(Icons.chevron_right),
-                ),
-                SizedBox(
-                    height: 50,
-                    child: StreamBuilder<List<Tag>>(
-                        stream: null,
-                        builder: (context, snapshot) {
-                          final tags = snapshot.data ?? <Tag>[];
-                          return ListView.builder(
-                              itemCount: tags.length,
-                              scrollDirection: Axis.horizontal,
-                              itemBuilder: (context, index) {
-                                Tag cur = tags[index];
-                                return Padding(
-                                    padding: const EdgeInsets.all(4.0),
-                                    child: FilterChip(
-                                      backgroundColor:
-                                          categoryColor.withOpacity(0.1),
-                                      label: Text(cur.name),
-                                      onSelected: (bool value) {},
-                                    ));
-                              });
-                        })),
-                const Spacer(),
-                Center(
-                    child: MoneyNumberTablet(
-                  moneyController: amountController,
-                  callback: (text) {
-                    setState(() {
-                      amountController.text = text;
-                    });
-                  },
-                ))
-              ]));
-        }));
+                  })),
+          const Spacer(),
+          Center(
+              child: MoneyNumberTablet(
+            moneyController: amountController,
+            callback: (text) {
+              setState(() {
+                amountController.text = text;
+              });
+            },
+          ))
+        ]));
   }
 }

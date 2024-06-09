@@ -9,23 +9,23 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
-class AccountWidget extends StatelessWidget {
-  const AccountWidget({Key? key}) : super(key: key);
+class SettingsWidget extends StatelessWidget {
+  const SettingsWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return const AccountPageWidget();
+    return const SettingsPageWidget();
   }
 }
 
-class AccountPageWidget extends StatefulWidget {
-  const AccountPageWidget({Key? key}) : super(key: key);
+class SettingsPageWidget extends StatefulWidget {
+  const SettingsPageWidget({Key? key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _AccountPageState();
+  State<StatefulWidget> createState() => _SettingsPageState();
 }
 
-class _AccountPageState extends State<AccountPageWidget> {
+class _SettingsPageState extends State<SettingsPageWidget> {
   int backUpPercent = -1;
   int restorePercent = -1;
   late MyDatabase db;
@@ -40,31 +40,28 @@ class _AccountPageState extends State<AccountPageWidget> {
   Widget build(BuildContext context) {
     return Expanded(
         child: SafeArea(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          AppBar(
-            title: Text(AppLocalizations.of(context)!.account_title),
-            leading: null,
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16.0, 8.0, 0.0, 8.0),
-            child: FutureBuilder<Directory?>(
-                future: getExternalStorageDirectory(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData && snapshot.data != null) {
-                    return Text(AppLocalizations.of(context)!.account_DataPath +
-                        "\n" +
-                        snapshot.data!.path +
-                        "/backup");
-                  }
-                  return const Text("");
-                }),
-          ),
-          _buildBackupButton(),
-          _buildRestoreButton()
-        ],
-      ),
+      child: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+        AppBar(
+          title: Text(AppLocalizations.of(context)!.settings_title),
+          leading: null,
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16.0, 8.0, 0.0, 8.0),
+          child: FutureBuilder<Directory?>(
+              future: getExternalStorageDirectory(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.data != null) {
+                  return Text(AppLocalizations.of(context)!.settings_DataPath +
+                      "\n" +
+                      snapshot.data!.path +
+                      "/backup");
+                }
+                return const Text("");
+              }),
+        ),
+        _buildBackupButton(),
+        _buildRestoreButton(),
+      ]),
     ));
   }
 
@@ -80,7 +77,7 @@ class _AccountPageState extends State<AccountPageWidget> {
       ScaffoldMessenger.of(context).removeCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(
-              AppLocalizations.of(context)!.account_NeedStoragePermission)));
+              AppLocalizations.of(context)!.settings_NeedStoragePermission)));
       return false;
     }
     return true;
@@ -88,7 +85,7 @@ class _AccountPageState extends State<AccountPageWidget> {
 
   Widget _buildBackupButton() {
     return ListTile(
-      title: Text(AppLocalizations.of(context)!.account_Backup),
+      title: Text(AppLocalizations.of(context)!.settings_Backup),
       trailing: Visibility(
         child: CircularProgressIndicator(
           value: backUpPercent / 5,
@@ -129,7 +126,7 @@ class _AccountPageState extends State<AccountPageWidget> {
           });
           ScaffoldMessenger.of(context).removeCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(AppLocalizations.of(context)!.account_BackupSuccess),
+            content: Text(AppLocalizations.of(context)!.settings_BackupSuccess),
           ));
           final allBudgets = await db.select(db.budgets).get();
           final budgetsFile = File("${externalRoot.path}/backup/budget.txt");
@@ -145,15 +142,21 @@ class _AccountPageState extends State<AccountPageWidget> {
           setState(() {
             backUpPercent++;
           });
+          final allAccounts = await db.select(db.accounts).get();
+          final accountsFile = File("${externalRoot.path}/backup/account.txt");
+          await accountsFile.writeAsString(jsonEncode(allAccounts));
+          setState(() {
+            backUpPercent++;
+          });
           ScaffoldMessenger.of(context).removeCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(AppLocalizations.of(context)!.account_BackupSuccess),
+            content: Text(AppLocalizations.of(context)!.settings_BackupSuccess),
           ));
         } catch (e) {
           print(e.toString());
           ScaffoldMessenger.of(context).removeCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(AppLocalizations.of(context)!.account_BackupFaliure),
+            content: Text(AppLocalizations.of(context)!.settings_BackupFaliure),
           ));
         } finally {
           Future.delayed(const Duration(milliseconds: 300), () {
@@ -168,7 +171,7 @@ class _AccountPageState extends State<AccountPageWidget> {
 
   Widget _buildRestoreButton() {
     return ListTile(
-      title: Text(AppLocalizations.of(context)!.account_Restore),
+      title: Text(AppLocalizations.of(context)!.settings_Restore),
       trailing: Visibility(
         child: CircularProgressIndicator(
           value: restorePercent / 5,
@@ -187,20 +190,21 @@ class _AccountPageState extends State<AccountPageWidget> {
           final tagesFile = File("${externalRoot.path}/backup/tag.txt");
           final eventsFile = File("${externalRoot.path}/backup/event.txt");
           final budgetsFile = File("${externalRoot.path}/backup/budget.txt");
+          final accountsFile = File("${externalRoot.path}/backup/account.txt");
           if (!(await Directory("${externalRoot.path}/backup").exists())) {
             ScaffoldMessenger.of(context).removeCurrentSnackBar();
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content:
-                  Text(AppLocalizations.of(context)!.account_RestoreNotFound),
+                  Text(AppLocalizations.of(context)!.settings_RestoreNotFound),
             ));
           } else {
             showDialog(
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: Text(AppLocalizations.of(context)!.account_Restore),
+                    title: Text(AppLocalizations.of(context)!.settings_Restore),
                     content: Text(
-                        AppLocalizations.of(context)!.account_RestoreConfirm),
+                        AppLocalizations.of(context)!.settings_RestoreConfirm),
                     actions: [
                       TextButton(
                         child: Text(AppLocalizations.of(context)!.cancel),
@@ -217,6 +221,10 @@ class _AccountPageState extends State<AccountPageWidget> {
                                 final allTransactions = jsonDecode(
                                     await transactionsFile.readAsString());
                                 allTransactions.forEach((transaction) async {
+                                  if (!transaction.containsKey('accoundId')) {
+                                    transaction['accountId'] =
+                                        db.currentAccountId;
+                                  }
                                   db
                                       .into(db.transactions)
                                       .insertOnConflictUpdate(
@@ -234,6 +242,9 @@ class _AccountPageState extends State<AccountPageWidget> {
                                 final allCategories = jsonDecode(
                                     await categoriesFile.readAsString());
                                 allCategories.forEach((category) async {
+                                  if (!category.containsKey('accoundId')) {
+                                    category['accountId'] = db.currentAccountId;
+                                  }
                                   db.into(db.categories).insertOnConflictUpdate(
                                       Category.fromJson(category));
                                 });
@@ -246,6 +257,9 @@ class _AccountPageState extends State<AccountPageWidget> {
                                 final allTages =
                                     jsonDecode(await tagesFile.readAsString());
                                 allTages.forEach((tag) async {
+                                  if (!tag.containsKey('accoundId')) {
+                                    tag['accountId'] = db.currentAccountId;
+                                  }
                                   db.into(db.tags).insertOnConflictUpdate(
                                       Tag.fromJson(tag));
                                 });
@@ -270,10 +284,25 @@ class _AccountPageState extends State<AccountPageWidget> {
                                 final allBudgets = jsonDecode(
                                     await budgetsFile.readAsString());
                                 allBudgets.forEach((budget) async {
+                                  if (!budget.containsKey('accoundId')) {
+                                    budget['accountId'] = db.currentAccountId;
+                                  }
                                   db.into(db.budgets).insertOnConflictUpdate(
                                       Budget.fromJson(budget,
                                           serializer:
                                               const MyValueSerializer()));
+                                });
+                                setState(() {
+                                  restorePercent++;
+                                });
+                              }
+                              if (await accountsFile.exists()) {
+                                await db.delete(db.accounts).go();
+                                final allAccounts = jsonDecode(
+                                    await accountsFile.readAsString());
+                                allAccounts.forEach((account) async {
+                                  db.into(db.accounts).insertOnConflictUpdate(
+                                      Account.fromJson(account));
                                 });
                                 setState(() {
                                   restorePercent++;
@@ -284,7 +313,7 @@ class _AccountPageState extends State<AccountPageWidget> {
                               ScaffoldMessenger.of(context)
                                   .showSnackBar(SnackBar(
                                 content: Text(AppLocalizations.of(context)!
-                                    .account_RestoreSuccess),
+                                    .settings_RestoreSuccess),
                               ));
                             } catch (e) {
                               ScaffoldMessenger.of(context)
@@ -292,7 +321,7 @@ class _AccountPageState extends State<AccountPageWidget> {
                               ScaffoldMessenger.of(context)
                                   .showSnackBar(SnackBar(
                                 content: Text(AppLocalizations.of(context)!
-                                    .account_RestoreFailure),
+                                    .settings_RestoreFailure),
                               ));
                             } finally {
                               Navigator.of(context).pop();
@@ -311,7 +340,8 @@ class _AccountPageState extends State<AccountPageWidget> {
         } catch (e) {
           ScaffoldMessenger.of(context).removeCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(AppLocalizations.of(context)!.account_RestoreFailure),
+            content:
+                Text(AppLocalizations.of(context)!.settings_RestoreFailure),
           ));
         } finally {
           Future.delayed(const Duration(milliseconds: 300), () {
@@ -321,6 +351,89 @@ class _AccountPageState extends State<AccountPageWidget> {
           });
         }
       },
+    );
+  }
+}
+
+class AccountItemWidget extends StatefulWidget {
+  const AccountItemWidget({
+    super.key,
+    required this.account,
+    required this.db,
+  });
+
+  final Account account;
+  final MyDatabase db;
+
+  @override
+  State<AccountItemWidget> createState() => _AccountItemWidgetState();
+}
+
+class _AccountItemWidgetState extends State<AccountItemWidget> {
+  TextEditingController _nameController = TextEditingController();
+  FocusNode _nameFocusNode = FocusNode();
+  bool _nameIsEditing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController.text = widget.account.name;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Focus(
+        onFocusChange: (value) {
+          if (value == false) {
+            setState(() {
+              _nameIsEditing = false;
+            });
+          }
+        },
+        child: TextField(
+            maxLines: 1,
+            focusNode: _nameFocusNode,
+            controller: _nameController,
+            onSubmitted: (changed) {
+              setState(() {
+                _nameFocusNode.unfocus();
+              });
+            },
+            onTap: () {
+              setState(() {
+                _nameIsEditing = true;
+              });
+            },
+            onTapOutside: (event) {
+              setState(() {
+                _nameIsEditing = false;
+                _nameFocusNode.unfocus();
+              });
+            },
+            decoration: InputDecoration(
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 0,
+                vertical: 4.4,
+              ),
+              border: _nameIsEditing
+                  ? const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(0)),
+                    )
+                  : InputBorder.none,
+            )),
+      ),
+      trailing: IconButton(
+          icon: const Icon(
+            Icons.delete,
+            color: Colors.red,
+          ),
+          onPressed: () async {
+            (widget.db.delete(widget.db.accounts)
+                  ..where((t) => t.id.equals(widget.account.id)))
+                .go();
+          }),
     );
   }
 }
