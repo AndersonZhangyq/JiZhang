@@ -215,42 +215,38 @@ class _SettingsPageState extends State<SettingsPageWidget> {
                       children: [
                         Text(AppLocalizations.of(context)!
                             .settings_RestoreConfirm),
-                        ListTile(
-                          dense: true,
-                          title: Text(AppLocalizations.of(context)!
-                              .settings_Restore_TrancateCurrentAccount),
-                          leading: ValueListenableBuilder<RestoreMode>(
-                              valueListenable: restoreModeNotifier,
-                              builder: (context, restoreMode, _) {
-                                return Radio<RestoreMode>(
-                                  value: RestoreMode.TrancateCurrentAccount,
-                                  groupValue: restoreMode,
-                                  onChanged: (value) {
-                                    if (value != null) {
-                                      restoreModeNotifier.value = value;
-                                    }
-                                  },
-                                );
-                              }),
-                        ),
-                        ListTile(
-                          dense: true,
-                          title: Text(AppLocalizations.of(context)!
-                              .settings_Restore_TrancateAll),
-                          leading: ValueListenableBuilder<RestoreMode>(
-                              valueListenable: restoreModeNotifier,
-                              builder: (context, restoreMode, _) {
-                                return Radio<RestoreMode>(
-                                  value: RestoreMode.TrancateAll,
-                                  groupValue: restoreMode,
-                                  onChanged: (value) {
-                                    if (value != null) {
-                                      restoreModeNotifier.value = value;
-                                    }
-                                  },
-                                );
-                              }),
-                        ),
+                        ValueListenableBuilder<RestoreMode>(
+                            valueListenable: restoreModeNotifier,
+                            builder: (context, restoreMode, _) {
+                              return RadioListTile<RestoreMode>(
+                                dense: true,
+                                title: Text(AppLocalizations.of(context)!
+                                    .settings_Restore_TrancateCurrentAccount),
+                                value: RestoreMode.TrancateCurrentAccount,
+                                groupValue: restoreMode,
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    restoreModeNotifier.value = value;
+                                  }
+                                },
+                              );
+                            }),
+                        ValueListenableBuilder<RestoreMode>(
+                            valueListenable: restoreModeNotifier,
+                            builder: (context, restoreMode, _) {
+                              return RadioListTile<RestoreMode>(
+                                dense: true,
+                                title: Text(AppLocalizations.of(context)!
+                                    .settings_Restore_TrancateAll),
+                                value: RestoreMode.TrancateAll,
+                                groupValue: restoreMode,
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    restoreModeNotifier.value = value;
+                                  }
+                                },
+                              );
+                            }),
                       ],
                     ),
                     actions: [
@@ -277,6 +273,18 @@ class _SettingsPageState extends State<SettingsPageWidget> {
                                       .go();
                                   final allCategories = jsonDecode(
                                       await categoriesFile.readAsString());
+                                  allCategories.sort((a, b) {
+                                    if (a['parentId'] == null &&
+                                        b['parentId'] == null) {
+                                      return (a['id'] - b['id']) as int;
+                                    } else if (a['parentId'] == null) {
+                                      return -1;
+                                    } else if (b['parentId'] == null) {
+                                      return 1;
+                                    } else {
+                                      return (a['id'] - b['id']) as int;
+                                    }
+                                  });
                                   allCategories.forEach((category) async {
                                     if (!category.containsKey('accountId')) {
                                       category['accountId'] =
@@ -284,6 +292,10 @@ class _SettingsPageState extends State<SettingsPageWidget> {
                                     }
                                     var newCategory =
                                         Category.fromJson(category);
+                                    int? newParentId =
+                                        newCategory.parentId == null
+                                            ? null
+                                            : categoryMap[newCategory.parentId];
                                     int newCategoryId = await db
                                         .into(db.categories)
                                         .insertOnConflictUpdate(
@@ -295,8 +307,8 @@ class _SettingsPageState extends State<SettingsPageWidget> {
                                                 pos: newCategory.pos,
                                                 predefined:
                                                     newCategory.predefined,
-                                                parentId: drift.Value(
-                                                    newCategory.parentId),
+                                                parentId:
+                                                    drift.Value(newParentId),
                                                 parentName: drift.Value(
                                                     newCategory.parentName),
                                                 accountId:
