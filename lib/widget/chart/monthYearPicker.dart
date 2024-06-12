@@ -6,13 +6,11 @@ class CustomDatePickerDialog extends StatefulWidget {
   final List<int> disabledMonths;
   final Function(bool, Map<String, int>)
       onConfirm; // callback to pass selection info
-  final MyDatabase db;
 
   CustomDatePickerDialog({
     Key? key,
     required this.disabledMonths,
     required this.onConfirm,
-    required this.db,
   }) : super(key: key);
 
   @override

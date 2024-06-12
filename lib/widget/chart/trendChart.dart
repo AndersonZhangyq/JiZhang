@@ -646,7 +646,9 @@ class _TrendChartWidgetState extends State<TrendChartWidget> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => ModifyTransactionsPage(
-                                  transaction: curTransaction)),
+                                    transaction: curTransaction,
+                                    category: curCategoryItem,
+                                  )),
                         );
                       },
                       leading: FloatingActionButton.small(

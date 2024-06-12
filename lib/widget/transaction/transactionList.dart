@@ -29,7 +29,8 @@ class TransactionListWidget extends StatelessWidget {
   final bool isByDate;
 
   Widget _buildTransactionListByDate() {
-    var groupedTransaction = groupBy(transactions, (Transaction t) => t.date);
+    var groupedTransaction =
+        groupBy(transactions, (Transaction t) => t.date.getDateOnly());
     List<ListItem> listItems = [];
     groupedTransaction.keys.sorted((a, b) => -a.compareTo(b)).forEach((date) {
       List<Transaction> transactions = groupedTransaction[date]!;
@@ -109,37 +110,58 @@ class TransactionListWidget extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                           builder: (context) => ModifyTransactionsPage(
-                              transaction: curTransaction)),
+                                transaction: curTransaction,
+                                category: curCategoryItem,
+                              )),
                     );
                   },
-                  leading: FloatingActionButton.small(
-                    heroTag: "transaction_category_$index",
-                    child: Icon(
-                      curCategoryItem!.icon,
-                      color: Colors.white,
-                    ),
-                    backgroundColor: curCategoryItem.color,
-                    elevation: 0,
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        builder: (BuildContext context) =>
-                            const CategorySelectorWidget(),
-                      ).then((value) async {
-                        if (null != value) {
-                          int ret = await (db.update(db.transactions)
-                                ..where((t) => t.id.equals(curTransaction.id)))
-                              .write(TransactionsCompanion(
-                                  categoryId: drift.Value(value["id"] as int)));
-                          if (0 == ret) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                content: Text(AppLocalizations.of(context)!
-                                    .transactions_SnackBar_failed_to_update_transaction)));
+                  leading: Stack(alignment: Alignment.bottomRight, children: [
+                    FloatingActionButton.small(
+                      heroTag: "transaction_category_$index",
+                      child: Icon(
+                        curCategoryItem!.icon,
+                        color: Colors.white,
+                      ),
+                      backgroundColor: curCategoryItem.color,
+                      elevation: 0,
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (BuildContext context) =>
+                              const CategorySelectorWidget(),
+                        ).then((value) async {
+                          if (null != value) {
+                            int ret = await (db.update(db.transactions)
+                                  ..where(
+                                      (t) => t.id.equals(curTransaction.id)))
+                                .write(TransactionsCompanion(
+                                    categoryId:
+                                        drift.Value(value["id"] as int)));
+                            if (0 == ret) {
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                  content: Text(AppLocalizations.of(context)!
+                                      .transactions_SnackBar_failed_to_update_transaction)));
+                            }
                           }
-                        }
-                      });
-                    },
-                  ),
+                        });
+                      },
+                    ),
+                    if (curCategoryItem.parentId != null)
+                      Container(
+                        decoration: ShapeDecoration(
+                            color: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            )),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 2),
+                          child: Text(
+                            curCategoryItem.getTrueName(context),
+                            style: TextStyle(color: Colors.black, fontSize: 8),
+                          ),
+                        ),
+                      )
+                  ]),
                   title: Text(curTransaction.comment ??
                       curCategoryItem.getDisplayName(context)),
                   trailing: Text(
@@ -232,37 +254,59 @@ class TransactionListWidget extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) =>
-                          ModifyTransactionsPage(transaction: curTransaction)),
+                      builder: (context) => ModifyTransactionsPage(
+                            transaction: curTransaction,
+                            category: curCategoryItem,
+                          )),
                 );
               },
-              leading: FloatingActionButton.small(
-                heroTag: "transaction_category_$index",
-                child: Icon(
-                  curCategoryItem!.icon,
-                  color: Colors.white,
-                ),
-                backgroundColor: curCategoryItem.color,
-                elevation: 0,
-                onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    builder: (BuildContext context) =>
-                        const CategorySelectorWidget(),
-                  ).then((value) async {
-                    if (null != value) {
-                      int ret = await (db.update(db.transactions)
-                            ..where((t) => t.id.equals(curTransaction.id)))
-                          .write(TransactionsCompanion(
-                              categoryId: drift.Value(value["id"] as int)));
-                      if (0 == ret) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text(AppLocalizations.of(context)!
-                                .transactions_SnackBar_failed_to_update_transaction)));
-                      }
-                    }
-                  });
-                },
+              leading: Stack(
+                alignment: Alignment.bottomRight,
+                children: [
+                  FloatingActionButton.small(
+                    heroTag: "transaction_category_$index",
+                    child: Icon(
+                      curCategoryItem!.icon,
+                      color: Colors.white,
+                    ),
+                    backgroundColor: curCategoryItem.color,
+                    elevation: 0,
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (BuildContext context) =>
+                            const CategorySelectorWidget(),
+                      ).then((value) async {
+                        if (null != value) {
+                          int ret = await (db.update(db.transactions)
+                                ..where((t) => t.id.equals(curTransaction.id)))
+                              .write(TransactionsCompanion(
+                                  categoryId: drift.Value(value["id"] as int)));
+                          if (0 == ret) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Text(AppLocalizations.of(context)!
+                                    .transactions_SnackBar_failed_to_update_transaction)));
+                          }
+                        }
+                      });
+                    },
+                  ),
+                  if (curCategoryItem.parentId != null)
+                    Container(
+                      decoration: ShapeDecoration(
+                          color: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          )),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 2),
+                        child: Text(
+                          curCategoryItem.getTrueName(context),
+                          style: TextStyle(color: Colors.black, fontSize: 8),
+                        ),
+                      ),
+                    )
+                ],
               ),
               title: Text(curTransaction.comment ??
                   curCategoryItem.getDisplayName(context)),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ji_zhang/models/database.dart';
 import 'package:ji_zhang/widget/budget/modifyBudget.dart';
-import 'package:ji_zhang/widget/navigationPage/account.dart';
+import 'package:ji_zhang/widget/navigationPage/settings.dart';
 import 'package:ji_zhang/widget/navigationPage/budget.dart';
 import 'package:ji_zhang/widget/navigationPage/chart.dart';
 import 'package:ji_zhang/widget/navigationPage/transaction.dart';
@@ -15,6 +15,7 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(
     Provider<MyDatabase>(
       create: (context) => MyDatabase(),
@@ -67,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
     const TransactionWidget(),
     const ChartWidget(),
     const BudgetWidget(),
-    const AccountWidget()
+    const SettingsWidget()
   ];
 
   void onTabTapped(int index) {
@@ -103,7 +104,9 @@ class _MyHomePageState extends State<MyHomePage> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => const ModifyTransactionsPage(
-                                transaction: null)),
+                                  transaction: null,
+                                  category: null,
+                                )),
                       );
                     },
                   ),
@@ -157,8 +160,8 @@ class _MyHomePageState extends State<MyHomePage> {
             label: AppLocalizations.of(context)!.bottomNav_Budgets,
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.account_circle_outlined),
-            label: AppLocalizations.of(context)!.bottomNav_Account,
+            icon: const Icon(Icons.settings_outlined),
+            label: AppLocalizations.of(context)!.bottomNav_Settings,
           ),
         ],
       ),

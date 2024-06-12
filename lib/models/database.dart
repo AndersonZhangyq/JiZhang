@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/drift.dart';
+import 'package:drift_dev/api/migrations.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart' as ui;
 import 'package:ji_zhang/common/datetimeExtension.dart';
@@ -42,6 +43,8 @@ class Categories extends Table {
 
   TextColumn get parentName => text().nullable()();
 
+  IntColumn get accountId => integer()();
+
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
@@ -49,6 +52,8 @@ class Tags extends Table {
   IntColumn get id => integer().autoIncrement()();
 
   TextColumn get name => text()();
+
+  IntColumn get accountId => integer()();
 
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
@@ -69,6 +74,8 @@ class Transactions extends Table {
 
   TextColumn get comment => text().nullable()();
 
+  IntColumn get accountId => integer()();
+
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
@@ -83,7 +90,15 @@ class Budgets extends Table {
 
   IntColumn get recurrence => intEnum<RECURRENCE_TYPE>()();
 
+  IntColumn get accountId => integer()();
+
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+class Accounts extends Table {
+  IntColumn get id => integer().autoIncrement()();
+
+  TextColumn get name => text()();
 }
 
 int compareTransaction(Transaction a, Transaction b) {
@@ -172,12 +187,15 @@ LazyDatabase _openConnection() {
   });
 }
 
-@DriftDatabase(tables: [Categories, Events, Transactions, Tags, Budgets])
+@DriftDatabase(
+    tables: [Categories, Events, Transactions, Tags, Budgets, Accounts])
 class MyDatabase extends _$MyDatabase {
   // we tell the database where to store the data with this constructor
   MyDatabase() : super(_openConnection());
 
-  Future<void> insertPredefinedCategories() async {
+  int currentAccountId = 1;
+
+  Future<void> insertPredefinedCategories(int accountId) async {
     var expenseCategoryColorKeys = expenseCategoryColorInfo.keys.toList();
     for (int i = 0; i < expenseCategoryColorKeys.length; ++i) {
       var curCategory = expenseCategoryColorKeys[i];
@@ -189,7 +207,8 @@ class MyDatabase extends _$MyDatabase {
         var parentName = splited[0];
         var categoryName = splited[1];
         var parentCategory = await (select(categories)
-              ..where((tbl) => tbl.name.equals(parentName)))
+              ..where((tbl) => tbl.name.equals(parentName))
+              ..where((tbl) => tbl.accountId.equals(accountId)))
             .getSingleOrNull();
         if (parentCategory == null) {
           print("parent of $curCategory $parentName is not found!");
@@ -204,9 +223,10 @@ class MyDatabase extends _$MyDatabase {
               }),
               color: color.value.toString(),
               predefined: 1,
-              parentName: Value.ofNullable(parentName),
-              parentId: Value.ofNullable(parentCategory.id),
-              pos: i));
+              parentName: Value.absentIfNull(parentName),
+              parentId: Value.absentIfNull(parentCategory.id),
+              pos: i,
+              accountId: accountId));
         }
       } else {
         into(categories).insertOnConflictUpdate(CategoriesCompanion.insert(
@@ -219,7 +239,8 @@ class MyDatabase extends _$MyDatabase {
             }),
             color: color.value.toString(),
             predefined: 1,
-            pos: i));
+            pos: i,
+            accountId: accountId));
       }
     }
     var incomeCategoryColorKeys = incomeCategoryIconInfo.keys.toList();
@@ -238,33 +259,68 @@ class MyDatabase extends _$MyDatabase {
           }),
           color: color.value.toString(),
           predefined: 1,
-          pos: i));
+          pos: i,
+          accountId: accountId));
     }
   }
 
   @override
-  MigrationStrategy get migration => MigrationStrategy(onCreate: (Migrator m) {
+  MigrationStrategy get migration =>
+      MigrationStrategy(onCreate: (Migrator m) async {
+        print("onCreate called");
         m.createAll();
-        return insertPredefinedCategories();
+        currentAccountId = await into(accounts)
+            .insert(AccountsCompanion.insert(name: "default"));
+        insertPredefinedCategories(currentAccountId);
       }, onUpgrade: (Migrator m, int from, int to) async {
         m.drop(categories);
         m.drop(transactions);
         m.drop(events);
         m.drop(tags);
+        m.drop(budgets);
+        m.drop(accounts);
         m.createAll();
-        insertPredefinedCategories();
+        currentAccountId = await into(accounts)
+            .insert(AccountsCompanion.insert(name: "default"));
+        insertPredefinedCategories(currentAccountId);
+      }, beforeOpen: (details) async {
+        var tmp = await select(accounts).get();
+        if (tmp.isEmpty) {
+          currentAccountId = await into(accounts)
+              .insert(AccountsCompanion.insert(name: "default"));
+        } else {
+          currentAccountId = tmp.first.id;
+        }
       });
 
   // you should bump this number whenever you change or add a table definition. Migrations
   // are covered later in this readme.
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
+
+  Future<void> removeCategory(
+      int categoryId, int defaultCategoryId, int? parentId) async {
+    if (parentId == null) {
+      await (update(transactions)..where((t) => t.id.equals(categoryId)))
+          .write(TransactionsCompanion(categoryId: Value(defaultCategoryId)));
+      await (delete(categories)..where((t) => t.id.equals(categoryId))).go();
+    } else {
+      await (update(transactions)..where((t) => t.id.equals(categoryId)))
+          .write(TransactionsCompanion(categoryId: Value(parentId)));
+      await (delete(categories)..where((t) => t.id.equals(categoryId))).go();
+    }
+  }
+
+  Stream<List<Account>> watchAccounts() {
+    return select(accounts).watch();
+  }
 
   Stream<List<Transaction>>? getTransactionsByMonth(int year, int month) {
     DateTime startDate = DateTime(year, month);
     DateTime endDate =
         DateTime(year, month + 1).subtract(const Duration(days: 1));
     return (select(transactions)
+          ..where((t) => t.accountId.equals(currentAccountId))
           ..where((t) => t.date.isBetween(
               CustomExpression(
                   (startDate.millisecondsSinceEpoch / 1000).toString(),
@@ -277,7 +333,9 @@ class MyDatabase extends _$MyDatabase {
   }
 
   Stream<List<CategoryItem>>? watchAllCategories() {
-    return (select(categories)..orderBy([(u) => OrderingTerm.asc(u.pos)]))
+    return (select(categories)
+          ..where((t) => t.accountId.equals(currentAccountId))
+          ..orderBy([(u) => OrderingTerm.asc(u.pos)]))
         .watch()
         .map((value) {
       List<CategoryItem> ret = [];
@@ -290,6 +348,7 @@ class MyDatabase extends _$MyDatabase {
 
   Stream<List<CategoryItem>>? watchCategoriesByType(String type) {
     return (select(categories)
+          ..where((t) => t.accountId.equals(currentAccountId))
           ..where((c) => c.type.equals(type))
           ..orderBy([(u) => OrderingTerm.asc(u.pos)]))
         .watch()
@@ -303,7 +362,9 @@ class MyDatabase extends _$MyDatabase {
   }
 
   Stream<Map<String, List<CategoryItem>>>? watchCategoriesGroupByType() {
-    return (select(categories)..orderBy([(u) => OrderingTerm.asc(u.pos)]))
+    return (select(categories)
+          ..where((t) => t.accountId.equals(currentAccountId))
+          ..orderBy([(u) => OrderingTerm.asc(u.pos)]))
         .watch()
         .map((value) {
       Map<String, List<CategoryItem>> ret = {};
@@ -319,6 +380,7 @@ class MyDatabase extends _$MyDatabase {
 
   Future<int?> getCategoryLastPosByType(String type) {
     return (select(categories)
+          ..where((t) => t.accountId.equals(currentAccountId))
           ..where((c) => c.type.equals(type))
           ..orderBy([(u) => OrderingTerm.desc(u.pos)])
           ..limit(1))
@@ -363,6 +425,7 @@ class MyDatabase extends _$MyDatabase {
           break;
       }
       curTransactions = await (select(transactions)
+            ..where((t) => t.accountId.equals(currentAccountId))
             ..where((t) => t.date.isBetween(
                 CustomExpression(
                     (startDate!.millisecondsSinceEpoch / 1000).toString(),
@@ -383,17 +446,19 @@ class MyDatabase extends _$MyDatabase {
       return budget;
     }
 
-    return select(budgets)
-        .map((t) => BudgetItem(t))
-        .watch()
-        .asyncMap<List<BudgetItem>>((budgetItems) =>
+    var query = select(budgets)
+      ..where((t) => t.accountId.equals(currentAccountId));
+    return query.map((t) => BudgetItem(t)).watch().asyncMap<List<BudgetItem>>(
+        (budgetItems) =>
             Future.wait([for (final budget in budgetItems) process(budget)]));
   }
 
   Stream<ui.DateTimeRange>? getTransactionRange() {
     final minDate = transactions.date.min();
     final maxDate = transactions.date.max();
-    return (selectOnly(transactions)..addColumns([minDate, maxDate]))
+    return (selectOnly(transactions)
+          ..where(transactions.accountId.equals(currentAccountId))
+          ..addColumns([minDate, maxDate]))
         .watchSingleOrNull()
         .map((row) {
       if (row != null) {
@@ -410,6 +475,7 @@ class MyDatabase extends _$MyDatabase {
     DateTime endDate =
         DateTime(year, month + 1).subtract(const Duration(days: 1));
     return (select(transactions)
+          ..where((t) => t.accountId.equals(currentAccountId))
           ..where((t) => t.date.isBetween(
               CustomExpression(
                   (startDate.millisecondsSinceEpoch / 1000).toString(),
@@ -426,6 +492,7 @@ class MyDatabase extends _$MyDatabase {
     DateTime startDate = DateTime(year);
     DateTime endDate = DateTime(year + 1).subtract(const Duration(days: 1));
     return (select(transactions)
+          ..where((t) => t.accountId.equals(currentAccountId))
           ..where((t) => t.date.isBetween(
               CustomExpression(
                   (startDate.millisecondsSinceEpoch / 1000).toString(),
@@ -442,6 +509,7 @@ class MyDatabase extends _$MyDatabase {
     DateTime startDate = DateTime(year);
     DateTime endDate = DateTime(year + 1).subtract(const Duration(days: 1));
     return (select(transactions)
+          ..where((t) => t.accountId.equals(currentAccountId))
           ..where((t) => t.date.isBetween(
               CustomExpression(
                   (startDate.millisecondsSinceEpoch / 1000).toString(),
@@ -459,6 +527,7 @@ class MyDatabase extends _$MyDatabase {
       innerJoin(categories, categories.id.equalsExp(transactions.categoryId))
     ]);
     query.where(categories.type.equals(categoryType));
+    query.where(transactions.accountId.equals(currentAccountId));
     query.orderBy([OrderingTerm.desc(transactions.date)]);
     return query.watch().map((value) {
       Map<DateTime, double> ret = {};
@@ -487,6 +556,7 @@ class MyDatabase extends _$MyDatabase {
       innerJoin(categories, categories.id.equalsExp(transactions.categoryId))
     ]);
     query.where(categories.type.equals(categoryType));
+    query.where(transactions.accountId.equals(currentAccountId));
     return query.watch().map((value) {
       Map<DateTime, double> ret = {};
       for (var item in value) {
