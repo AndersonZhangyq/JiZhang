@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:drift/drift.dart' as drift;
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -8,6 +8,11 @@ import 'package:ji_zhang/models/database.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+
+enum RestoreMode {
+  TrancateCurrentAccount,
+  TrancateAll,
+}
 
 class SettingsWidget extends StatelessWidget {
   const SettingsWidget({Key? key}) : super(key: key);
@@ -198,13 +203,56 @@ class _SettingsPageState extends State<SettingsPageWidget> {
                   Text(AppLocalizations.of(context)!.settings_RestoreNotFound),
             ));
           } else {
+            ValueNotifier<RestoreMode> restoreModeNotifier =
+                ValueNotifier(RestoreMode.TrancateCurrentAccount);
             showDialog(
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
                     title: Text(AppLocalizations.of(context)!.settings_Restore),
-                    content: Text(
-                        AppLocalizations.of(context)!.settings_RestoreConfirm),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(AppLocalizations.of(context)!
+                            .settings_RestoreConfirm),
+                        ListTile(
+                          dense: true,
+                          title: Text(AppLocalizations.of(context)!
+                              .settings_Restore_TrancateCurrentAccount),
+                          leading: ValueListenableBuilder<RestoreMode>(
+                              valueListenable: restoreModeNotifier,
+                              builder: (context, restoreMode, _) {
+                                return Radio<RestoreMode>(
+                                  value: RestoreMode.TrancateCurrentAccount,
+                                  groupValue: restoreMode,
+                                  onChanged: (value) {
+                                    if (value != null) {
+                                      restoreModeNotifier.value = value;
+                                    }
+                                  },
+                                );
+                              }),
+                        ),
+                        ListTile(
+                          dense: true,
+                          title: Text(AppLocalizations.of(context)!
+                              .settings_Restore_TrancateAll),
+                          leading: ValueListenableBuilder<RestoreMode>(
+                              valueListenable: restoreModeNotifier,
+                              builder: (context, restoreMode, _) {
+                                return Radio<RestoreMode>(
+                                  value: RestoreMode.TrancateAll,
+                                  groupValue: restoreMode,
+                                  onChanged: (value) {
+                                    if (value != null) {
+                                      restoreModeNotifier.value = value;
+                                    }
+                                  },
+                                );
+                              }),
+                        ),
+                      ],
+                    ),
                     actions: [
                       TextButton(
                         child: Text(AppLocalizations.of(context)!.cancel),
@@ -216,97 +264,274 @@ class _SettingsPageState extends State<SettingsPageWidget> {
                           child: Text(AppLocalizations.of(context)!.ok),
                           onPressed: () async {
                             try {
-                              if (await transactionsFile.exists()) {
-                                await db.delete(db.transactions).go();
-                                final allTransactions = jsonDecode(
-                                    await transactionsFile.readAsString());
-                                allTransactions.forEach((transaction) async {
-                                  if (!transaction.containsKey('accoundId')) {
-                                    transaction['accountId'] =
-                                        db.currentAccountId;
-                                  }
-                                  db
-                                      .into(db.transactions)
-                                      .insertOnConflictUpdate(
-                                          Transaction.fromJson(transaction,
-                                              serializer:
-                                                  const MyValueSerializer()));
-                                });
-                                setState(() {
-                                  restorePercent++;
-                                });
-                              }
+                              if (restoreModeNotifier.value ==
+                                  RestoreMode.TrancateCurrentAccount) {
+                                Map<int, int> categoryMap = {};
+                                Map<int, int> tagMap = {};
+                                Map<int, int> eventMap = {};
 
-                              if (await categoriesFile.exists()) {
-                                await db.delete(db.categories).go();
-                                final allCategories = jsonDecode(
-                                    await categoriesFile.readAsString());
-                                allCategories.forEach((category) async {
-                                  if (!category.containsKey('accoundId')) {
-                                    category['accountId'] = db.currentAccountId;
-                                  }
-                                  db.into(db.categories).insertOnConflictUpdate(
-                                      Category.fromJson(category));
-                                });
-                                setState(() {
-                                  restorePercent++;
-                                });
-                              }
-                              if (await tagesFile.exists()) {
-                                await db.delete(db.tags).go();
-                                final allTages =
-                                    jsonDecode(await tagesFile.readAsString());
-                                allTages.forEach((tag) async {
-                                  if (!tag.containsKey('accoundId')) {
-                                    tag['accountId'] = db.currentAccountId;
-                                  }
-                                  db.into(db.tags).insertOnConflictUpdate(
-                                      Tag.fromJson(tag));
-                                });
-                                setState(() {
-                                  restorePercent++;
-                                });
-                              }
-                              if (await eventsFile.exists()) {
-                                await db.delete(db.events).go();
-                                final allEvents =
-                                    jsonDecode(await eventsFile.readAsString());
-                                allEvents.forEach((event) async {
-                                  db.into(db.events).insertOnConflictUpdate(
-                                      Event.fromJson(event));
-                                });
-                                setState(() {
-                                  restorePercent++;
-                                });
-                              }
-                              if (await budgetsFile.exists()) {
-                                await db.delete(db.budgets).go();
-                                final allBudgets = jsonDecode(
-                                    await budgetsFile.readAsString());
-                                allBudgets.forEach((budget) async {
-                                  if (!budget.containsKey('accoundId')) {
-                                    budget['accountId'] = db.currentAccountId;
-                                  }
-                                  db.into(db.budgets).insertOnConflictUpdate(
-                                      Budget.fromJson(budget,
-                                          serializer:
-                                              const MyValueSerializer()));
-                                });
-                                setState(() {
-                                  restorePercent++;
-                                });
-                              }
-                              if (await accountsFile.exists()) {
-                                await db.delete(db.accounts).go();
-                                final allAccounts = jsonDecode(
-                                    await accountsFile.readAsString());
-                                allAccounts.forEach((account) async {
-                                  db.into(db.accounts).insertOnConflictUpdate(
-                                      Account.fromJson(account));
-                                });
-                                setState(() {
-                                  restorePercent++;
-                                });
+                                if (await categoriesFile.exists()) {
+                                  await (db.delete(db.categories)
+                                        ..where((t) => t.accountId
+                                            .equals(db.currentAccountId)))
+                                      .go();
+                                  final allCategories = jsonDecode(
+                                      await categoriesFile.readAsString());
+                                  allCategories.forEach((category) async {
+                                    if (!category.containsKey('accountId')) {
+                                      category['accountId'] =
+                                          db.currentAccountId;
+                                    }
+                                    var newCategory =
+                                        Category.fromJson(category);
+                                    int newCategoryId = await db
+                                        .into(db.categories)
+                                        .insertOnConflictUpdate(
+                                            CategoriesCompanion.insert(
+                                                name: newCategory.name,
+                                                type: newCategory.type,
+                                                icon: newCategory.icon,
+                                                color: newCategory.color,
+                                                pos: newCategory.pos,
+                                                predefined:
+                                                    newCategory.predefined,
+                                                parentId: drift.Value(
+                                                    newCategory.parentId),
+                                                parentName: drift.Value(
+                                                    newCategory.parentName),
+                                                accountId:
+                                                    newCategory.accountId,
+                                                createdAt: drift.Value(
+                                                    newCategory.createdAt)));
+                                    categoryMap[category['id']] = newCategoryId;
+                                  });
+                                  setState(() {
+                                    restorePercent++;
+                                  });
+                                }
+                                if (await tagesFile.exists()) {
+                                  await (db.delete(db.tags)
+                                        ..where((t) => t.accountId
+                                            .equals(db.currentAccountId)))
+                                      .go();
+                                  final allTages = jsonDecode(
+                                      await tagesFile.readAsString());
+                                  allTages.forEach((tag) async {
+                                    if (!tag.containsKey('accountId')) {
+                                      tag['accountId'] = db.currentAccountId;
+                                    }
+                                    var newTag = Tag.fromJson(tag);
+                                    int newTagId = await db
+                                        .into(db.tags)
+                                        .insertOnConflictUpdate(
+                                            TagsCompanion.insert(
+                                          name: newTag.name,
+                                          accountId: newTag.accountId,
+                                          createdAt:
+                                              drift.Value(newTag.createdAt),
+                                        ));
+                                    tagMap[tag['id']] = newTagId;
+                                  });
+                                  setState(() {
+                                    restorePercent++;
+                                  });
+                                }
+                                if (await eventsFile.exists()) {
+                                  await db.delete(db.events).go();
+                                  final allEvents = jsonDecode(
+                                      await eventsFile.readAsString());
+                                  allEvents.forEach((event) async {
+                                    var newEvent = Event.fromJson(event);
+                                    await db
+                                        .into(db.events)
+                                        .insertOnConflictUpdate(
+                                            EventsCompanion.insert(
+                                          name: newEvent.name,
+                                          createdAt:
+                                              drift.Value(newEvent.createdAt),
+                                        ));
+                                  });
+                                  setState(() {
+                                    restorePercent++;
+                                  });
+                                }
+                                if (await budgetsFile.exists()) {
+                                  await (db.delete(db.budgets)
+                                        ..where((t) => t.accountId
+                                            .equals(db.currentAccountId)))
+                                      .go();
+                                  await db.delete(db.budgets).go();
+                                  final allBudgets = jsonDecode(
+                                      await budgetsFile.readAsString());
+                                  allBudgets.forEach((budget) async {
+                                    if (!budget.containsKey('accountId')) {
+                                      budget['accountId'] = db.currentAccountId;
+                                    }
+                                    List<int> categoryIds = [];
+                                    budget['categoryIds'].forEach((categoryId) {
+                                      categoryIds.add(categoryMap[categoryId]!);
+                                    });
+                                    budget['categoryIds'] = categoryIds;
+                                    var newBudget = Budget.fromJson(budget,
+                                        serializer: const MyValueSerializer());
+                                    await db
+                                        .into(db.budgets)
+                                        .insertOnConflictUpdate(
+                                            BudgetsCompanion.insert(
+                                                name: newBudget.name,
+                                                amount: newBudget.amount,
+                                                categoryIds:
+                                                    newBudget.categoryIds,
+                                                recurrence:
+                                                    newBudget.recurrence,
+                                                accountId: newBudget.accountId,
+                                                createdAt: drift.Value(
+                                                    newBudget.createdAt)));
+                                  });
+                                  setState(() {
+                                    restorePercent++;
+                                  });
+                                }
+                                if (await transactionsFile.exists()) {
+                                  await (db.delete(db.transactions)
+                                        ..where((t) => t.accountId
+                                            .equals(db.currentAccountId)))
+                                      .go();
+                                  final allTransactions = jsonDecode(
+                                      await transactionsFile.readAsString());
+                                  allTransactions.forEach((transaction) async {
+                                    if (!transaction.containsKey('accountId')) {
+                                      transaction['accountId'] =
+                                          db.currentAccountId;
+                                    }
+                                    var newTransaction = Transaction.fromJson(
+                                        transaction,
+                                        serializer: const MyValueSerializer());
+                                    await db
+                                        .into(db.transactions)
+                                        .insertOnConflictUpdate(
+                                            TransactionsCompanion.insert(
+                                          amount: newTransaction.amount,
+                                          date: newTransaction.date,
+                                          categoryId: categoryMap[
+                                              newTransaction.categoryId]!,
+                                          recurrence: drift.Value(
+                                              newTransaction.recurrence),
+                                          tagIds: newTransaction.tagIds == null
+                                              ? drift.Value.absent()
+                                              : drift.Value(newTransaction
+                                                  .tagIds!
+                                                  .map(
+                                                      (tagId) => tagMap[tagId]!)
+                                                  .toList()),
+                                          comment: drift.Value(
+                                              newTransaction.comment),
+                                          accountId: newTransaction.accountId,
+                                          createdAt: drift.Value(
+                                              newTransaction.createdAt),
+                                        ));
+                                  });
+                                  setState(() {
+                                    restorePercent++;
+                                  });
+                                }
+                              } else {
+                                if (await transactionsFile.exists()) {
+                                  await db.delete(db.transactions).go();
+                                  final allTransactions = jsonDecode(
+                                      await transactionsFile.readAsString());
+                                  allTransactions.forEach((transaction) async {
+                                    if (!transaction.containsKey('accountId')) {
+                                      transaction['accountId'] =
+                                          db.currentAccountId;
+                                    }
+                                    db
+                                        .into(db.transactions)
+                                        .insertOnConflictUpdate(
+                                            Transaction.fromJson(
+                                                transaction,
+                                                serializer:
+                                                    const MyValueSerializer()));
+                                  });
+                                  setState(() {
+                                    restorePercent++;
+                                  });
+                                }
+
+                                if (await categoriesFile.exists()) {
+                                  await db.delete(db.categories).go();
+                                  final allCategories = jsonDecode(
+                                      await categoriesFile.readAsString());
+                                  allCategories.forEach((category) async {
+                                    if (!category.containsKey('accountId')) {
+                                      category['accountId'] =
+                                          db.currentAccountId;
+                                    }
+                                    db
+                                        .into(db.categories)
+                                        .insertOnConflictUpdate(
+                                            Category.fromJson(category));
+                                  });
+                                  setState(() {
+                                    restorePercent++;
+                                  });
+                                }
+                                if (await tagesFile.exists()) {
+                                  await db.delete(db.tags).go();
+                                  final allTages = jsonDecode(
+                                      await tagesFile.readAsString());
+                                  allTages.forEach((tag) async {
+                                    if (!tag.containsKey('accountId')) {
+                                      tag['accountId'] = db.currentAccountId;
+                                    }
+                                    db.into(db.tags).insertOnConflictUpdate(
+                                        Tag.fromJson(tag));
+                                  });
+                                  setState(() {
+                                    restorePercent++;
+                                  });
+                                }
+                                if (await eventsFile.exists()) {
+                                  await db.delete(db.events).go();
+                                  final allEvents = jsonDecode(
+                                      await eventsFile.readAsString());
+                                  allEvents.forEach((event) async {
+                                    db.into(db.events).insertOnConflictUpdate(
+                                        Event.fromJson(event));
+                                  });
+                                  setState(() {
+                                    restorePercent++;
+                                  });
+                                }
+                                if (await budgetsFile.exists()) {
+                                  await db.delete(db.budgets).go();
+                                  final allBudgets = jsonDecode(
+                                      await budgetsFile.readAsString());
+                                  allBudgets.forEach((budget) async {
+                                    if (!budget.containsKey('accountId')) {
+                                      budget['accountId'] = db.currentAccountId;
+                                    }
+                                    db.into(db.budgets).insertOnConflictUpdate(
+                                        Budget.fromJson(budget,
+                                            serializer:
+                                                const MyValueSerializer()));
+                                  });
+                                  setState(() {
+                                    restorePercent++;
+                                  });
+                                }
+                                if (await accountsFile.exists()) {
+                                  await db.delete(db.accounts).go();
+                                  final allAccounts = jsonDecode(
+                                      await accountsFile.readAsString());
+                                  allAccounts.forEach((account) async {
+                                    db.into(db.accounts).insertOnConflictUpdate(
+                                        Account.fromJson(account));
+                                  });
+                                  setState(() {
+                                    restorePercent++;
+                                  });
+                                }
                               }
                               ScaffoldMessenger.of(context)
                                   .removeCurrentSnackBar();
