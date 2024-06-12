@@ -298,6 +298,19 @@ class MyDatabase extends _$MyDatabase {
   @override
   int get schemaVersion => 8;
 
+  Future<void> removeCategory(
+      int categoryId, int defaultCategoryId, int? parentId) async {
+    if (parentId == null) {
+      await (update(transactions)..where((t) => t.id.equals(categoryId)))
+          .write(TransactionsCompanion(categoryId: Value(defaultCategoryId)));
+      await (delete(categories)..where((t) => t.id.equals(categoryId))).go();
+    } else {
+      await (update(transactions)..where((t) => t.id.equals(categoryId)))
+          .write(TransactionsCompanion(categoryId: Value(parentId)));
+      await (delete(categories)..where((t) => t.id.equals(categoryId))).go();
+    }
+  }
+
   Stream<List<Account>> watchAccounts() {
     return select(accounts).watch();
   }

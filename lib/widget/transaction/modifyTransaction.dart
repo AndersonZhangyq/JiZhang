@@ -31,6 +31,7 @@ class CategoryItem implements Comparable {
     pos = category.pos;
     parentId = category.parentId;
     parentName = category.parentName;
+    accountId = category.accountId;
   }
 
   CategoryItem.empty();
@@ -46,6 +47,7 @@ class CategoryItem implements Comparable {
   late String originColor;
   late int? parentId;
   late String? parentName;
+  late int accountId;
 
   @override
   int compareTo(other) {

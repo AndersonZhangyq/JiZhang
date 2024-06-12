@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ji_zhang/models/database.dart';
-import 'package:ji_zhang/widget/category/modifyCategory.dart';
+import 'package:ji_zhang/widget/category/categorySettings.dart';
 import 'package:provider/provider.dart';
 
 import 'package:ji_zhang/widget/transaction/modifyTransaction.dart';
@@ -76,7 +76,7 @@ class CategorySelectorWidget extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                           builder: (context) =>
-                              const ModifyCategoryWidget(tabName: "income")),
+                              const CategorySettingsWidget(tabName: "income")),
                     );
                   },
                   color: Colors.black,
@@ -137,7 +137,7 @@ class CategorySelectorWidget extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                           builder: (context) =>
-                              const ModifyCategoryWidget(tabName: "expense")),
+                              const CategorySettingsWidget(tabName: "expense")),
                     );
                   },
                   color: Colors.black,
