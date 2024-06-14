@@ -304,6 +304,9 @@ class MyDatabase extends _$MyDatabase {
       await (update(transactions)..where((t) => t.id.equals(categoryId)))
           .write(TransactionsCompanion(categoryId: Value(defaultCategoryId)));
       await (delete(categories)..where((t) => t.id.equals(categoryId))).go();
+      await (update(categories)..where((t) => t.parentId.equals(categoryId)))
+          .write(CategoriesCompanion(
+              parentId: Value(null), parentName: Value(null)));
     } else {
       await (update(transactions)..where((t) => t.id.equals(categoryId)))
           .write(TransactionsCompanion(categoryId: Value(parentId)));

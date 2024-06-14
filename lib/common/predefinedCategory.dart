@@ -64,3 +64,26 @@ final Map<String, Color> incomeCategoryColorInfo = {
   "InsurancePayout": Colors.blueAccent,
   "Other": Colors.grey
 };
+
+final Map<IconData, Color> predefinedIcons = {
+  MaterialCommunityIcons.silverware_fork_knife: Colors.orange,
+  Icons.shopping_cart: Colors.pink,
+  Icons.airport_shuttle: Colors.lime,
+  Icons.home: Colors.brown,
+  Icons.payments: Colors.green,
+  Entypo.game_controller: Colors.deepOrange,
+  Icons.directions_car: Colors.blue,
+  FontAwesome.plane: Colors.redAccent,
+  Icons.people: Colors.blueGrey,
+  Icons.local_hospital: Colors.purple,
+  Icons.school: Colors.amber,
+  Icons.card_giftcard: Colors.greenAccent,
+  Icons.directions_run: Colors.lightGreen,
+  Icons.face: Colors.purpleAccent,
+  Icons.work: Colors.grey,
+  Icons.more_horiz: Colors.grey,
+  Icons.attach_money: Colors.green,
+  Icons.business: Colors.orange,
+  Icons.money_sharp: Colors.lightGreen,
+  Icons.wallet_giftcard: Colors.pinkAccent,
+};

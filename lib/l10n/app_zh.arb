@@ -17,7 +17,7 @@
   "modifyTransaction_Comment_hint": "备注",
   "categorySettings_Add_Category": "添加新类别",
   "categorySettings_Dialog_title_remove_category": "删除类别",
-  "categorySettings_Dialog_content_remove_category": "确定删除类别吗？与之关联的账单将被赋予父类别或其他。",
+  "categorySettings_Dialog_content_remove_category": "确定删除类别吗？与之关联的账单将被赋予父类别或其他，相关子类别将失去父类别信息。",
   "categorySettings_SnackBar_category_removed": "类别已删除",
   "categorySettings_SnackBar_failed_to_remove_category": "删除类别失败",
   "categorySettings_Title": "类别设置",

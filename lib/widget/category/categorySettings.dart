@@ -185,14 +185,16 @@ class _CategorySettingsState extends State<CategorySettingsWidget> {
       itemBuilder: (BuildContext context, int index) {
         return ListTile(
           key: Key(index.toString()),
-          onTap: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => ModifyCategoryWidget(
-                          category: categories[index],
-                        )));
-          },
+          onTap: categories[index].name != "Other"
+              ? () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ModifyCategoryWidget(
+                                category: categories[index],
+                              )));
+                }
+              : null,
           leading: SizedBox(
             height: 25,
             child: Visibility.maintain(

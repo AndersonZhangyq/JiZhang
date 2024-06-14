@@ -18,7 +18,7 @@
   "categorySettings_Add_Category": "Add New Category",
   "categorySettings_SnackBar_category_removed": "Category removed",
   "categorySettings_Dialog_title_remove_category": "Remove Category",
-  "categorySettings_Dialog_content_remove_category": "Are you sure you want to remove this category? Associated transactions will be classifed as parent category or OTHER.",
+  "categorySettings_Dialog_content_remove_category": "Are you sure you want to remove this category? Associated transactions will be classifed as parent category or OTHER. Children categories will be treated as parent categories.",
   "categorySettings_SnackBar_failed_to_remove_category": "Failed to remove category",
   "categorySettings_Title": "Category Settings",
   "modifyBudget_Title_add": "Add",
