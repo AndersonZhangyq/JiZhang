@@ -87,6 +87,7 @@ class ModifyTransactionsPage extends StatefulWidget {
 class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
   late MyDatabase db;
   late bool isAdd;
+  late String widgetTitle;
   // late int selectedCategoryId;
   DateTime selectedDate = DateTime.now().getDateOnly();
   final defaultColor = const Color(0xFF68a1e8);
@@ -121,6 +122,51 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
     }
   }
 
+  Future<bool> saveTransaction() async {
+    String result = "";
+    final amount = double.parse(amountController.text);
+    if (isAdd) {
+      int id = await db
+          .into(db.transactions)
+          .insert(TransactionsCompanion.insert(
+            amount: amount,
+            date: selectedDate,
+            categoryId: selectedCategory!.id,
+            accountId: db.currentAccountId,
+            comment: drift.Value(
+                commentController.text.isEmpty ? null : commentController.text),
+          ));
+      if (0 == id) {
+        result = AppLocalizations.of(context)!
+            .modifyTransaction_SnackBar_failed_to_add_transaction;
+      } else {
+        Navigator.of(context, rootNavigator: true).pop(context);
+      }
+    } else {
+      bool ret = await db.update(db.transactions).replace(TransactionsCompanion(
+          id: drift.Value(widget.transaction!.id),
+          amount: drift.Value(amount),
+          date: drift.Value(selectedDate),
+          categoryId: drift.Value(selectedCategory!.id),
+          comment: drift.Value(
+              commentController.text.isEmpty ? null : commentController.text),
+          accountId: drift.Value(widget.transaction!.accountId)));
+      if (false == ret) {
+        result = AppLocalizations.of(context)!
+            .modifyTransaction_SnackBar_failed_to_update_transaction;
+      }
+    }
+    if (result.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result),
+        ),
+      );
+      return false;
+    }
+    return true;
+  }
+
   bool canSave() {
     return amountController.text.isNotEmpty &&
         0 != double.tryParse(amountController.text) &&
@@ -151,6 +197,10 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
 
   @override
   Widget build(BuildContext context) {
+    widgetTitle = (isAdd
+            ? AppLocalizations.of(context)!.modifyTransaction_Title_add
+            : AppLocalizations.of(context)!.modifyTransaction_Title_edit) +
+        AppLocalizations.of(context)!.modifyTransaction_Title_transaction;
     return Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
@@ -159,12 +209,7 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
                 : selectedCategory!.color,
             elevation: 0,
             centerTitle: true,
-            title: Text((isAdd
-                    ? AppLocalizations.of(context)!.modifyTransaction_Title_add
-                    : AppLocalizations.of(context)!
-                        .modifyTransaction_Title_edit) +
-                AppLocalizations.of(context)!
-                    .modifyTransaction_Title_transaction),
+            title: Text(widgetTitle),
             leading: IconButton(
               icon: const Icon(Icons.close),
               onPressed: () {
@@ -176,55 +221,9 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
                 icon: const Icon(Icons.save),
                 onPressed: canSave()
                     ? () async {
-                        final amount = double.parse(amountController.text);
-                        if (isAdd) {
-                          int id = await db
-                              .into(db.transactions)
-                              .insert(TransactionsCompanion.insert(
-                                amount: amount,
-                                date: selectedDate,
-                                categoryId: selectedCategory!.id,
-                                accountId: db.currentAccountId,
-                                comment: drift.Value(
-                                    commentController.text.isEmpty
-                                        ? null
-                                        : commentController.text),
-                              ));
-                          if (0 == id) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(AppLocalizations.of(context)!
-                                    .modifyTransaction_SnackBar_failed_to_add_transaction),
-                              ),
-                            );
-                          } else {
-                            Navigator.of(context, rootNavigator: true)
-                                .pop(context);
-                          }
-                        } else {
-                          bool ret = await db.update(db.transactions).replace(
-                              TransactionsCompanion(
-                                  id: drift.Value(widget.transaction!.id),
-                                  amount: drift.Value(amount),
-                                  date: drift.Value(selectedDate),
-                                  categoryId: drift.Value(selectedCategory!.id),
-                                  comment: drift.Value(
-                                      commentController.text.isEmpty
-                                          ? null
-                                          : commentController.text),
-                                  accountId: drift.Value(
-                                      widget.transaction!.accountId)));
-                          if (false == ret) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(AppLocalizations.of(context)!
-                                    .modifyTransaction_SnackBar_failed_to_update_transaction),
-                              ),
-                            );
-                          } else {
-                            Navigator.of(context, rootNavigator: true)
-                                .pop(context);
-                          }
+                        if (await saveTransaction()) {
+                          Navigator.of(context, rootNavigator: true)
+                              .pop(context);
                         }
                       }
                     : null,
@@ -375,13 +374,37 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
           const Spacer(),
           Center(
               child: MoneyNumberTablet(
-            moneyController: amountController,
-            callback: (text) {
-              setState(() {
-                amountController.text = text;
-              });
-            },
-          ))
+                  moneyController: amountController,
+                  callback: (text) {
+                    setState(() {
+                      amountController.text = text;
+                    });
+                  },
+                  emptyTabletName: AppLocalizations.of(context)!
+                      .modifyTransaction_MoneyNumberTablet_EmptyTablet_name,
+                  emptyTabletCallback: (text) async {
+                    if (canSave() && await saveTransaction()) {
+                      isAdd = true;
+                      setState(() {
+                        widgetTitle = (isAdd
+                                ? AppLocalizations.of(context)!
+                                    .modifyTransaction_Title_add
+                                : AppLocalizations.of(context)!
+                                    .modifyTransaction_Title_edit) +
+                            AppLocalizations.of(context)!
+                                .modifyTransaction_Title_transaction;
+                        amountController.clear();
+                        dateController.text =
+                            DateTime.now().format("yyyy-MM-dd");
+                        commentController.clear();
+                        selectedDate = DateTime.now().getDateOnly();
+                        selectedCategory = null;
+                      });
+                      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                        showCategorySelector(context);
+                      });
+                    }
+                  }))
         ]));
   }
 }

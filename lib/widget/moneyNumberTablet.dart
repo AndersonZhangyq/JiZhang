@@ -2,12 +2,18 @@ import 'package:flutter/material.dart';
 
 class MoneyNumberTablet extends StatefulWidget {
   MoneyNumberTablet(
-      {Key? key, required this.moneyController, required this.callback})
+      {Key? key,
+      required this.moneyController,
+      required this.callback,
+      this.emptyTabletName = "",
+      this.emptyTabletCallback})
       : super(key: key);
 
   final TextEditingController moneyController;
+  final String emptyTabletName;
 
   final void Function(String text)? callback;
+  final void Function(String text)? emptyTabletCallback;
 
   @override
   State<MoneyNumberTablet> createState() => _MoneyNumberTabletState();
@@ -239,15 +245,19 @@ class _MoneyNumberTabletState extends State<MoneyNumberTablet> {
           },
         ),
         OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.black,
-              textStyle: const TextStyle(fontSize: 18),
-              backgroundColor: Colors.white,
-            ),
-            child: const Text('.'),
-            onPressed: () {
-              _onNumberTabletPressed(isDot: true);
-            }),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Colors.black,
+            textStyle: const TextStyle(fontSize: 18),
+            backgroundColor: Colors.white,
+          ),
+          child: Text(widget.emptyTabletName),
+          onPressed: () {
+            if (widget.emptyTabletCallback != null) {
+              _onNumberTabletPressed(isEqual: true);
+              widget.emptyTabletCallback!("");
+            }
+          },
+        ),
         OutlinedButton(
             style: OutlinedButton.styleFrom(
               foregroundColor: Colors.black,
@@ -264,8 +274,10 @@ class _MoneyNumberTabletState extends State<MoneyNumberTablet> {
               textStyle: const TextStyle(fontSize: 18),
               backgroundColor: Colors.white,
             ),
-            child: const Text(''),
-            onPressed: null),
+            child: const Text('.'),
+            onPressed: () {
+              _onNumberTabletPressed(isDot: true);
+            }),
         OutlinedButton(
           style: OutlinedButton.styleFrom(
             foregroundColor: Colors.black,

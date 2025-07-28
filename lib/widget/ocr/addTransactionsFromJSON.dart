@@ -1,8 +1,8 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:ji_zhang/common/datetimeExtension.dart';
 import 'package:ji_zhang/models/database.dart';
 import 'package:ji_zhang/widget/category/categorySelector.dart';
@@ -12,43 +12,39 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:image/image.dart' as image;
 
 class RecognizedTransaction {
-  late String title;
-  late double amount;
-  late DateTime date;
-  late Rect boundingBox;
   IconData? iconData;
   Color? color;
   int? categoryId;
   String? categoryType;
 
-  RecognizedTransaction(RecognizedTextElement title,
-      RecognizedTextElement amount, RecognizedTextElement date) {
-    this.title = title.text;
-    this.amount = amount.amount!;
-    this.date = date.date!;
-    boundingBox = amount.boundingBox;
-    this.boundingBox = title.boundingBox
-        .expandToInclude(amount.boundingBox)
-        .expandToInclude(date.boundingBox);
-    this.boundingBox = this.boundingBox.inflate(15);
+  late String title;
+  late DateTime date;
+  late double billAmount;
+  late double billRefund;
+  late double billAdjustedAmount;
+  late double amount;
+
+  RecognizedTransaction(String jsonString) {
+    final json = jsonDecode(jsonString);
+    title = json['bill_name'];
+    date = DateTime.parse(json['bill_date']);
+    billAmount = json['bill_amount'].toDouble();
+    billRefund = json['bill_refund'].toDouble();
+    billAdjustedAmount = json['bill_adjusted_amount'].toDouble();
+    amount = billAdjustedAmount;
   }
 }
 
-class BatchAddTransactions extends StatefulWidget {
-  final List<RecognizedTextElement> recognizedTextElements;
-  final Uint8List originalImageBytes;
-  final String type;
+class AddTransactionsFromJSON extends StatefulWidget {
+  final String jsonString;
 
-  const BatchAddTransactions(
-      {super.key,
-      required this.recognizedTextElements,
-      required this.originalImageBytes,
-      required this.type});
+  const AddTransactionsFromJSON({super.key, required this.jsonString});
   @override
-  State<BatchAddTransactions> createState() => _BatchAddTransactionsState();
+  State<AddTransactionsFromJSON> createState() =>
+      _AddTransactionsFromJSONState();
 }
 
-class _BatchAddTransactionsState extends State<BatchAddTransactions> {
+class _AddTransactionsFromJSONState extends State<AddTransactionsFromJSON> {
   List<RecognizedTransaction> recognizedTransactions = [];
   List<bool> _selected = [];
   late MyDatabase db;
@@ -57,7 +53,6 @@ class _BatchAddTransactionsState extends State<BatchAddTransactions> {
   void initState() {
     super.initState();
     generateRecognizedTransactions();
-    img = image.decodeImage(widget.originalImageBytes)!;
   }
 
   @override
@@ -143,24 +138,19 @@ class _BatchAddTransactionsState extends State<BatchAddTransactions> {
                 itemCount: recognizedTransactions.length,
                 itemBuilder: (context, index) {
                   final transaction = recognizedTransactions[index];
-                  var croppedImage = image.copyCrop(img,
-                      x: transaction.boundingBox.left.round(),
-                      y: transaction.boundingBox.top.round(),
-                      width: transaction.boundingBox.width.round(),
-                      height: transaction.boundingBox.height.round());
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 2.0),
-                    child: TransactionListElment(
-                        key: ValueKey(transaction.hashCode),
-                        isSelected: _selected[index],
-                        widget: widget,
-                        transaction: transaction,
-                        index: index,
-                        imageBytes:
-                            Uint8List.fromList(image.encodePng(croppedImage)),
-                        onSelected: (value) {
-                          _selected[index] = value;
-                        }),
+                    child:
+                        // Text("${index}")
+                        TransactionListElment(
+                            key: ValueKey(transaction.hashCode),
+                            isSelected: _selected[index],
+                            // widget: widget,
+                            transaction: transaction,
+                            index: index,
+                            onSelected: (value) {
+                              _selected[index] = value;
+                            }),
                   );
                 },
               ),
@@ -173,89 +163,11 @@ class _BatchAddTransactionsState extends State<BatchAddTransactions> {
 
   void generateRecognizedTransactions() {
     recognizedTransactions.clear();
-    // sort the recognizedTextElements by their position in the image, from top to bottom, from left to right
-    widget.recognizedTextElements.sort((a, b) {
-      if (a.boundingBox.top < b.boundingBox.top) {
-        return -1;
-      } else if (a.boundingBox.top > b.boundingBox.top) {
-        return 1;
-      } else {
-        if (a.boundingBox.left < b.boundingBox.left) {
-          return -1;
-        } else if (a.boundingBox.left > b.boundingBox.left) {
-          return 1;
-        } else {
-          return 0;
-        }
-      }
-    });
-    for (int i = 0; i < widget.recognizedTextElements.length; i++) {
-      final currentElement = widget.recognizedTextElements[i];
-      if (currentElement.isAmount) {
-        // look for the corresponding transaction title, should have similar height
-        RecognizedTextElement? titleElement;
-        for (int j = i - 1; j >= 0; j--) {
-          final candidateTitleElement = widget.recognizedTextElements[j];
-          final heightDiff = (candidateTitleElement.boundingBox.center.dy -
-                  currentElement.boundingBox.center.dy)
-              .abs();
-          if (heightDiff > 20) {
-            break;
-          }
-          if (candidateTitleElement.isAmount == false &&
-              candidateTitleElement.isDate == false) {
-            if (titleElement == null ||
-                (candidateTitleElement.boundingBox.left >
-                    titleElement.boundingBox.left)) {
-              titleElement = candidateTitleElement;
-            }
-          }
-        }
-        for (int j = i + 1; j < widget.recognizedTextElements.length; j++) {
-          final candidateTitleElement = widget.recognizedTextElements[j];
-          final heightDiff = (candidateTitleElement.boundingBox.center.dy -
-                  currentElement.boundingBox.center.dy)
-              .abs();
-          if (heightDiff > 20) {
-            break;
-          }
-          if (candidateTitleElement.isAmount == false &&
-              candidateTitleElement.isDate == false) {
-            if (titleElement == null ||
-                (candidateTitleElement.boundingBox.left >
-                    titleElement.boundingBox.left)) {
-              titleElement = candidateTitleElement;
-            }
-          }
-        }
-        if (titleElement == null) {
-          continue;
-        }
-        // look for the corresponding transaction date, should have similar left position
-        RecognizedTextElement? dateElement;
-        for (int j = i + 1; j < widget.recognizedTextElements.length; j++) {
-          final candidateDateElement = widget.recognizedTextElements[j];
-          final heightDiff = (candidateDateElement.boundingBox.center.dy -
-                  titleElement.boundingBox.center.dy)
-              .abs();
-          if (heightDiff > (widget.type == 'wechat' ? 100 : 200)) {
-            break;
-          }
-          if (candidateDateElement.isDate) {
-            dateElement = candidateDateElement;
-            break;
-          }
-        }
-        if (dateElement == null) {
-          continue;
-        }
-        // print this candidate transaction
-        print(
-            'Transaction: ${titleElement.text}, Amount: ${currentElement.amount}, Date: ${dateElement.date!.format("MM-dd")}');
-        recognizedTransactions.add(
-            RecognizedTransaction(titleElement, currentElement, dateElement));
-        _selected.add(true);
-      }
+    final json = jsonDecode(widget.jsonString);
+    for (var item in json) {
+      final recognizedTransaction = RecognizedTransaction(jsonEncode(item));
+      recognizedTransactions.add(recognizedTransaction);
+      _selected.add(true);
     }
   }
 }
@@ -263,16 +175,14 @@ class _BatchAddTransactionsState extends State<BatchAddTransactions> {
 class TransactionListElment extends StatefulWidget {
   const TransactionListElment({
     super.key,
-    required this.widget,
+    // required this.widget,
     required this.transaction,
     required this.index,
     required this.onSelected,
     required this.isSelected,
-    required this.imageBytes,
   });
 
-  final Uint8List imageBytes;
-  final BatchAddTransactions widget;
+  // final BatchAddTransactions widget;
   final RecognizedTransaction transaction;
   final int index;
   final bool isSelected;
@@ -323,7 +233,6 @@ class _TransactionListElmentState extends State<TransactionListElment> {
         opacity: _isSelected ? 1 : 0.3,
         child: Column(
           children: [
-            Image.memory(widget.imageBytes),
             // _isSelected ? Image.memory(widget.imageBytes) : Container(),
             ListTile(
               contentPadding: const EdgeInsets.symmetric(horizontal: 2),
@@ -380,6 +289,7 @@ class _TransactionListElmentState extends State<TransactionListElment> {
                 onFocusChange: (value) {
                   if (value == false) {
                     setState(() {
+                      widget.transaction.title = _titleController.text;
                       _titleIsEditing = false;
                     });
                   }
@@ -391,7 +301,7 @@ class _TransactionListElmentState extends State<TransactionListElment> {
                     controller: _titleController,
                     onSubmitted: (changed) {
                       setState(() {
-                        widget.transaction.title = changed;
+                        _titleIsEditing = false;
                         _titleFocusNode.unfocus();
                       });
                     },
@@ -402,7 +312,6 @@ class _TransactionListElmentState extends State<TransactionListElment> {
                     },
                     onTapOutside: (event) {
                       setState(() {
-                        widget.transaction.title = _titleController.text;
                         _titleIsEditing = false;
                         _titleFocusNode.unfocus();
                       });

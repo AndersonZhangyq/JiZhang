@@ -45,7 +45,7 @@ class _ModifyBudgetPageState extends State<ModifyBudgetPage> {
     }
     db = Provider.of<MyDatabase>(context);
     primaryColor = Theme.of(context).primaryColor;
-    if (isAdd) budgetCategoryIds = categoryIds;
+    if (isAdd) budgetCategoryIds = [];
   }
 
   bool canSave() {

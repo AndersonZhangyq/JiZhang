@@ -2,27 +2,47 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ji_zhang/models/database.dart';
 import 'package:ji_zhang/widget/budget/modifyBudget.dart';
+import 'package:ji_zhang/widget/navigationPage/converter_ds.dart';
+import 'package:ji_zhang/widget/navigationPage/converter_ty.dart';
 import 'package:ji_zhang/widget/navigationPage/settings.dart';
 import 'package:ji_zhang/widget/navigationPage/budget.dart';
 import 'package:ji_zhang/widget/navigationPage/chart.dart';
 import 'package:ji_zhang/widget/navigationPage/transaction.dart';
+import 'package:ji_zhang/widget/ocr/jsonInput.dart';
 import 'package:ji_zhang/widget/ocr/textRecognition.dart';
+import 'package:ji_zhang/widget/ocr/billImport.dart';
 import 'package:ji_zhang/widget/transaction/modifyTransaction.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/date_symbol_data_local.dart'; // For initializing date symbols
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting(); // Initializes for the current locale
   runApp(
-    Provider<MyDatabase>(
-      create: (context) => MyDatabase(),
+    MultiProvider(
+      providers: [
+        Provider<MyDatabase>(
+          create: (context) => MyDatabase(),
+          dispose: (context, db) => db.close(),
+        ),
+        ChangeNotifierProvider<AppState>(
+          create: (context) => AppState(),
+        )
+      ],
       child: const MyApp(),
-      dispose: (context, db) => db.close(),
     ),
   );
+  // runApp(
+  //   Provider<MyDatabase>(
+  //     create: (context) => MyDatabase(),
+  //     child: const MyApp(),
+  //     dispose: (context, db) => db.close(),
+  //   ),
+  // );
 }
 
 class MyApp extends StatelessWidget {
@@ -67,6 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final List _children = [
     const TransactionWidget(),
     const ChartWidget(),
+    const ConverterDs(),
     const BudgetWidget(),
     const SettingsWidget()
   ];
@@ -88,46 +109,36 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: () {
         switch (_currentIndex) {
           case 1:
-          case 3:
+          case 2:
+          case 4:
             return null;
           case 0:
-            return IntrinsicHeight(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  FloatingActionButton.small(
-                    heroTag: 'add_transaction_manual',
-                    elevation: 4.0,
-                    child: const Icon(Icons.add),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const ModifyTransactionsPage(
-                                  transaction: null,
-                                  category: null,
-                                )),
-                      );
-                    },
-                  ),
-                  FloatingActionButton.small(
-                    heroTag: 'add_transaction_ocr',
-                    elevation: 4.0,
-                    child: const Icon(Icons.camera_alt_outlined),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => TextRecognitionWidget()),
-                      );
-                    },
-                  ),
-                ],
-              ),
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                FloatingActionButton.small(
+                  heroTag: 'add_transaction_manual',
+                  elevation: 4.0,
+                  child: const Icon(Icons.add),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ModifyTransactionsPage(
+                                transaction: null,
+                                category: null,
+                              )),
+                    );
+                  },
+                ),
+                _ImportFabGroup(),
+              ],
             );
-          case 2:
+          case 3:
             return FloatingActionButton.small(
-              heroTag: 'add_transaction',
+              heroTag: 'add_budget',
               elevation: 4.0,
               child: const Icon(Icons.add),
               onPressed: () {
@@ -156,6 +167,10 @@ class _MyHomePageState extends State<MyHomePage> {
             label: AppLocalizations.of(context)!.bottomNav_Chart,
           ),
           BottomNavigationBarItem(
+            icon: const Icon(Icons.currency_exchange_outlined),
+            label: AppLocalizations.of(context)!.bottomNav_Exchange,
+          ),
+          BottomNavigationBarItem(
             icon: const Icon(Icons.attach_money_rounded),
             label: AppLocalizations.of(context)!.bottomNav_Budgets,
           ),
@@ -165,6 +180,91 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
+    );
+  }
+}
+
+// Custom FAB group for transaction page
+
+// Place these classes at the bottom of the file, outside any other class or function
+
+class _ImportFabGroup extends StatefulWidget {
+  @override
+  State<_ImportFabGroup> createState() => _ImportFabGroupState();
+}
+
+class _ImportFabGroupState extends State<_ImportFabGroup>
+    with SingleTickerProviderStateMixin {
+  bool _expanded = false;
+
+  void _toggleExpand() {
+    setState(() {
+      _expanded = !_expanded;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(height: 8),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          child: Column(
+            children: [
+              if (_expanded) ...[
+                FloatingActionButton.small(
+                  heroTag: 'add_transaction_ocr',
+                  elevation: 4.0,
+                  child: const Icon(Icons.camera_alt_outlined),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => TextRecognitionWidget()),
+                    );
+                  },
+                ),
+                const SizedBox(height: 8),
+                FloatingActionButton.small(
+                  heroTag: 'add_transaction_json',
+                  elevation: 4.0,
+                  child: const Icon(Icons.topic_outlined),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => JsonInputWidget()),
+                    );
+                  },
+                ),
+                const SizedBox(height: 8),
+                FloatingActionButton.small(
+                  heroTag: 'add_transaction_xlsx',
+                  elevation: 4.0,
+                  child: const Icon(Icons.description_outlined),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => BillImportWidget()),
+                    );
+                  },
+                ),
+                const SizedBox(height: 8),
+              ]
+            ],
+          ),
+        ),
+        FloatingActionButton.small(
+          heroTag: 'import_transaction',
+          elevation: 4.0,
+          child: const Icon(Icons.document_scanner_outlined),
+          onPressed: _toggleExpand,
+        ),
+      ],
     );
   }
 }

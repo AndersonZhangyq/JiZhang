@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ji_zhang/common/datetimeExtension.dart';
-import 'package:ji_zhang/widget/ocr/batchAddTransactions.dart';
+import 'package:ji_zhang/widget/ocr/addTransactionsFromOCR.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 // 自定义类来存储识别结果和位置
@@ -18,6 +18,7 @@ class RecognizedTextElement {
 
   RecognizedTextElement({required this.text, required this.boundingBox}) {
     print('process text: $text');
+
     // 判断是否为日期，形如 xx月xx日
     final dateRegexWechat = RegExp(r'^\d{1,2}月\d{1,2}日');
     // 判断是否为日期，形如 xx-xx
@@ -30,7 +31,7 @@ class RecognizedTextElement {
       final day = int.parse(matchedPart.split('日')[0].split('月')[1]);
       if (month > 0 && month <= 12 && day > 0 && day <= 31) {
         isDate = true;
-        date = DateTime.now().copyWith(month: month, day: day);
+        date = DateTime.now().getDateOnly().copyWith(month: month, day: day);
         print('date: ${date!.format("MM-dd")}');
       }
     } else if (dateRegexZhiFuBao.hasMatch(text)) {
@@ -39,7 +40,7 @@ class RecognizedTextElement {
       final day = int.parse(matchedPart.split('-')[1]);
       if (month > 0 && month <= 12 && day > 0 && day <= 31) {
         isDate = true;
-        date = DateTime.now().copyWith(month: month, day: day);
+        date = DateTime.now().getDateOnly().copyWith(month: month, day: day);
         print('date: ${date!.format("MM-dd")}');
       }
     } else if (amountRegex.hasMatch(text)) {
@@ -95,8 +96,10 @@ class _TextRecognitionWidgetState extends State<TextRecognitionWidget> {
       for (TextBlock block in recognizedText.blocks) {
         for (TextLine line in block.lines) {
           for (TextElement element in line.elements) {
+            // 将一些易识别错误的字符替换掉
+            final text = element.text.replaceAll(',', '').replaceAll('—', '-');
             _recognizedTextElements.add(RecognizedTextElement(
-                text: element.text, boundingBox: element.boundingBox));
+                text: text, boundingBox: element.boundingBox));
           }
         }
       }
@@ -173,7 +176,7 @@ class _TextRecognitionWidgetState extends State<TextRecognitionWidget> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            BatchAddTransactions(
+                                            AddTransactionsFromOCR(
                                               recognizedTextElements:
                                                   _recognizedTextElements,
                                               originalImageBytes: _imageBytes!,
