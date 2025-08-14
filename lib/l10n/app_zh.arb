@@ -140,5 +140,7 @@
   "billImport_GenerateTransactions": "生成账单",
   "billImport_ChosenFilePath": "已选择文件路径",
   "billImport_ChooseWeChatBillFile": "选择微信账单文件",
-  "billImport_ChooseAliPayBillFile": "选择支付宝账单文件"
+  "billImport_ChooseAliPayBillFile": "选择支付宝账单文件",
+  "addTransactionsFromBillFile_BillAmount": "账单金额",
+  "addTransactionsFromBillFile_BilRefund": "账单退款"
 }

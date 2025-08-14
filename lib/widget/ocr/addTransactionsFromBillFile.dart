@@ -9,6 +9,7 @@ import 'package:ji_zhang/common/datetimeExtension.dart';
 import 'package:ji_zhang/models/database.dart';
 import 'package:ji_zhang/widget/category/categorySelector.dart';
 import 'package:ji_zhang/widget/ocr/billImport.dart';
+import 'package:ji_zhang/widget/tapToCopyWidget.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:image/image.dart' as image;
@@ -257,7 +258,8 @@ class _TransactionListElmentState extends State<TransactionListElment> {
                           : Colors.green),
                 ),
                 subtitle: widget.transaction.billExtraInfo.isNotEmpty
-                    ? Text('${widget.transaction.billExtraInfo}')
+                    ? BlinkBorderTapToCopy(
+                        text: '${widget.transaction.billExtraInfo}')
                     : Container(),
               ),
               subtitle: Text(
@@ -267,10 +269,10 @@ class _TransactionListElmentState extends State<TransactionListElment> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '账单金额  ${widget.transaction.billAmount.toStringAsFixed(2)}',
+                    '${AppLocalizations.of(context)!.addTransactionsFromBillFile_BillAmount}  ${widget.transaction.billAmount.toStringAsFixed(2)}',
                   ),
                   Text(
-                    '账单退款  ${widget.transaction.billRefund.toStringAsFixed(2)}',
+                    '${AppLocalizations.of(context)!.addTransactionsFromBillFile_BilRefund}  ${widget.transaction.billRefund.toStringAsFixed(2)}',
                   ),
                 ],
               ),

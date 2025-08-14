@@ -139,8 +139,6 @@ class _ModifyTransactionsPageState extends State<ModifyTransactionsPage> {
       if (0 == id) {
         result = AppLocalizations.of(context)!
             .modifyTransaction_SnackBar_failed_to_add_transaction;
-      } else {
-        Navigator.of(context, rootNavigator: true).pop(context);
       }
     } else {
       bool ret = await db.update(db.transactions).replace(TransactionsCompanion(

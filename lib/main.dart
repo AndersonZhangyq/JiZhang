@@ -14,7 +14,8 @@ import 'package:ji_zhang/widget/ocr/billImport.dart';
 import 'package:ji_zhang/widget/transaction/modifyTransaction.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/date_symbol_data_local.dart'; // For initializing date symbols
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; // For initializing date symbols
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +23,9 @@ void main() async {
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting(); // Initializes for the current locale
+  const supabaseUrl = 'https://nuouhdrvndhcusrglnye.supabase.co';
+  const supabaseKey = 'sb_publishable_h8LYDp7dwifVefpKXvF-xw_B9wrYzn-';
+  await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
   runApp(
     MultiProvider(
       providers: [

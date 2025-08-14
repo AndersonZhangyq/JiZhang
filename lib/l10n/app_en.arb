@@ -140,5 +140,7 @@
   "billImport_GenerateTransactions": "Generate Transactions",
   "billImport_ChosenFilePath": "Chosen file path",
   "billImport_ChooseWeChatBillFile": "Choose WeChat Bill File",
-  "billImport_ChooseAliPayBillFile": "Choose AliPay Bill File"
+  "billImport_ChooseAliPayBillFile": "Choose AliPay Bill File",
+  "addTransactionsFromBillFile_BillAmount": "Bill Amount",
+  "addTransactionsFromBillFile_BilRefund": "Bill Refund"
 }
